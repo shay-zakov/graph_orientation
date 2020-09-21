@@ -1,0 +1,83 @@
+
+\section{Linear Graphs}
+
+A \emph{linear graph} of length $n$ is an undirected graph $P = (V, E)$, where $V = \{v_0, v_1, \ldots, v_n\}$ and $E = \left\{\{v_i, v_{i+1}\} : 0\leq i < n\right\}$. 
+
+
+Let $P$ be a bi-weighted linear graph of length $n$. Denote:
+\begin{itemize}
+	\item $P_{i, j}$: the sub-graph of $P$ induced by the vertices $\left\{v_i, v_{i+1}, \ldots, v_j \right\}$. For short, denote by $P_j$ the prefix $P_{0, j}$ of $P$;
+	\item $\dir[P'] \dir[P'']$: an orientation of $P$ obtained by concatenating the orientations $\dir[P']$ and $\dir[P'']$ for some prefix $P_{k}$ and suffix $P_{k, n}$ of $P$, respectively;
+	\item $\dir[P^r]$, $\dir[P^l]$: the orientations of $P$ in which all edges are directed "rightward" (i.e. of the form $(v_i, v_{i+1})$) or "leftwards" (i.e. of the form $(v_{i+1}, v_i)$), respectively;
+	\item $\mathcal{O}^r(P) = \left\{\dir[P'] \dir[P^r]_{n-1,n} : \dir[P'] \in \mathcal{O}(P_{n-1})\right\}$ (i.e. the subset of $\mathcal{O}(P)$ containing all orientations of $P$ ending with the directed edge $(v_{n-1}, v_n)$);
+	\item $\mathcal{O}^l(P) = \mathcal{O}(P) \setminus \mathcal{O}^r(P) = \left\{\dir[P'] \dir[P^l]_{n-1,n} : \dir[P'] \in \mathcal{O}(P_{n-1})\right\}$ (i.e. the subset of $\mathcal{O}(P)$ containing all orientations of $P$ ending with the directed edge $(v_n, v_{n-1})$);
+	\item $H^r(P) = \min_{\dir[P] \in \mathcal{O}^r(P)} h(\dir[P])$;
+	\item $H^l(P) = \min_{\dir[P] \in \mathcal{O}^l(P)} h(\dir[P])$.
+\end{itemize}
+
+Before describing the computation of $H(P)$, we first describe an auxiliary computation of values of the form $h(\dir[P^r]_{i, j})$ which will be used within the computation of $H(P)$. This computation utilizes the \emph{deque} data structure to store information about $\dir[P^r]_{i, j}$ that will allow the efficient computation of $h(\dir[P^r]_{i, j})$. In addition, given the structure for the segment $\dir[P^r]_{i, j}$, the updated structure with respect to segments $\dir[P^r]_{i+1, j}$ and $\dir[P^r]_{i, j+1}$ can be computed efficiently. The computation of values of the form $h(\dir[P^l]_{i, j})$ is symmetric and we omit its explicit description. 
+
+Let $S = \langle s_0, s_1, ..., s_{m-1}\rangle$ be a series of numbers. When $m > 0$, denote by $k_S$ the index $0 \leq k < m$ so that $s_{k_S}$ is the maximum of $S$, and $k_S$ is the biggest such index if there are multiple maximal values in $S$. In other words, for every $k_S < k < m$, $s_{k_S} > s_k$. The \emph{decreasing maximum indices} $S^{\downarrow}$ of $S$ is inductively defined as follows. When $S$ is empty then $S^{\downarrow}$ is empty, and otherwise $S^{\downarrow}$ is the series of indices starting with $k_S$ and continuing with the decreasing maximum indices of the suffix $\langle s_{k_S+1}, s_{k_S+2}, ..., s_{m-1}\rangle$ of $S$. For example, for $S = \langle 5, 4, 5, 2, 3, -1, 0, 1\rangle$, $S^\downarrow = \langle 2, 4, 7\rangle$, which corresponds to the decreasing subsequence $\langle 5, 3, 1\rangle$ of $S$.
+
+Assume the decreasing maximum indices $S^\downarrow_{i, j}$ is given with respect to some interval $S_{i, j} = \langle s_i, s_{i+1}, ..., s_{j-1}\rangle$ in $S$, and consider the corresponding indices $S^\downarrow_{i, j+1}$ with respect to $S_{i, j+1} = \langle s_i, s_{i+1}, ..., s_{j}\rangle$. It is simple to assert that $S^\downarrow_{i, j+1}$ can be obtained by removing from the suffix of $S^\downarrow_{i, j}$ all indices $k$ such that $s_k \leq s_j$, and adding the index $j$ at the end of the resulting sequence. To compute $S^\downarrow_{i+1, j}$, one just remove the index $i$ from $S^\downarrow_{i, j}$ in case it is the first index in this series, and otherwise it is identical to $S^\downarrow_{i, j}$. In both cases, the time required for updating the data structure is proportional to the total number of element insertions and deletions from the index sequence.
+
+
+
+
+********************************
+
+
+In what follow, we describe a recursive computation for $H(P_j)$ for every prefix $P_j$ of $P$ (and in particular for $P = P_n$). Clearly,
+
+\begin{equation}\label{eq:H}
+H(P_j) = \min\left(H^r(P_j), H^l(P_j)\right).
+\end{equation}
+
+
+Consider an orientation $\dir[P_j] \in \mathcal{O}^r(P_j)$. By definition, there exists some $0 \leq i < j$ such that $\dir[P_j] = \dir[P'] \dir[P^r]_{i, j}$, where $\dir[P'] \in \mathcal{O}^l(P_i)$. Observe that any path in $\dir[P_j]$ cannot contain edges from both $\dir[P']$ (which is either empty when $i=0$, or otherwise ending with a leftward edge $(v_i, v_{i-1})$) and $\dir[P^r]_{i, j}$ (starting with a rightward edge $(v_i, v_{i+1})$). In particular, a heaviest path in $\dir[P_j]$ is fully contained in either $\dir[P']$ or $\dir[P^r]_{i, j}$. Therefore, $h(\dir[P_j]) = \max\left(h(\dir[P']), h(\dir[P^r]_{i, j})\right)$. An orientation that would minimize the heaviest path weight among all orientations of this form with the same $i$ value would thus have the weight $\max\left(H^l(P_i), h(\dir[P^r]_{i, j})\right)$, and we get that 
+
+\begin{equation}\label{eq:Hr}
+H^r(P_j) = \left\{\begin{array}{ll}
+0, & j = 0\\
+\min_{0 \leq i < j}\left(\max\left(H^l(P_i), h(\dir[P^r]_{i, j})\right)\right), & \text{otherwise}\\
+\end{array}\right.
+\end{equation}
+
+Symmetrically: 
+
+\begin{equation}\label{eq:Hl}
+H^l(P_j) = \left\{\begin{array}{ll}
+0, & j = 0\\
+\min_{0 \leq i < j}\left(\max\left(H^r(P_i), h(\dir[P^l]_{i, j})\right)\right), & \text{otherwise}\\
+\end{array}\right.
+\end{equation}
+
+
+Next, we describe how to efficiently compute the above recursion. 
+
+
+\begin{observation}
+	\label{obs:subpath}
+	For every $0 \leq i \leq j \leq n$, $H(P_{i, j}) \leq H(P)$, $h(P^r_{i, j}) \leq h(P^r)$, and $h(P^l_{i, j}) \leq h(P^l)$.
+\end{observation}
+
+The correctness of the observation follows from the fact that any orientation for $P$ induces an orientation for $P_{i, j}$ in which the weight of a heaviest path can only decrease. Next, consider equation~\ref{eq:Hr}, and denote by $k_P$ the maximal integer that minimizes the equation term for $n > 0$. 
+
+\begin{claim}
+	\label{clm:kp}
+	$H(P_{0, k_P}) < H(P_{0, k_P+1})$.
+\end{claim}
+
+\begin{proof}
+	By definition of $K_P$, $\max\left(H^l(P_{0, k_P}), h(P^r_{k_P, n})\right) < \max\left(H^l(P_{0, k_P + 1}), h(P^r_{k_P + 1, n})\right)$. Since $h(P^r_{k_P, n}) \geq h(P^r_{k_P+1, n})$ (from Obs.~\ref{obs:subpath}), it must be that $H(P_{0, k_P}) < H(P_{0, k_P+1})$
+\end{proof}
+
+
+\begin{claim}
+	\label{clm:kp_monotonicity}
+	For every $0 \leq j < n$, $K_{P_{0, j}} \leq K_P$.
+\end{claim}
+
+\begin{proof}
+	
+\end{proof}
