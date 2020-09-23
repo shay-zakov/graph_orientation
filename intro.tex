@@ -1,6 +1,12 @@
 \section{Introduction}
 
-A \emph{edge bi-weighted graph} is an undirected graph $G = (V, E)$, such that each edge $\{u, v\} \in E$ has a pair of (possibly different) weights $w(u, v)$ and $w(v, u)$ associated with its two possible orientations $(u, v)$ and $(v, u)$, respectively. An \emph{orientation} $ \vec{O}$ of $G$ creates a directed graph $\vec{G}=\vec{O} (G)$ from $G$ by selecting for each undirected edge $\{u, v\} \in E$ exactly one of its two possible orientations. Denote by $\mathcal{O}(G)$ the set of all orientations of $G$. 
+A \emph{edge bi-weighted graph} is an undirected graph $G = (V, E)$, such that each edge $\{u, v\} \in E$ has a pair of (possibly different) weights $w(u, v)$ and $w(v, u)$ associated with its two possible orientations $(u, v)$ and $(v, u)$, respectively. An \emph{orientation} 
+%$ \vec{O}$ 
+of $G$ creates a directed graph $\vec{G}
+%=\vec{O} (G)
+$ 
+%from $G$ 
+by selecting for each undirected edge $\{u, v\} \in E$ exactly one of its two possible orientations. Denote by $\mathcal{O}(G)$ the set of all orientations of $G$. 
 
 The problem we address is the following.
 
@@ -19,15 +25,15 @@ simple paths or over all simple subpaths. To distinguish between these two possi
 h_m(\vec{P})=\sum_{k=0}^{n-1} w(v_k,v_{k+1}),\ 
 	h_s(\vec{P})=\max_{0\leq i<j\leq n-1}\sum_{k=i}^{j} w(v_k,v_{k+1}).
 \end{equation}
-	We also extend these measures to an oriented graph $\vec{G}$
+	We extend these measures to an oriented graph $\vec{G}$
 	\begin{align} 
-	h_m(\vecG)&=\max\{h_m(\vec{P}): \vecP \mbox{ is a maximal simple path in }\vecG \},\\
-	h_s(\vecG)&=\max\{h_s(\vec{P}):\ \vecP \mbox{ is a simple path in }\vecG \}.
+	h_m(\vecG)&=\max\{h_m(\vec{P})\mid \vecP \mbox{ is a maximal simple path in }\vecG \},\\
+	h_s(\vecG)&=\max\{h_s(\vec{P})\mid \vecP \mbox{ is a simple path in }\vecG \}.
 \end{align}
 The corresponding cost functions for orienting an undirected graph are 
 \begin{align}
-H_m(G)&=\min\{h_m(\vecO(G)): \vecO \in \mathcal{O}(G)\},\\
-H_s(G)&=\min\{h_s(\vecO(G)): \vecO \in \mathcal{O}(G)\}.
+H_m(G)=\min\{h_m(\vecG)\mid \vecG \in \mathcal{O}(G)\},
+H_s(G)=\min\{h_s(\vecG)\mid \vecG \in \mathcal{O}(G)\}.
 \end{align}
 \end{definition}
 
@@ -53,10 +59,12 @@ However, if all weights are non-negative $h_m$, too, is monotonic. In fact, in t
 
 \begin{lemma}
 	Suppose that G is an edge bi-weighted graph  all of whose weights are non-negative.
-	Then $h_{s}( \vecG )= h_{m}( \vecG )$ for any orientation $\vecG$ of $G$ .
+	Then $h_{s}( \vecG )= h_{m}( \vecG )$ for any orientation $\vecG$
+%	 of $G$ 
+.
 	In particular,  $H_{s}(G)= H_{m}(G)$,  and 
-	$\vecO$ is an optimal orientation of $G$ with respect to $H_{s}$
-	if and only if it is an optimal orientation with respect to $ H_{m} $.
+	$\vecG$ is an optimal orientation of $G$ with respect to $h_{s}$
+	if and only if it is optimal with respect to $ h_{m} $.
 \end{lemma}
 \noindent {\bf Proof:}
 From the definitions of $h_m$ and $h_s$ it is clear that for any path graph P  $h_{m}(P)\leq  h_{s}(P)$, and that the inequality is in fact an equality if all the weights 
@@ -75,18 +83,19 @@ optimal with respect to $h_s$.
 In the following sections we will consider the following two problems
 for various classes of graphs.
 
-\begin{problem}[Minimizing the heaviest subpath - HS]
-	Given a class of edge bi-weighted graphs find an algorithm to compute, for any $G$
-	in the class,  
-	$$
-	H_s(G) = \min_{\vecO \in \mathcal{O}(G)} h_s(\vecG)
-	$$
+\begin{problem}[
+%	Minimizing the heaviest subpath - 
+	HS]
+	Given a class of edge bi-weighted graphs find an algorithm to compute
+	$H_s(G) $
+	for any $G$
+	in the class.
 \end{problem}
 
-\begin{problem}[Minimizing the heaviest maximal path - HM]
-	Given a class of edge bi-weighted graphs find an algorithm to compute, for any $G$
-	in the class,  
-	$$
-H_m(G) = \min_{\vecO \in \mathcal{O}(G)} h_m (\vecG)
-	$$
+\begin{problem}[
+%	Minimizing the heaviest maximal path - 
+	HM]
+	Given a class of edge bi-weighted graphs find an algorithm to compute $H_m(G) $
+	for any $G$
+	in the class.
 \end{problem}
