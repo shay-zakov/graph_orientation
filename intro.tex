@@ -36,7 +36,7 @@ H_s(G)&=\min\{h_s(\vecO(G)): \vecO \in \mathcal{O}(G)\}.
  Then $h_m(\vec{P})=5, h_s(\vec{P})=6$.
 
 A very useful property of $h_s$ is that it is monotone: the cost of a graph is never less than the cost of a subgraph.
-\begin{lemma}
+\begin{lemma}\label{l.sprop}
 	Given any edge bi-weighted graph G,
 	$H_{s}(G)\geq  H_{s}(G')$ for any subgraph $G'$ of $G$. 
 \end{lemma}
@@ -49,7 +49,7 @@ $\vecP '$ of $\vecP$.
 This property sets $h_m$ apart from $h_s$,  as the above example shows:
 $h_{m}(\vecP)=5 <  h_{m}(\vecP')=6$ for the subgraph $\vecP '=<v_2,v_3>$ of $\vecP$.
 
-However, if all weights are non-negative $h_m$ too is monotonic. In fact, in that case the two definitions coincide.
+However, if all weights are non-negative $h_m$, too, is monotonic. In fact, in that case the two definitions coincide.
 
 \begin{lemma}
 	Suppose that G is an edge bi-weighted graph  all of whose weights are non-negative.
@@ -72,7 +72,7 @@ optimal with respect to $h_s$.
 	respect to $h_{m}$ is also optimal with respect to $h_{s} $.}
 
 \bigskip
-In the following sections we will consider the two problems
+In the following sections we will consider the following two problems
 for various classes of graphs.
 
 \begin{problem}[Minimizing the heaviest subpath - HS]

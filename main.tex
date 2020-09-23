@@ -4,6 +4,7 @@
 \usepackage{multirow}
 \usepackage{amsmath}
 \usepackage{amsthm}
+\usepackage{graphicx}
 
 \usepackage[linesnumbered,ruled,vlined,scleft]{algorithm2e}
 %\DontPrintSumicolon % Some LaTeX compilers require you to use \dontprintsemicolon instead
@@ -23,7 +24,22 @@
 %\g@addto@macro\algorithm{\setcounter{cond}{0}}
 %\makeatother   
 
-
+\makeatletter
+\DeclareRobustCommand{\cev}[1]{%
+	{\mathpalette\do@cev{#1}}%
+}
+\newcommand{\do@cev}[2]{%
+	\vbox{\offinterlineskip
+		\sbox\z@{$\m@th#1 x$}%
+		\ialign{##\cr
+			\hidewidth\reflectbox{$\m@th#1\vec{}\mkern4mu$}\hidewidth\cr
+			\noalign{\kern-\ht\z@}
+			$\m@th#1#2$\cr
+		}%
+	}%
+}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\makeatother
 
 \begin{document}
 	
@@ -37,7 +53,7 @@
 \newcommand{\vecP}{\vec{P}}
 \newcommand{\vecO}{\vec{O}}
 \newcommand{\vecG}{\vec{G}}
-\newcommand{\dirG}[1][G]{\stackrel{\rightarrow}{#1}}
+\newcommand{\dir}[1]{\stackrel{\rightarrow}{#1}}
 \newcommand{\dirO}[1][O]{\stackrel{\rightarrow}{#1}}
 
 \maketitle
@@ -45,7 +61,7 @@
 
 \include{intro}
 
-\include{paths}
+\include{linear_graphs}
 
 % bibliography, glossary and index would go here.
 
