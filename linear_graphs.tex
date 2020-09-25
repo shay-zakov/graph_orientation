@@ -17,30 +17,61 @@ under $h_s$ but quadratic under $h_m$.
 {\bf Notation}:
 \begin{itemize}
  	\item $P_{i, j}$ is the sub-graph of $P$ induced by the vertices $i,  \ldots, j$, and $P=P_{0,n}$. 
- 	\item $\vec{P_{i, j}}$ denotes the oriented version 
- 	of $P_{i, j}$ in which all edges are directed to the right (i.e. of the form $(i, {i+1})$),
- 	and similarly  $\cev{P_{i, j}}$ denotes the oriented version 
+ 	\item $\vec{P}_{i, j}$ denotes the oriented version 
+ 	of $P_{i, j}$ in which all edges are directed to the right (i.e. of the form $(k, {k+1})$),
+ 	and similarly  $\cev{P}_{i, j}$ denotes the oriented version 
  	of $P_{i, j}$ in which all edges are directed to the left.
- 	\item $H^r[i]$ is the value of an optimal orientaton of $P_{0, i}$ under the constraint
- 	that edge $\{i,i+1\}$ is directed towards $i+1$, and $H^{\ell}[i]$ is the value of an optimal orientaton of $P_{0, i}$ under the constraint
- 	that edge $\{i,i+1\}$ is directed towards $i$.
+ 	\item $H_x(j)$ is the value of an optimal orientaton of $P_{0, j}$ with respect to the $h_x$ cost function, where $x = s$ or $x = m$. $H^r_x(j)$ and $H^{\ell}_x(j)$ are defined similarly, under the constraint 
+ 	that edge $\{j-1, j\}$ is directed either towards $j$ or towards $j-1$, respectively. Using this notation we are assuming that the original instance graph $P$ is clear from the context.
 \end{itemize}
 
-The algorithm uses dynamic programming, and its basic step is to locate the last 
-breakpoint of an optimal solution, in the sense that its two edges are either both
-ingoing or both outgoing. 
-\bigskip
+Clearly,
 
-\noindent \textbf{Algorithm BestCostPath ($P$)}:
-\begin{enumerate}
-	\item $H^r[0]=H^{\ell}[0]=0$;
-	\item for $j=1$ to $n$ do
-	\begin{enumerate}
-	  \item \label{i.1} $H^{r}[j]=\min_{0\leq i <j} \max \{ H^{\ell}[i], h(\vec{P_{i, j}}) \}$;
-	  \item \label{i.2} $H^{\ell}[j]=\min_{0\leq i <j} \max \{ H^r[i], h(\cev{P_{i, j}}) \}$;
-	\end{enumerate}
-	\item return $\max \{H^{r}[n],\ H^{\ell}[n]\}$.	
-\end{enumerate}
+\begin{equation}
+\label{eq:Hx}
+H_x(j) = \min \left(H^r_x(j), H^\ell_x(j)\right).
+\end{equation}
+
+Consider next the set of orientations of $P_{0, j}$ in which the orientation of $\{j-1, j\}$ is directed towards $j$. In any such an orientation, there exists some unique $0 \leq i < j$ such that for every $i \leq k < j$ the edges $\{k, k+1\}$ are oriented as $(k, k+1)$, and either $i = 0$ or the edge $\{i-1, i\}$ is oriented as $(i, i-1)$. Any path in such an orientation is fully contained in either the induced orientation of the prefix $P_{0, i}$, or the induced orientation of the suffix $P_{i, j}$ (as both edges $(i, i-1)$ and $(i, i+1)$ cannot participate in a single path). In the former case, it is clear that an optimal orientation for the prefix would be one that minimizes the heaviest path weight for the edge bi-weighted subgraph $P_{0, i}$ under the constrain that $\{i-1, i\}$ is oriented as $(i, i-1)$. By definition, the weight of such an orientation is $H^\ell_x(i)$. For the suffix $P_{i, j}$ the orientation is fixed to $\vec{P}_{i, j}$, and the weight of a heaviest path in it is $h_x(\vec{P}_{i, j})$. Therefore, for a particular split index $i$ the minimum weight of an orientation as describe above would be $\min\left(H^\ell_x(i), h_x(\vec{P}_{i, j})\right)$, and considering all possible split indices we get the following:
+
+\begin{equation}\label{eq:Hr}
+H^r_x(j) = \left\{\begin{array}{ll}
+0, & j = 0\\
+\min_{0 \leq i < j}\left(\max\left(H^\ell_x(i), h_x(\vec{P}_{i, j})\right)\right), & \text{otherwise}\\
+\end{array}\right.
+\end{equation}
+
+Symmetrically: 
+
+\begin{equation}\label{eq:Hl}
+H^\ell_x(j) = \left\{\begin{array}{ll}
+0, & j = 0\\
+\min_{0 \leq i < j}\left(\max\left(H^r_x(i), h_x(\cev{P}_{i, j})\right)\right), & \text{otherwise}\\
+\end{array}\right.
+\end{equation}
+
+[TODO: explain how to naively compute $h_x(\vec{P}_{i, j})$ for both values of $x$, and show that all values of this form can be computed in a quadratic time].
+
+The recursive computation described by Equations~\ref{eq:Hx} to~\ref{eq:Hl} can be efficiently implemented in a bottom-up fashion. Algorithm~\ref{algo:H} describes this implementation, utilizing two arrays $H^r[\cdot]$ and $H^\ell[\cdot]$ to store values of the forms $H^r_x(i)$ and $H^\ell_x(i)$ respectively (we use rectangle brackets to distinguish the algorithm entity from the formal one to which it corresponds), and two diagonal matrices $h^r[\cdot, \cdot]$ and $h^\ell[\cdot, \cdot]$ to store values of the forms $h_x(\vec{P}_{i, j})$ and $h_x(\cev{P}_{i, j})$, respectively.
+
+
+\begin{algorithm}
+	Compute all values of the form $h_x(\vec{P}_{i, j})$ and $h_x(\cev{P}_{i, j})$ using Algorithm~XXX, and store them in the corresponding matrices $h^r[\cdot, \cdot]$ and $h^\ell[\cdot, \cdot]$, resp.\;
+	Allocate two $n+1$-length arrays $H^r$ and $H^\ell$, and initialize both $H^r[0]$ and $H^{\ell}[0]$ to $0$\;
+	\For{$j=1$ to $n$}{
+		$H^{r}[j] \gets \min_{0\leq i <j} \max \{ H^{\ell}[i], h^r[i, j]\}$\;
+		$H^{\ell}[j] \gets \min_{0\leq i <j} \max \{ H^r[i], h^l[i, j]\}$\;
+	}
+	\Return{$\min \{H^{r}[n],\ H^{\ell}[n]\}$}\;
+	\caption{BestCostPath ($P$)}
+	\label{algo:H}
+\end{algorithm}
+
+The computation of all values $h_x(\vec{P}_{i, j})$ and $h_x(\cev{P}_{i, j})$ in the first line of Algorithm~\ref{algo:H} takes $O(n^2)$ as shown above. The loop in lines~3 to~5 is executed $n$ times, where the expressions computed within each loop iteration take $O(n)$ time to compute (as all values of the form $H^{\ell}[i]$, $h^r[i, j]$, $H^{r}[i]$, and $h^l[i, j]$ are pre-computed, and $O(n)$ split-points $i$ are examine in each iteration). Therefore, the overall time complexity of the algorithm is $O(n^2)$, and its space complexity is too $O(n^2)$, dictated by the $h$ matrices.
+
+
+****************************************
+
 
 Turning now to the running time analysis, we note first of all that the values 
 $ h(\vec{P_{i, j}}), h(\cev{P_{i, j}})$ used in statements (\ref{i.1}) and (\ref{i.2})
