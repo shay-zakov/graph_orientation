@@ -50,24 +50,22 @@ H^\ell_x(j) = \left\{\begin{array}{ll}
 \end{array}\right.
 \end{equation}
 
-[TODO: explain how to naively compute $h_x(\vec{P}_{i, j})$ for both values of $x$, and show that all values of this form can be computed in a quadratic time].
-
-The recursive computation described by Equations~\ref{eq:Hx} to~\ref{eq:Hl} can be efficiently implemented in a bottom-up fashion. Algorithm~\ref{algo:H} describes this implementation, utilizing two arrays $H^r[\cdot]$ and $H^\ell[\cdot]$ to store values of the forms $H^r_x(i)$ and $H^\ell_x(i)$ respectively (we use rectangle brackets to distinguish the algorithm entity from the formal one to which it corresponds), and two diagonal matrices $h^r[\cdot, \cdot]$ and $h^\ell[\cdot, \cdot]$ to store values of the forms $h_x(\vec{P}_{i, j})$ and $h_x(\cev{P}_{i, j})$, respectively.
-
+The recursive computation described by Equations~\ref{eq:Hx} to~\ref{eq:Hl} can be efficiently implemented in a bottom-up fashion. Algorithm~\ref{algo:H} describes this implementation, utilizing two arrays $H^r[\cdot]$ and $H^\ell[\cdot]$ to store values of the forms $H^r_x(i)$ and $H^\ell_x(i)$ respectively (we use rectangle brackets to distinguish the algorithm entity from the formal one to which it corresponds). For now, we keep abstract the manner in which values of the form $h_x(\vec{P}_{i, j})$ and $h_x(\cev{P}_{i, j})$ are being computed in the algorithm. Though it is not difficult to show all such values can be computed in quadratic running time and match the algorithm's running time (as explained below), we later show how can all components of the algorithm be computed more efficiently.
 
 \begin{algorithm}
-	Compute all values of the form $h_x(\vec{P}_{i, j})$ and $h_x(\cev{P}_{i, j})$ using Algorithm~XXX, and store them in the corresponding matrices $h^r[\cdot, \cdot]$ and $h^\ell[\cdot, \cdot]$, resp.\;
 	Allocate two $n+1$-length arrays $H^r$ and $H^\ell$, and initialize both $H^r[0]$ and $H^{\ell}[0]$ to $0$\;
 	\For{$j=1$ to $n$}{
-		$H^{r}[j] \gets \min_{0\leq i <j} \max \{ H^{\ell}[i], h^r[i, j]\}$\;
-		$H^{\ell}[j] \gets \min_{0\leq i <j} \max \{ H^r[i], h^l[i, j]\}$\;
+		$H^{r}[j] \gets \min_{0\leq i <j} \max \{ H^{\ell}[i], h_x(\vec{P}_{i, j})\}$\;
+		$H^{\ell}[j] \gets \min_{0\leq i <j} \max \{ H^r[i], h_x(\cev{P}_{i, j})\}$\;
 	}
 	\Return{$\min \{H^{r}[n],\ H^{\ell}[n]\}$}\;
-	\caption{BestCostPath ($P$)}
+	\caption{BestCostPath-$x$ $(P)$}
 	\label{algo:H}
 \end{algorithm}
 
-The computation of all values $h_x(\vec{P}_{i, j})$ and $h_x(\cev{P}_{i, j})$ in the first line of Algorithm~\ref{algo:H} takes $O(n^2)$ as shown above. The loop in lines~3 to~5 is executed $n$ times, where the expressions computed within each loop iteration take $O(n)$ time to compute (as all values of the form $H^{\ell}[i]$, $h^r[i, j]$, $H^{r}[i]$, and $h^l[i, j]$ are pre-computed, and $O(n)$ split-points $i$ are examine in each iteration). Therefore, the overall time complexity of the algorithm is $O(n^2)$, and its space complexity is too $O(n^2)$, dictated by the $h$ matrices.
+\paragraph{Time and space complxities of Algorithm~\ref{algo:H}.}
+This analysis ignores the computational resources needed for computing values of the form $h_x(\vec{P}_{i, j})$ and $h_x(\cev{P}_{i, j})$, which will be discussed later.
+The time complexity of the algorithm is dictated by the loop in lines~2 to~4. This loop is executed $n$ times. The expressions computed within each loop iteration take $O(n)$ time to compute, as $O(n)$ split-points $i$ are examine in each iteration, and all values of the form $H^{\ell}[i]$ and $H^{r}[i]$ are pre-computed. Therefore, the overall time complexity of the algorithm is $O(n^2)$. The space complexity is $O(n)$ due to the need to maintain the $H$ arrays.
 
 
 ****************************************
