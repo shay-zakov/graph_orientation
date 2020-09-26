@@ -8,13 +8,10 @@ are numbered from \textit{0} to \textit{n}, and denote the weights of
 edges $(i,i+1)$ and  $(i+1,i)$ by $w(i,i+1)$ and $w(i+1,1)$, respectively.
 
 We describe next an algorithm for finding an optimal orientation 
-of a linear graph. The high level version of the algorithm makes no use of the details
-of the cost function, be it $h_m$ or $h_s$. The description will therefore omit these subscripts. However, upon implementing the high level version, the difference between 
-the two cost functions leads to a surprising difference in running times: it is linear 
-under $h_s$ but quadratic under $h_m$.
-\bigskip
-
-{\bf Notation}:
+of a linear graph. We first describe a high level recursive computation that makes no use of the details of the cost function, be it $h_m$ or $h_s$. The description will therefore omit these subscripts. Then, we show how different properties of the specific cost functions may be exploited to improve the efficiency of the computation in each one of the cases. In the rest of this section we make use in the following notation:
+%\bigskip
+%
+%{\bf Notation}:
 \begin{itemize}
  	\item $P_{i, j}$ is the sub-graph of $P$ induced by the vertices $i,  \ldots, j$, and $P=P_{0,n}$. 
  	\item $\vec{P}_{i, j}$ denotes the oriented version 
@@ -25,6 +22,9 @@ under $h_s$ but quadratic under $h_m$.
  	that edge $\{j-1, j\}$ is directed either towards $j$ or towards $j-1$, respectively. Using this notation we are assuming that the original instance graph $P$ is clear from the context.
 \end{itemize}
 
+\subsection{Recursive Relations}
+
+In this section we show recursive relations which are satisfied in the problem, i.e. how solutions for general instances may be computed given solutions for certain sub-instances. 
 Clearly,
 
 \begin{equation}
@@ -53,7 +53,7 @@ H^\ell_x(j) = \left\{\begin{array}{ll}
 The recursive computation described by Equations~\ref{eq:Hx} to~\ref{eq:Hl} can be efficiently implemented in a bottom-up fashion. Algorithm~\ref{algo:H} describes this implementation, utilizing two arrays $H^r[\cdot]$ and $H^\ell[\cdot]$ to store values of the forms $H^r_x(i)$ and $H^\ell_x(i)$ respectively (we use rectangle brackets to distinguish the algorithm entity from the formal one to which it corresponds). For now, we keep abstract the manner in which values of the form $h_x(\vec{P}_{i, j})$ and $h_x(\cev{P}_{i, j})$ are being computed in the algorithm. Though it is not difficult to show all such values can be computed in quadratic running time and match the algorithm's running time (as explained below), we later show how can all components of the algorithm be computed more efficiently.
 
 \begin{algorithm}
-	Allocate two $n+1$-length arrays $H^r$ and $H^\ell$, and initialize both $H^r[0]$ and $H^{\ell}[0]$ to $0$\;
+	For $n$ the length of $P$, allocate two $n+1$-length arrays $H^r$ and $H^\ell$, and initialize both $H^r[0]$ and $H^{\ell}[0]$ to $0$\;
 	\For{$j=1$ to $n$}{
 		$H^{r}[j] \gets \min_{0\leq i <j} \max \{ H^{\ell}[i], h_x(\vec{P}_{i, j})\}$\;
 		$H^{\ell}[j] \gets \min_{0\leq i <j} \max \{ H^r[i], h_x(\cev{P}_{i, j})\}$\;
@@ -67,6 +67,106 @@ The recursive computation described by Equations~\ref{eq:Hx} to~\ref{eq:Hl} can 
 This analysis ignores the computational resources needed for computing values of the form $h_x(\vec{P}_{i, j})$ and $h_x(\cev{P}_{i, j})$, which will be discussed later.
 The time complexity of the algorithm is dictated by the loop in lines~2 to~4. This loop is executed $n$ times. The expressions computed within each loop iteration take $O(n)$ time to compute, as $O(n)$ split-points $i$ are examine in each iteration, and all values of the form $H^{\ell}[i]$ and $H^{r}[i]$ are pre-computed. Therefore, the overall time complexity of the algorithm is $O(n^2)$. The space complexity is $O(n)$ due to the need to maintain the $H$ arrays.
 
+\subsection{More efficient implementations}
+We now turn to show more efficient implementations of the algorithm designated specifically to each of the cost functions $s$ and $m$. Both utilize the following observation:
+
+\begin{observation}
+	\label{obs:subpath}
+	The weights of the directed paths $\vec{P}_{i, j}$ and $\cev{P}_{i, j}$ are given by 
+	$$
+	\begin{array}{l}
+		h(\vec{P}_{i, j}) = h(\vec{P}_{0, j}) - h(\vec{P}_{0, i}), \\
+		h(\cev{P}_{i, j}) = h(\cev{P}_{0, j}) - h(\cev{P}_{0, i}).
+	\end{array}
+	$$
+\end{observation}
+
+Therefore, given arrays $h^r[\cdot]$ and $h^\ell[\cdot]$ that store in their $j$-th entries the corresponding values $h(\vec{P}_{0, j})$ and $h(\cev{P}_{0, j})$, it is possible to obtain any value of the forms $h(\vec{P}_{i, j})$ or $h(\cev{P}_{i, j})$ in constant time by applying Observation~\ref{obs:subpath}. Algorithm~\ref{algo:prefix_weights} computes such arrays for a given edge bi-weighted linear graph $P$.
+
+\begin{algorithm}
+	For $n$ the length of $P$, allocate two $n+1$-length arrays $h^r[\cdot]$ and $h^\ell[\cdot]$, and initialize both $h^r[0]$ and $h^{\ell}[0]$ to $0$\;
+	\For{$j=1$ to $n$}{
+		$h^{r}[j] \gets h^r[j-1] + w(j-1, j)$\;
+		$h^{\ell}[j] \gets h^\ell[j-1] + w(j, j-1)$\;
+	}
+	\Return{$h^{r},\ h^{\ell}$}\;
+	\caption{ComputePrefixWeights $(P)$}
+	\label{algo:prefix_weights}
+\end{algorithm}
+
+
+\subsubsection{An algorithm for the $h_s$ cost function}
+
+In this section, the following property of the $h_s$ cost function is exploited in order to improve the computation efficiency:
+
+\begin{property}
+	\label{prop:sub_path}
+	For a directed path $\vec{P}$ and any sub-path $\vec{P}'$ of $\vec{P}$, $h_s(\vec{P}') \leq h_s(\vec{P})$.
+\end{property}
+
+The correctness of the property follows from the fact that any sub-path of $\vec{P}'$, and in particular a heaviest sub-path, is also a sub-path of $\vec{P}$.
+
+Consider the computation of $H^r_s(j)$ given in Equation~\ref{eq:Hr} with respect to the specific costs $h_s$, and assume that $j > 0$. Say that an index $0 \leq i < j$ is \emph{dominant} with respect to $H^r_s(j)$, if for every $0 \leq i' < i$ it holds that $\max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\} \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$.
+
+\begin{claim}
+	\label{clm:dominance_a}
+	An index $i$ is dominant with respect to $H^r_s(j)$ if and only if $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$ for every $0 \leq i' < i$.
+\end{claim}
+
+\begin{proof}
+	Let $i'$ be an index such that $0 \leq i' < i$.
+	From Property~\ref{prop:sub_path}, $h_s(\vec{P}_{i, j}) \leq h_s(\vec{P}_{i', j}) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$. Therefore, $\max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\} \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$ if and only if $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$. By the definition of dominance, $i$ is dominant with respect to $H^r_s(j)$ if and only if the latter inequality holds for every $0 \leq i' < i$.
+\end{proof}
+
+
+\begin{claim}
+	\label{clm:dominance}
+	If an index $i$ is dominant with respect to $H^r_s(j-1)$, then it is also dominant with respect to  $H^r_s(j)$.
+\end{claim}
+
+\begin{proof}
+	Let $i$ be a dominant index with respect to $H^r_s(j-1)$. Due to Claim~\ref{clm:dominance_a}, to prove the claim we only need to show that $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$ for every $0 \leq i' < i$.
+	Let $i'$ be any such index.
+	If $H^\ell_s(i) \leq H^\ell_s(i')$, it immediately follows that $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$.
+	Otherwise  $H^\ell_s(i) > H^\ell_s(i')$. Since $i$ is dominant with respect to $H^r_s(j-1)$ we get that $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j-1})\right\}$. This means that $H^\ell_s(i) \leq h_s(\vec{P}_{i', j-1}) \leq h_s(\vec{P}_{i', j})$, and in particular $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$.
+\end{proof}
+
+Denote by $i^r_j$ the maximal dominant index with respect to $H^r_s(j)$. It is simple to assert that choosing $i = i^r_j$ minimizes the right-hand side expression in Equation~\ref{eq:Hr} for the case when $j > 0$. If $j > 1$, then from Claim~\ref{clm:dominance} we get that $i^r_{j-1}$ is also dominant with respect to $H^r_s(j)$, and in particular $i^r_j \geq i^r_{j-1}$. This means that if $i^r_{j-1}$ is known, it is sufficient to examine only indices $i$ between $i^r_{j-1}$ and $j-1$ in the right-hand side computation (rather than starting from $i=0$), and still to be guaranteed to find an index $i$ that minimizes $\max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$ for all $0 \leq i < j$.
+
+Next, given \emph{some} dominant index with respect to $H^r_s(j)$, we show how it is possible to find the biggest such dominant index $i^r_j$. Note that if $i$ is a dominant index with respect to $j$ and $i = j-1$, it must be that $i = i^r_j$. Otherwise, Claim~\ref{clm:k} below describes a property that allows to efficiently identify $i^r_j$. Denote $k^r_{i, j} = \argmin_{i < k < j} H^\ell_s(k)$, where $k^r_{i, j}$ is taken to be the maximal such index in case multiple indices $k$ produce the same minimal $H^\ell_s(k)$ value.
+
+\begin{claim}
+	\label{clm:k}
+	Let $i$ be a dominant index with respect to $H^r_s(j)$ where $i < j-1$, and denote $k = k^r_{i, j}$. 
+	If $H^\ell_s(k) > \max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$ then $i = i^r_j$, and otherwise $k$ is dominant with respect to $H^r_s(j)$.
+\end{claim}
+
+\begin{proof}
+	For the case when $H^\ell_s(k) > \max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$, it follows from the definition of $k^r_{i, j}$ that for every $i < i' < j$ it holds that $\max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\} < H^\ell_s(k) \leq H^\ell_s(i') \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$, and so $i = i^r_j$.
+	
+	For the case when $H^\ell_s(k) \leq \max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$, we need to show that $k$ is dominant with respect to $H^r_s(j)$. From Claim~\ref{clm:dominance_a}, it is sufficient to show that $H^\ell_s(k) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$ for every $0 \leq i' < k$. For $i' \leq i$ this follows immediately from the fact that $i$ is dominant respect to $H^r_s(j)$. For $i < i' < k$, the inequality holds since $H^\ell_s(k) \leq H^\ell_s(i') \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$.
+\end{proof}
+
+
+\begin{algorithm}
+	For $n$ the length of $P$, allocate two $n+1$-length arrays $H^r$ and $H^\ell$, and initialize both $H^r[0]$ and $H^{\ell}[0]$ to $0$\;
+	Set $i^r \gets 0, \ i^\ell \gets 0$\;
+	\For{$j=1$ to $n$}{
+		\While{$i^r < j-1$ and $H^\ell_s(k^r_{i^r, j}) \leq \max\left\{H^\ell_s(i^r), h_s(\vec{P}_{i^r, j})\right\}$}{
+			$i^r \gets k^r_{i^r, j}$\;
+		}
+		$H^{r}[j] \gets \max \{ H^{\ell}[i^r], h_s(\vec{P}_{i^r, j})\}$\;
+		\While{$i^\ell < j-1$ and $H^r_s(k^\ell_{i^\ell, j}) \leq \max\left\{H^r_s(i^\ell), h_s(\cev{P}_{i^\ell, j})\right\}$}{
+			$i^\ell \gets k^\ell_{i^\ell, j}$\;
+		}
+		$H^{\ell}[j] \gets \max \{ H^r[i^\ell], h_s(\cev{P}_{i^\ell, j})\}$\;
+	}
+	\Return{$\min \{H^{r}[n],\ H^{\ell}[n]\}$}\;
+	\caption{EfficientBestCostPath-$s$ $(P)$}
+	\label{algo:effH}
+\end{algorithm}
+
+[TODO: complete the details for the computation of $k^r_{i^r, j}$ and $h_s(\vec{P}_{i, j})$ (using deques)]
 
 ****************************************
 
