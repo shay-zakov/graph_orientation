@@ -29,15 +29,15 @@ Clearly,
 
 \begin{equation}
 \label{eq:Hx}
-H_x(j) = \min \left(H^r_x(j), H^\ell_x(j)\right).
+H_x(j) = \min \left\{H^r_x(j), H^\ell_x(j)\right\}.
 \end{equation}
 
-Consider next the set of orientations of $P_{0, j}$ in which the orientation of $\{j-1, j\}$ is directed towards $j$. In any such an orientation, there exists some unique $0 \leq i < j$ such that for every $i \leq k < j$ the edges $\{k, k+1\}$ are oriented as $(k, k+1)$, and either $i = 0$ or the edge $\{i-1, i\}$ is oriented as $(i, i-1)$. Any path in such an orientation is fully contained in either the induced orientation of the prefix $P_{0, i}$, or the induced orientation of the suffix $P_{i, j}$ (as both edges $(i, i-1)$ and $(i, i+1)$ cannot participate in a single path). In the former case, it is clear that an optimal orientation for the prefix would be one that minimizes the heaviest path weight for the edge bi-weighted subgraph $P_{0, i}$ under the constrain that $\{i-1, i\}$ is oriented as $(i, i-1)$. By definition, the weight of such an orientation is $H^\ell_x(i)$. For the suffix $P_{i, j}$ the orientation is fixed to $\vec{P}_{i, j}$, and the weight of a heaviest path in it is $h_x(\vec{P}_{i, j})$. Therefore, for a particular split index $i$ the minimum weight of an orientation as describe above would be $\min\left(H^\ell_x(i), h_x(\vec{P}_{i, j})\right)$, and considering all possible split indices we get the following:
+Consider next the set of orientations of $P_{0, j}$ in which the orientation of $\{j-1, j\}$ is directed towards $j$. In any such an orientation $P'_{0, j}$, there exists some unique $0 \leq i < j$ such that for every $i \leq k < j$ the edges $\{k, k+1\}$ are oriented as $(k, k+1)$, and either $i = 0$ or the edge $\{i-1, i\}$ is oriented as $(i, i-1)$. Any path in such an orientation, and in particular a heaviest path, is fully contained in either the induced orientation $P'_{0, i}$ of the prefix $P_{0, i}$ of $P_{0, j}$, or the induced orientation $\vec{P}_{i, j}$ of the suffix $P_{i, j}$ of $P_{0, j}$ (as both edges $(i, i-1)$ and $(i, i+1)$ cannot participate in the same path in $P'_{0, j}$). Therefore, $h_x(P'_{0, j}) = \max \left\{h_x(P'_{0, i}), h_x(\vec{P}_{i, j})\right\}$. By definition, the minimal value $h_x(P'_{0, i})$ can get is $H^\ell_x(i)$, and such a value is achievable if $i = 0$ and $P'_{0, i}$ is the trivial empty orientation, or if $i > 0$ and $P'_{0, i}$ is an orientation for $P_{0, i}$ with a minimal heaviest path weight among all orientations for $P_{0, i}$ in which $\{i-1, i\}$ is oriented as $(i, i-1)$.	Therefore, for a particular split index $i$ the minimum weight of an orientation as describe above would be $\max\left\{H^\ell_x(i), h_x(\vec{P}_{i, j})\right\}$, and considering all possible split indices we get the following:
 
 \begin{equation}\label{eq:Hr}
 H^r_x(j) = \left\{\begin{array}{ll}
 0, & j = 0\\
-\min_{0 \leq i < j}\left(\max\left(H^\ell_x(i), h_x(\vec{P}_{i, j})\right)\right), & \text{otherwise}\\
+\min_{0 \leq i < j}\left(\max\left\{H^\ell_x(i), h_x(\vec{P}_{i, j})\right\}\right), & \text{otherwise}\\
 \end{array}\right.
 \end{equation}
 
@@ -46,7 +46,7 @@ Symmetrically:
 \begin{equation}\label{eq:Hl}
 H^\ell_x(j) = \left\{\begin{array}{ll}
 0, & j = 0\\
-\min_{0 \leq i < j}\left(\max\left(H^r_x(i), h_x(\cev{P}_{i, j})\right)\right), & \text{otherwise}\\
+\min_{0 \leq i < j}\left(\max\left\{H^r_x(i), h_x(\cev{P}_{i, j})\right\}\right), & \text{otherwise}\\
 \end{array}\right.
 \end{equation}
 
