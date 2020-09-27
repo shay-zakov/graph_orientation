@@ -106,7 +106,16 @@ In this section, the following property of the $h_s$ cost function is exploited 
 
 The correctness of the property follows from the fact that any sub-path of $\vec{P}'$, and in particular a heaviest sub-path, is also a sub-path of $\vec{P}$.
 
-Consider the computation of $H^r_s(j)$ given in Equation~\ref{eq:Hr} with respect to the specific costs $h_s$, and assume that $j > 0$. Say that an index $0 \leq i < j$ is \emph{dominant} with respect to $H^r_s(j)$, if for every $0 \leq i' < i$ it holds that $\max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\} \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$.
+Consider the computation of $H^r_s(j)$ given in Equation~\ref{eq:Hr} with respect to the specific costs $h_s$, and assume that $j > 0$. Say that an index $0 \leq i < j$ is \emph{dominant} with respect to $H^r_s(j)$, if for every $0 \leq i' < i$ it holds that $\max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\} \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$. Denote by $i^r_j$ the maximal dominant index with respect to $H^r_s(j)$, and observe that for every $0 \leq i < j$, $\max\left\{H^\ell_s(i^r_j), h_s(\vec{P}_{i^r_j, j})\right\} \leq \max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$. Therefore, a recursive computation for $H^r_s(j)$ can replace Equation~\ref{eq:Hr} by the following equation:
+
+\begin{equation}\label{eq:Hr1}
+H^r_s(j) = \left\{\begin{array}{ll}
+0, & j = 0,\\
+\max\left\{H^\ell_s(i^r_j), h_s(\vec{P}_{i^r_j, j})\right\}, & \text{otherwise.}\\
+\end{array}\right.
+\end{equation}
+
+In what follows, we show how can indices of the form $i^r_j$ can be efficiently computed.
 
 \begin{claim}
 	\label{clm:dominance_a}
@@ -118,6 +127,37 @@ Consider the computation of $H^r_s(j)$ given in Equation~\ref{eq:Hr} with respec
 	From Property~\ref{prop:sub_path}, $h_s(\vec{P}_{i, j}) \leq h_s(\vec{P}_{i', j}) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$. Therefore, $\max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\} \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$ if and only if $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$. By the definition of dominance, $i$ is dominant with respect to $H^r_s(j)$ if and only if the latter inequality holds for every $0 \leq i' < i$.
 \end{proof}
 
+Note that if $i$ is a dominant index with respect to $H^r_s(j)$ and $i = j-1$, it must be that $i = i^r_j$. Otherwise, Claim~\ref{clm:k} below describes a property that allows, given \emph{some} dominant index $i$ with respect to $H^r_s(j)$, to traverse an increasing sequence of dominant indices in order to identify $i^r_j$ without considering non-dominant indices. More importantly, it provides a condition that allows to identify $i^r_j$ once it has reached.
+
+
+\begin{claim}
+	\label{clm:k}
+	Let $i$ be a dominant index with respect to $H^r_s(j)$ where $i < j-1$, and let $k = \argmin_{i < i' < j} H^\ell_s(i')$. 
+	If $H^\ell_s(k) > \max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$ then $i = i^r_j$, and otherwise $k$ is dominant with respect to $H^r_s(j)$.
+\end{claim}
+
+\begin{proof}
+	For the case when $H^\ell_s(k) > \max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$, it follows from the selection of $k$ that for every $i < i' < j$ it holds that $\max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\} < H^\ell_s(k) \leq H^\ell_s(i') \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$, and so $i = i^r_j$.
+	
+	For the case when $H^\ell_s(k) \leq \max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$, we need to show that $k$ is dominant with respect to $H^r_s(j)$. From Claim~\ref{clm:dominance_a}, it is sufficient to show that $H^\ell_s(k) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$ for every $0 \leq i' < k$. For $i' \leq i$ this follows immediately from the fact that $i$ is dominant respect to $H^r_s(j)$. For $i < i' < k$, the inequality holds since $H^\ell_s(k) \leq H^\ell_s(i') \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$.
+\end{proof}
+
+In order to utilize Claim~\ref{clm:k} for the efficient identification of $i^r_j$, there is also a need to be able to efficiently find an index $k$ such that $k = \argmin_{i < i' < j} H^\ell_s(i')$. This is known as the Range Minimum Query problem [TODO: add citations], for which there are efficient implementations that allow, after linear preprocessing time, to execute each query in a constant time. In our case, as will be shown later, the series of queries executed throughout the computation has the property of having monotonously increasing endpoints (that is, for every pair of endpoints $(i, j)$ and $(i', j')$ in two consecutive queries, it holds that $i \leq i'$ and $j \leq j'$). For this case there is a simple solution using the \emph{Deque} data structure [TODO: add citations]. Besides its simplicity, this solution does not require the entire array over which the queries are performed to be given prior to the series of queries. It allows the sequential addition of elements at the end of the array, and to execute queries given that their endpoints are within the current array length. While some queries might take more than a constant time for their execution, the overall running time for executing $m$ queries over an array whose final length is $n$, is $O(m+n)$. In this paper, we will denote such structures over the arrays $H^r[\cdot]$ and $H^\ell[\cdot]$  by $D^r$ and $D^\ell$, respectively. The procedure GetMin$(D^r, i, j)$ correspond to finding an index $i < k < j$ that minimizes $H^r[k]$, and the procedure Append$(D^r, H^r[j])$ corresponds to updating the internal structure of $D^r$ due to the addition of the element $H^r[j]$ at the end of the currently computed array $H^r[\cdot]$. [TODO: consider adding an appendix with implementation details.] Algorithm~\ref{algo:maxDominant} computes $i^r_j$, given some initial dominant index $i$ with respect to $H^r_s(j)$ and the data structure $D^\ell$, under the assumption $D^\ell$ can execute a range minimum query with respect to the endpoints $i$ and $j$ [TODO: make the notation more generic to work with both $r$ and $\ell$ directions].
+
+\begin{algorithm}
+	\If{$i < j-1$}{
+		$i' \gets \text{GetMin}(D^\ell, i, j)$\;
+		\While{$H^\ell[i'] \leq \max\left\{H^\ell[i], h_s(\vec{P}_{i, j})\right\}$}{
+			$i \gets i'$\;
+			\If{$i = j-1$}{\Break}
+			$i' \gets \text{GetMin}(D^\ell, i, j)$\;
+		}
+	}
+	\Return{$i$}\;
+	\caption{MaxDominant$(i, \ j, \ D^\ell, \ H^\ell)$}
+	\label{algo:maxDominant}
+\end{algorithm}
+
 
 \begin{claim}
 	\label{clm:dominance}
@@ -128,38 +168,24 @@ Consider the computation of $H^r_s(j)$ given in Equation~\ref{eq:Hr} with respec
 	Let $i$ be a dominant index with respect to $H^r_s(j-1)$. Due to Claim~\ref{clm:dominance_a}, to prove the claim we only need to show that $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$ for every $0 \leq i' < i$.
 	Let $i'$ be any such index.
 	If $H^\ell_s(i) \leq H^\ell_s(i')$, it immediately follows that $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$.
-	Otherwise  $H^\ell_s(i) > H^\ell_s(i')$. Since $i$ is dominant with respect to $H^r_s(j-1)$ we get that $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j-1})\right\}$. This means that $H^\ell_s(i) \leq h_s(\vec{P}_{i', j-1}) \leq h_s(\vec{P}_{i', j})$, and in particular $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$.
+	Otherwise  $H^\ell_s(i) > H^\ell_s(i')$. Since $i$ is dominant with respect to $H^r_s(j-1)$ we get that $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j-1})\right\}$. This means that $H^\ell_s(i) \leq h_s(\vec{P}_{i', j-1}) \stackrel{\text{Prop.~\ref{prop:sub_path}}}{\leq} h_s(\vec{P}_{i', j})$, and in particular $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$.
 \end{proof}
 
-Denote by $i^r_j$ the maximal dominant index with respect to $H^r_s(j)$. It is simple to assert that choosing $i = i^r_j$ minimizes the right-hand side expression in Equation~\ref{eq:Hr} for the case when $j > 0$. If $j > 1$, then from Claim~\ref{clm:dominance} we get that $i^r_{j-1}$ is also dominant with respect to $H^r_s(j)$, and in particular $i^r_j \geq i^r_{j-1}$. This means that if $i^r_{j-1}$ is known, it is sufficient to examine only indices $i$ between $i^r_{j-1}$ and $j-1$ in the right-hand side computation (rather than starting from $i=0$), and still to be guaranteed to find an index $i$ that minimizes $\max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$ for all $0 \leq i < j$.
+For $j = 1$, $i^r_1 = 0$. For $j > 1$, from Claim~\ref{clm:dominance} we get that $i^r_{j-1}$ is also dominant with respect to $H^r_s(j)$, and can be used as an input for Algorithm~\ref{algo:maxDominant} for computing $i^r_j$.
 
-Next, given \emph{some} dominant index with respect to $H^r_s(j)$, we show how it is possible to find the biggest such dominant index $i^r_j$. Note that if $i$ is a dominant index with respect to $j$ and $i = j-1$, it must be that $i = i^r_j$. Otherwise, Claim~\ref{clm:k} below describes a property that allows to efficiently identify $i^r_j$. Denote $k^r_{i, j} = \argmin_{i < k < j} H^\ell_s(k)$, where $k^r_{i, j}$ is taken to be the maximal such index in case multiple indices $k$ produce the same minimal $H^\ell_s(k)$ value.
-
-\begin{claim}
-	\label{clm:k}
-	Let $i$ be a dominant index with respect to $H^r_s(j)$ where $i < j-1$, and denote $k = k^r_{i, j}$. 
-	If $H^\ell_s(k) > \max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$ then $i = i^r_j$, and otherwise $k$ is dominant with respect to $H^r_s(j)$.
-\end{claim}
-
-\begin{proof}
-	For the case when $H^\ell_s(k) > \max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$, it follows from the definition of $k^r_{i, j}$ that for every $i < i' < j$ it holds that $\max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\} < H^\ell_s(k) \leq H^\ell_s(i') \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$, and so $i = i^r_j$.
-	
-	For the case when $H^\ell_s(k) \leq \max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$, we need to show that $k$ is dominant with respect to $H^r_s(j)$. From Claim~\ref{clm:dominance_a}, it is sufficient to show that $H^\ell_s(k) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$ for every $0 \leq i' < k$. For $i' \leq i$ this follows immediately from the fact that $i$ is dominant respect to $H^r_s(j)$. For $i < i' < k$, the inequality holds since $H^\ell_s(k) \leq H^\ell_s(i') \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$.
-\end{proof}
 
 
 \begin{algorithm}
 	For $n$ the length of $P$, allocate two $n+1$-length arrays $H^r$ and $H^\ell$, and initialize both $H^r[0]$ and $H^{\ell}[0]$ to $0$\;
 	Set $i^r \gets 0, \ i^\ell \gets 0$\;
+	Initialize the data structures $D^r$ and $D^\ell$ with respect to $H^r[0]$ and $H^{\ell}[0]$\;
 	\For{$j=1$ to $n$}{
-		\While{$i^r < j-1$ and $H^\ell_s(k^r_{i^r, j}) \leq \max\left\{H^\ell_s(i^r), h_s(\vec{P}_{i^r, j})\right\}$}{
-			$i^r \gets k^r_{i^r, j}$\;
-		}
+		$i^r \gets \text{MaxDominant}(i^r, \ j, \ D^\ell, \ H^\ell)$\;
 		$H^{r}[j] \gets \max \{ H^{\ell}[i^r], h_s(\vec{P}_{i^r, j})\}$\;
-		\While{$i^\ell < j-1$ and $H^r_s(k^\ell_{i^\ell, j}) \leq \max\left\{H^r_s(i^\ell), h_s(\cev{P}_{i^\ell, j})\right\}$}{
-			$i^\ell \gets k^\ell_{i^\ell, j}$\;
-		}
+		$i^\ell \gets \text{MaxDominant}(i^\ell, \ j, \ D^r, \ H^r)$\;
 		$H^{\ell}[j] \gets \max \{ H^r[i^\ell], h_s(\cev{P}_{i^\ell, j})\}$\;
+		Append$(D^r, H^{r}[j])$\;
+		Append$(D^\ell, H^{\ell}[j])$\;
 	}
 	\Return{$\min \{H^{r}[n],\ H^{\ell}[n]\}$}\;
 	\caption{EfficientBestCostPath-$s$ $(P)$}
