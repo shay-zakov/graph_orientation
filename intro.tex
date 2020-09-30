@@ -21,20 +21,19 @@ simple paths or over all simple subpaths. To distinguish between these two possi
 
 \begin{definition}
 	Given a directed path $\vec{P}=<v_0,\ldots,v_n>$ let 
-\begin{equation}\label{e.h}
-h_m(\vec{P})=\sum_{k=0}^{n-1} w(v_k,v_{k+1}),\ 
-	h_s(\vec{P})=\max_{0\leq i<j\leq n-1}\sum_{k=i}^{j} w(v_k,v_{k+1}).
-\end{equation}
-	We extend these measures to an oriented graph $\vec{G}$
+	\begin{equation}\label{e.h}
+		w(\vec{P})=\sum_{k=0}^{n-1} w(v_k,v_{k+1}).
+	\end{equation}
+	We then define the following measures to an oriented graph $\vec{G}$:
 	\begin{align} 
-	h_m(\vecG)&=\max\{h_m(\vec{P})\mid \vecP \mbox{ is a maximal simple path in }\vecG \},\\
-	h_s(\vecG)&=\max\{h_s(\vec{P})\mid \vecP \mbox{ is a simple path in }\vecG \}.
-\end{align}
-The corresponding cost functions for orienting an undirected graph are 
-\begin{align}
-H_m(G)=\min\{h_m(\vecG)\mid \vecG \in \mathcal{O}(G)\},
-H_s(G)=\min\{h_s(\vecG)\mid \vecG \in \mathcal{O}(G)\}.
-\end{align}
+		h_s(\vecG) &= \max\{w(\vec{P})\mid \vecP \mbox{ is a simple path in }\vecG \}, \\
+		h_m(\vecG) &= \max\{w(\vec{P})\mid \vecP \mbox{ is a maximal simple path in }\vecG \}.
+	\end{align}
+	The corresponding cost functions for orienting an undirected graph are 
+	\begin{align}
+		H_s(G) &= \min\{h_s(\vecG)\mid \vecG \in \mathcal{O}(G)\}, \\
+		H_m(G) &= \min\{h_m(\vecG)\mid \vecG \in \mathcal{O}(G)\}.
+	\end{align}
 \end{definition}
 
  To illustrate the differences between the two cost functions consider\\
@@ -42,7 +41,7 @@ H_s(G)=\min\{h_s(\vecG)\mid \vecG \in \mathcal{O}(G)\}.
  Then $h_m(\vec{P})=5, h_s(\vec{P})=6$.
 
 A very useful property of $h_s$ is that it is monotone: the cost of a graph is never less than the cost of a subgraph.
-\begin{lemma}\label{l.sprop}
+\begin{lemma}\label{lem:sprop}
 	Given any edge bi-weighted graph G,
 	$H_{s}(G)\geq  H_{s}(G')$ for any subgraph $G'$ of $G$. 
 \end{lemma}

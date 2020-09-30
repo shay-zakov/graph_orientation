@@ -1,14 +1,37 @@
 \documentclass[a4paper,12pt]{article}
 %\usepackage[utf8]{inputenc}
-%\usepackage{graphicx}
 \usepackage{multirow}
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{graphicx}
 
+
+% Definintg \devc for double-arrow vector notation:
+\newcommand\shrinkage{2.1mu}
+\newcommand\vecsign{\mathchar"017E}
+\newcommand\dvecsign{\smash{\stackon[-1.95pt]{\mkern-\shrinkage\vecsign}{\rotatebox{180}{$\mkern-\shrinkage\vecsign$}}}}
+\newcommand\dvec[1]{\def\useanchorwidth{T}\stackon[-4.2pt]{#1}{\,\dvecsign}}
+\usepackage{stackengine}
+\stackMath
+%\usepackage{graphicx}
+
+% Commands for annotating path directions - either entire path or just last edge
+% TODO: workout the appropirate arrow styls
+\newcommand{\er}[1]{\ensuremath{#1^\rightarrow}} % Last edge pointing right
+\newcommand{\el}[1]{\ensuremath{#1^\leftarrow}} % Last edge pointing left
+\newcommand{\elr}[1]{\ensuremath{#1^\leftrightarrow}} % Last edge pointing either right or left
+\newcommand{\ar}[1]{\ensuremath{\vec{#1}}} % All edges pointing right
+\newcommand{\al}[1]{\ensuremath{\cev{#1}}} % All edges pointing left
+\newcommand{\alr}[1]{\ensuremath{\dvec{#1}}} % All edges pointing either right or left
+
+
 \usepackage[linesnumbered,ruled,vlined,scleft]{algorithm2e}
 %\DontPrintSumicolon % Some LaTeX compilers require you to use \dontprintsemicolon instead
 \SetKw{Break}{break}
+\SetKwComment{Precondition}{\textbf{precondition:~}}{}
+\SetKwComment{Postcondition}{\textbf{postcondition:~}}{}
+\SetKwComment{LoopInv}{\textbf{loop invariant:~}}{}
+\SetKwComment{Condition}{\textbf{condition:~}}{}
 
 
 \newtheorem{theorem}{Theorem}[section]

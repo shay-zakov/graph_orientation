@@ -8,7 +8,7 @@ are numbered from \textit{0} to \textit{n}, and denote the weights of
 edges $(i,i+1)$ and  $(i+1,i)$ by $w(i,i+1)$ and $w(i+1,1)$, respectively.
 
 We describe next an algorithm for finding an optimal orientation 
-of a linear graph. We first describe a high level recursive computation that makes no use of the details of the cost function, be it $h_m$ or $h_s$. The description will therefore omit these subscripts. Then, we show how different properties of the specific cost functions may be exploited to improve the efficiency of the computation in each one of the cases. In the rest of this section we make use in the following notation:
+of a linear graph. We first describe a high level recursive computation that makes no use of the details of the cost function, be it $h_m$ or $h_s$. The description will therefore omit these subscripts. Then, we show how different properties of the specific cost functions may be exploited to improve the efficiency of the computation in each one of the cases. In the rest of this section we make use of the following notation:
 %\bigskip
 %
 %{\bf Notation}:
@@ -19,7 +19,7 @@ of a linear graph. We first describe a high level recursive computation that mak
  	and similarly  $\cev{P}_{i, j}$ denotes the oriented version 
  	of $P_{i, j}$ in which all edges are directed to the left.
  	\item $H_x(j)$ is the value of an optimal orientaton of $P_{0, j}$ with respect to the $h_x$ cost function, where $x = s$ or $x = m$. $H^r_x(j)$ and $H^{\ell}_x(j)$ are defined similarly, under the constraint 
- 	that edge $\{j-1, j\}$ is directed either towards $j$ or towards $j-1$, respectively. Using this notation we are assuming that the original instance graph $P$ is clear from the context.
+ 	that edge $\{j-1, j\}$ is directed either towards $j$ or towards $j-1$, respectively. Using this notation we are assuming the original instance graph $P$ is clear from the context.
 \end{itemize}
 
 \subsection{Recursive Relations}
@@ -68,43 +68,116 @@ This analysis ignores the computational resources needed for computing values of
 The time complexity of the algorithm is dictated by the loop in lines~2 to~4. This loop is executed $n$ times. The expressions computed within each loop iteration take $O(n)$ time to compute, as $O(n)$ split-points $i$ are examine in each iteration, and all values of the form $H^{\ell}[i]$ and $H^{r}[i]$ are pre-computed. Therefore, the overall time complexity of the algorithm is $O(n^2)$. The space complexity is $O(n)$ due to the need to maintain the $H$ arrays.
 
 \subsection{More efficient implementations}
-We now turn to show more efficient implementations of the algorithm designated specifically to each of the cost functions $s$ and $m$. Both utilize the following observation:
+We now turn to show more efficient implementations of the algorithm designated specifically to each of the cost functions $h_s$ and $h_m$. Both utilize the following observation:
 
 \begin{observation}
 	\label{obs:subpath}
 	The weights of the directed paths $\vec{P}_{i, j}$ and $\cev{P}_{i, j}$ are given by 
 	$$
 	\begin{array}{l}
-		h(\vec{P}_{i, j}) = h(\vec{P}_{0, j}) - h(\vec{P}_{0, i}), \\
-		h(\cev{P}_{i, j}) = h(\cev{P}_{0, j}) - h(\cev{P}_{0, i}).
+		w(\vec{P}_{i, j}) = w(\vec{P}_{0, j}) - w(\vec{P}_{0, i}), \\
+		w(\cev{P}_{i, j}) = w(\cev{P}_{0, j}) - w(\cev{P}_{0, i}).
 	\end{array}
 	$$
 \end{observation}
 
-Therefore, given arrays $h^r[\cdot]$ and $h^\ell[\cdot]$ that store in their $j$-th entries the corresponding values $h(\vec{P}_{0, j})$ and $h(\cev{P}_{0, j})$, it is possible to obtain any value of the forms $h(\vec{P}_{i, j})$ or $h(\cev{P}_{i, j})$ in constant time by applying Observation~\ref{obs:subpath}. Algorithm~\ref{algo:prefix_weights} computes such arrays for a given edge bi-weighted linear graph $P$.
+Therefore, given arrays $\vec{w}[\cdot]$ and $\cev{w}[\cdot]$ that store in their $j$-th entries the corresponding values $w(\vec{P}_{0, j})$ and $w(\cev{P}_{0, j})$, it is possible to obtain any value of the forms $w(\vec{P}_{i, j})$ or $w(\cev{P}_{i, j})$ in constant time by applying Observation~\ref{obs:subpath}. Algorithm~\ref{algo:prefix_weights} computes such arrays for a given edge bi-weighted linear graph $P$.
 
 \begin{algorithm}
-	For $n$ the length of $P$, allocate two $n+1$-length arrays $h^r[\cdot]$ and $h^\ell[\cdot]$, and initialize both $h^r[0]$ and $h^{\ell}[0]$ to $0$\;
+	For $n$ the length of $P$, allocate two $n+1$-length arrays $\vec{w}[\cdot]$ and $\cev{h}[\cdot]$, and initialize both $\vec{w}[0]$ and $\cev{w}[0]$ to $0$\;
 	\For{$j=1$ to $n$}{
-		$h^{r}[j] \gets h^r[j-1] + w(j-1, j)$\;
-		$h^{\ell}[j] \gets h^\ell[j-1] + w(j, j-1)$\;
+		$\vec{w}[j] \gets \vec{w}[j-1] + w(j-1, j)$\;
+		$\cev{w}[j] \gets \cev{w}[j-1] + w(j, j-1)$\;
 	}
-	\Return{$h^{r},\ h^{\ell}$}\;
+	\Return{$\vec{w}[\cdot],\ \cev{w}[\cdot]$}\;
 	\caption{ComputePrefixWeights $(P)$}
 	\label{algo:prefix_weights}
 \end{algorithm}
 
+\subsubsection{Computing $h_s(\alr{P}_{i, j})$ for a monotonous series of endpoints}
+
+A series of pairs $(i_0, j_0), (i_1, j_1), \ldots, (i_p, j_p)$ is said to be \emph{monotonous} if for every $0 \leq q < p$, $i_q \leq i_{q+1}$ and $j_q \leq j_{q+1}$. 
+%The algorithm described below for the $HS$ problem over linear graphs requires the computation of values of the form $h_s(\vec{P}_{i, j})$ with respect to some monotonous series of path endpoints $(i, j)$. 
+We next describe data structures $\ar{D}$ and $\al{D}$ that support the operation \emph{HeaviestSubPath}, where HeaviestSubPath$(\ar{D}, i, j)$ returns $h_s(\ar{P}_{i, j})$ and HeaviestSubPath$(\al{D}, i, j)$ returns $h_s(\al{P}_{i, j})$, provided that the series of path endpoints used for these queries is monotonous. In particular, the implementation is efficient in the sense that if $p$ heaviest subpath queries are being executed, the overall running time for all queries is $O(n + p)$ ($n$ being the length of $P$). We denote by $\alr{D}$ either of the data structures $\ar{D}$ or $\al{D}$, to unify the description for both cases.
+To describe $\alr{D}$ we make use of the following definitions:
+
+\begin{definition}
+	\label{def:rightmost_heaviest}
+	A rightmost heaviest subpath of $\alr{P}_{i, j}$ is a heaviest subpth $\alr{P}_{l, r}$ of $\alr{P}_{i, j}$, such that $r$ is maximal with respect to all such paths.
+\end{definition}
+
+[TODO: illustrate the definition with an example.]
+
+
+\begin{definition}
+\label{def:h-series}
+	An \emph{$h$-series} of $\alr{P}_{i, j}$ is a list of pairs $(l_0, r_0), (l_1, r_1), \ldots, (l_z, r_z)$ defined as follows. If $i > j$ then it is an empty list. Otherwise, $(l_0, r_0)$ are the endpoints of a rightmost heaviest subpath of $\alr{P}_{i, j}$ (where $l_0 \leq r_0$), and the rest of the series $(l_1, r_1), \ldots, (l_z, r_z)$ is a $h$-series of $\alr{P}_{r_0 + 1, j}$.
+\end{definition}
+
+\begin{definition}
+	\label{def:t-series}
+	A \emph{$t$-series} with respect to a pair $\alr{P}_{i, j}$  is a list of indices $t_0, t_1, \ldots, t_k$ defined as follows. If $i \geq j$ then it is an empty list. Otherwise, $t_0 = \argmin_{i < t \leq j} w(\alr{P}_{0, t})$, and the rest of the series $t_1, \ldots, t_k$ is a $t$-series with respect to $(t_0, j)$.
+\end{definition}
+
+
+The data structure $\alr{D}$ is in fact composed of three data structures: the array $\alr{w}[\cdot]$ as computed by Algorithm~\ref{algo:prefix_weights} with respect to $\alr{P}$, and two \emph{deque} data structures $A$ and $B$\footnote{A \emph{deque} data structure $Q$ is a double-ended queue, that supports the operations of AppendLeft$(Q, x)$, AppendRight$(Q, x)$, PeekLeft$(Q)$, PeekRight$(Q)$, RemoveLeft$(Q)$, and RemoveRight$(Q)$, to add an element $x$, observe element, and remove element in either its left or right ends. Each of these operations is performed in $O(1)$ running time.}. 
+The following invariant is maintained for $\alr{D}$:
+
+\paragraph{$D$-invariant for $(i, j)$:}
+Right after performing a query HeaviestSubPath$(\alr{D}, i, j)$, $A$ contains an $h$-series of $\alr{P}_{i, j}$, and for the first pair $(l_0, r_0)$ in $A$, $B$ contains a $t$-series of $\alr{P}_{l_0, r_0}$.
+
+Algorithm~\ref{algo:D} gives an implementation of the HeaviestSubPath procedure, which maintains the $D$-invariant [TODO: break this algorithm to smaller procedures, use one that merges a current $A$ structure for $(i, j)$ with a rightmost heaviest path $(l, r)$ with respect to $(j'+1, j)$, given that $r = j'$].
+
+\begin{algorithm}
+	\LoopInv{$\alr{D} = (\alr{w}[\cdot], A, B)$ satisfies the $D$-invariant for some $(i', j')$ such that $i' \leq i$ and $j' \leq j$}
+	\While{$j' < j$}{
+		$j' \gets j'+1$\;
+		$l \gets j'$ \;
+		$(l', r') \gets \text{PeekRight}(A)$ \tcp*[r]{By definition, $r = j'-1$}
+		\LoopInv{$\alr{D}$ satisfies the $D$-invariant for $(i', r')$, where $i' \leq i$ and $r' < j' \leq j$, and $\alr{P}_{l, j'}$ is a rightmost heaviest subpath of $\alr{P}_{r'+1, j'}$}
+		\While{$\alr{w}[j'] - \min\left\{\alr{w}[l'], \alr{w}[l]\right\} \geq \alr{w}[r'] - \alr{w}[l']$}{
+			$l \gets \argmin\left\{\alr{w}[l'], \alr{w}[l]\right\}$\;
+			\Condition{$\alr{P}_{l, j'}$ is a rightmost heaviest path in $\alr{P}_{r''+1, j'}$, where $r''$ the second element in the pair $(l'', r'')$ preceding $(l', r')$ in $A$ if such a pair exists, or $i' - 1$ if $(l', r')$ is the first pair in $A$}
+			RemoveRight$(A)$\;
+			$(l', r') \gets \text{PeekRight}(A)$\;
+		}
+		AppendRight$(A, (l, j'))$ \;
+	}
+	\tcp{TODO: update the $B$ structure in case $A$ contains a single pair (ending at $r = j$).}
+	\LoopInv{$\alr{D}$ satisfies the $D$-invariant for $(i', j)$, where $i' \leq i$}
+	\While{$i' < i$}{
+		$(l, r) \gets \text{PeekLeft}(A)$ \;
+		\If{$l = i'$}{
+			RemoveLeft$(A)$\;
+			$l \gets \text{RemoveLeft}(B)$ \;
+			\If{$A$ is not empty}{
+				$(l', r') \gets \text{PeekLeft}(A)$ \;
+				\If{$\alr{w}[r] - \alr{w}[l] > \alr{w}[r'] - \alr{w}[l']$}{
+					AppendLeft$(A, (l, r))$ \;
+				}
+				\Else{
+				\tcp{TODO: update the $B$ for the current first pair $(l', r')$ in $A$.}
+				}
+			}
+			\Else{
+				AppendLeft$(A, (l, r))$ \;
+			}
+		}
+		$i' \gets i' + 1$ \;
+	}
+	\Condition{$\alr{D}$ satisfies the $D$-invariant for $(i, j)$}
+	$(l, r) \gets \text{PeekLeft}(A)$\;
+	\Return{$\alr{w}[r] - \alr{w}[l]$}\;
+	\caption{HeaviestSubPath$(\alr{D}, i, j)$}
+	\label{algo:D}
+\end{algorithm}
+
+
 
 \subsubsection{An algorithm for the $h_s$ cost function}
 
-In this section, the following property of the $h_s$ cost function is exploited in order to improve the computation efficiency:
+In this section we refine the implementation for the $h_s$ cost function. We start by describing an explicit way to compute values of the form $h_s(\vec{P_{i, j}})$ and $h_s(\cev{P_{i, j}})$. Then, we show how Lemma~\ref{lem:sprop} can exploited in order to improve the computation efficiency for this particular cost function.
 
-\begin{property}
-	\label{prop:sub_path}
-	For a directed path $\vec{P}$ and any sub-path $\vec{P}'$ of $\vec{P}$, $h_s(\vec{P}') \leq h_s(\vec{P})$.
-\end{property}
-
-The correctness of the property follows from the fact that any sub-path of $\vec{P}'$, and in particular a heaviest sub-path, is also a sub-path of $\vec{P}$.
 
 Consider the computation of $H^r_s(j)$ given in Equation~\ref{eq:Hr} with respect to the specific costs $h_s$, and assume that $j > 0$. Say that an index $0 \leq i < j$ is \emph{dominant} with respect to $H^r_s(j)$, if for every $0 \leq i' < i$ it holds that $\max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\} \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$. Denote by $i^r_j$ the maximal dominant index with respect to $H^r_s(j)$, and observe that for every $0 \leq i < j$, $\max\left\{H^\ell_s(i^r_j), h_s(\vec{P}_{i^r_j, j})\right\} \leq \max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$. Therefore, a recursive computation for $H^r_s(j)$ can replace Equation~\ref{eq:Hr} by the following equation:
 
