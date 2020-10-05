@@ -56,8 +56,22 @@ $$i_0=j_0=0, i_k\leq  i_{k+1},\  j_k \leq j_{k+1},
 i_{k+1}+j_{k+1}=i_k+j_k+1,
 k=0, \ldots 2n-1,$$
 i.e. such that exactly one of the indices increases by 1 with each increase in $k$.
-Since $W_s(\vec{P_{i_k, j_k}})=\sum_{p=i_k}^{j_k-1} w(p,p+1)$ we rephrase
-this task as an instance of the following Problem \ref{p.msmm}, the Maximum-sum-subarray one-way moving queries problem.
+Since $W_s(\vec{P_{i_k, j_k}})=\sum_{p=i_k}^{j_k-1} w(p,p+1)$ we can rephrase
+this task as an instance of the following Problem.
+\begin{problem}[Maximum-sum-subarray one-way moving queries - MSSM]\label{p.msmm}\ \\
+	\noindent {\bf Input}: a one-dimensional array $A[1\ldots n]$ of numbers
+	that can be positive, negative, or zero; and a sequence of query pairs $(i_k,j_k)$ 
+	such that 
+	$$i_0=j_0=0, i_k\leq  i_{k+1},\  j_k \leq j_{k+1}, 
+	i_{k+1}+j_{k+1}=i_k+j_k+1,
+	k=0, \ldots 2n-1.$$
+	\noindent  {\bf Find}: for each query $(i_k,j_k)$ a contiguous subarray of 
+	$A[i_k,j_k]$ with the largest sum,
+	i.e. find indices $x_k$ and 
+	$y_k$ with $i_k \leq x_k\leq y_k-1\leq j_k-1$, such that 
+	$ \sum_{i=x_k}^{y_k}A[i] $
+	is as large as possible. 
+\end{problem}
 
 This is a special case of the more general problem of answering a series of queries without any restrictions on the set of pairs $(i_k,j_k)$, for which an algorithm was
  presented by \cite{chen2004}. They showed
@@ -69,8 +83,8 @@ Taken together these two results prove the Theorem.
 
 \begin{lemma}\label{l.arg}
 	Denote 
-	$$a^{\prec}[j]=\argmin_{0\leq i <j} \max \{ H_s^{\prec}[i], W_s(\vec{P_{i, j}}) \},
-	a^{\succ}[j]=\argmin_{0\leq i <j} \max \{ H_s^{\succ}[i], W_s(\vec{P_{i, j}}) \}.
+	$$a^{\succ}[j]=\argmin_{0\leq i <j} \max \{ H_s^{\prec}[i], W_s(\vec{P_{i, j}}) \},
+	a^{\prec}[j]=\argmin_{0\leq i <j} \max \{ H_s^{\succ}[i], W_s(\cev{P_{i, j}}) \}.
 	$$
 	Then $a^{\prec}[j]\leq a^{\prec}[j+1]$, and $a^{\succ}[j]\leq a^{\succ}[j+1]$, $0\leq j <n$.
 \end{lemma}
@@ -90,20 +104,7 @@ is entirely analogous.
 %for $j+1$ the unique minimum is achieved at a value of $i$ that is no less than
 %$a^{\ell}[j]$.
 \qed
-\begin{problem}[Maximum-sum-subarray one-way moving queries - MSSM]\label{p.msmm}\ \\
-	\noindent {\bf Input}: a one-dimensional array $A[1\ldots n]$ of numbers
-	that can be positive, negative, or zero; and a sequence of query pairs $(i_k,j_k)$ 
-	such that 
-	$$i_0=j_0=0, i_k\leq  i_{k+1},\  j_k \leq j_{k+1}, 
-	i_{k+1}+j_{k+1}=i_k+j_k+1,
-	k=0, \ldots 2n-1.$$
-	\noindent  {\bf Find}: for each query $(i_k,j_k)$ a contiguous subarray of 
-	$A[i_k,j_k]$ with the largest sum,
-	i.e. find indices $x_k$ and 
-	$y_k$ with $i_k \leq x_k\leq y_k-1\leq j_k-1$, such that the sum
-	$ \sum_{x=x_k}^{j_k}A[x] $
-	is as large as possible. 
-\end{problem}
+
 %This problem is a non-trivial extension of the well known 
 %\begin{problem}[Maximum-sum-subarray problem]\ \\
 %\noindent {\bf Input}: a one-dimensional array $A[1\ldots n]$ of numbers
