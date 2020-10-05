@@ -16,7 +16,7 @@
 %\usepackage{graphicx}
 
 % Commands for annotating path directions - either entire path or just last edge
-% TODO: workout the appropirate arrow styls
+% TODO: workout the appropriate arrow styls
 \newcommand{\er}[1]{\ensuremath{#1^\rightarrow}} % Last edge pointing right
 \newcommand{\el}[1]{\ensuremath{#1^\leftarrow}} % Last edge pointing left
 \newcommand{\elr}[1]{\ensuremath{#1^\leftrightarrow}} % Last edge pointing either right or left
@@ -87,6 +87,20 @@
 
 \include{linear_graphs}
 
-% bibliography, glossary and index would go here.
+\include{cycles}
 
+% bibliography, glossary and index would go here.
+\begin{thebibliography}{99}
+	\bibitem{chen2004} Chen, Kuan-Yu and Chao, Kun-Mao,
+	On the range maximum-sum segment query problem,
+	{\it Discrete Applied Mathematics}, 155, pp. 2043-- 2052, 2007.
+	%@inproceedings{chen2004range,
+	%	title={},
+	%	author={Chen, Kuan-Yu and Chao, Kun-Mao},
+	%	booktitle={International Symposium on Algorithms and Computation},
+	%	pages={294--305},
+	%	year={2004},
+	%	organization={Springer}
+	%}
+\end{thebibliography}
 \end{document}
