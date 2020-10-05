@@ -1,0 +1,57 @@
+\section{An algorithm for cycles}\label{s.c}
+Given a cycle graph $C_n$ on $n$ vertices, number its vertices from \textit{0} to \textit{n-1}, 
+clockwise from an arbitrary node. 
+Denote the weight of a directed
+edge $(i,i+1)$ by $w(i,i+1)$. When a node $j$ with $j\geq n$ is referred to it 
+should be understood as referring to node $j \mod n$. 
+For example, $w(n-1,n)=w(n-1,0)$.
+
+\begin{theorem}
+	There is a linear time algorithm for finding an orientation for a cycle graph that is optimal	under the cost function $W_s$.
+\end{theorem}
+\noindent {\bf Proof}:
+
+\qed
+%The following algorithm uses the BestCostPath algorithm as a building block. 
+%
+%\noindent \textbf{Algorithm BestCostCycle ($C_n$)}:
+%
+%\begin{enumerate}
+%	\item $BestCost \leftarrow \min\{\sum_{i=0}^{n-1}w(i,i+1), \sum_{i=0}^{n-1}w(i+1,i)\}$;
+%	\item \label{ac.i1} for $i= 0$ to $n-1$ do:
+%	\begin{enumerate}
+%		\item break the cycle at vertex $i$ by making two copies of vertex 
+%		$i$, $i'$ and $i''$, and setting $P$ as the path $i', i+1,\ldots ,0,\ldots i-1, i''$
+%		with weights the same as in $C_n$ except for the edges involving $i', i''$;  
+%		\item \label{i.c1}let $P^{out}$ be the path $P$
+%		with $w(i',i+1)=w(i,i+1),\ w(i+1,i')=\infty$ and 
+%		$w(i-1,i'')=\infty,\  w(i'',i-1)=w(i,i-1)$;
+%		\item \label{i.c2}
+%%		$Cost(P_1)\leftarrow BestCostPath(P_1)$; 
+%		if $BestCostPath(P^{out})< BestCost$ then update $BestCost$;
+%		\item \label{i.c3} let $P^{in}$ be the path $P$
+%		with $w(i',i+1)=\infty,\ w(i+1,i')=w(i+1,i)$ and 
+%		$w(i-1,i'')=w(i-1,i),\  w(i'',i-1)=\infty$;
+%		\item \label{i.c4}
+%%		$Cost(P_2)\leftarrow BestCostPath(P_2)$; 
+%		if $BestCostPath(P^{in})< BestCost$ then update $BestCost$.
+%	\end{enumerate}		
+%	\item return $BestCost$; 
+%\end{enumerate}	
+%\noindent \textbf{End of Algorithm BestCostCycle}
+%\bigskip
+%
+%To prove the correctness of the algorithm let \textit{O} be an optimal orientation 
+%of $C_n$.
+%If \textit{O} is a clockwise or counterclockwise cycle then it will be found in step 1.
+%Otherwise, let \textit{i} be a vertex such that either both of the edges $\{i-1,i\}$ and $\{i,i+1\}$
+%are oriented away from \textit{i} in \textit{O}, or both of them are oriented towards \textit{i}.
+%In the former case, any optimal orientation of the path $P^{out}$ formed in 
+%the $i$-the execution of the loop yields an
+%orientation of $C_n$, because both edges involving $i$ are outward oriented
+%by the construction of $P^{out}$ in step \ref{i.c1}. This orientation has the same cost 
+%as \textit{O}, and it will be found in step \ref{i.c2}.
+%Similarly, in the latter case, any optimal orientation of $P^{in}$ yields an optimal
+%orientation of $C_n$, and it will be found in step \ref{i.c4}.
+%
+%Since a call to $BestCostPath(P)$ takes $O(n^2)$ time the algorithm runs in $O(n^3)$ time.
