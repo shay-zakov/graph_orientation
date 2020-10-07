@@ -19,7 +19,7 @@ In this section we consider the problem of computing MM$(f, g_j, j)$ and ARG-MM$
 A series of functions $g_1, g_2, \ldots, g_n$ is of \emph{Type 1} if every function $g_j$ in the series is monotonously non-increasing, and for every two consecutive functions $g_{j-1}$ and $g_j$ and for every integer $0 \leq i < j-1$, $g_j(i) \geq g_{j-1}(i)$.
 
 In what follows, assume a function $f$ and a Type 1 function series $g_1, g_2, \ldots, g_n$ are given.
-Say that an index $0 \leq i < j$ is \emph{dominant} with respect to $j$, if for every $0 \leq i' < i$ it holds that $\max\left\{f(i), g_j(i)\right\} \leq \max\left\{f(i'), g_j(i')\right\}$. Note there may be multiple such dominant indices, and denote by $i^\star_j$ the maximal dominant index with respect to $j$. Observe that for every $0 \leq i < j$, $\max\left\{f(i^\star_j), g(i^\star_j)\right\} \leq \max\left\{f(i), g(i)\right\}$. Therefore, 
+Say that an index $0 \leq i < j$ is \emph{dominant} with respect to $j$ and denote $i \in D_j$, if for every $0 \leq i' < i$ it holds that $\max\left\{f(i), g_j(i)\right\} \leq \max\left\{f(i'), g_j(i')\right\}$. Note there may be multiple such dominant indices, and denote by $i^\star_j$ the maximal dominant index with respect to $j$. Observe that for every $0 \leq i < j$, $\max\left\{f(i^\star_j), g_j(i^\star_j)\right\} \leq \max\left\{f(i), g_j(i)\right\}$. Therefore, 
 
 \begin{align}
 	\text{MM}(f, g_j, j) &= \max\left\{f(i^\star_j), g(i^\star_j)\right\},
@@ -32,66 +32,81 @@ We next show how can indices of the form $i^\star_j$ can be efficiently computed
 
 \begin{claim}
 	\label{clm:dominance_a}
-	An index $i$ is dominant with respect to $j$ if and only if $f(i) \leq \max\left\{f(i'), g_j(i')\right\}$ for every $0 \leq i' < i$.
+	$i \in D_j$ if and only if $f(i) \leq \max\left\{f(i'), g_j(i')\right\}$ for every $0 \leq i' < i$.
 \end{claim}
 
 \begin{proof}
 	Let $i$ and $i'$ be indices such that $0 \leq i' < i$.
-	Since $g_j$ is monotonously non-increasing, $g_j(i) \leq g_j(i') \leq \max\left\{f(i'), g_j(i')\right\}$. Therefore, $\max\left\{f(i), g_j(i)\right\} \leq \max\left\{f(i'), g_j(i')\right\}$ if and only if $f(i) \leq \max\left\{f(i'), g_j(i')\right\}$. By the definition of dominance, $i$ is dominant with respect to $j$ if and only if the latter inequality holds for every $0 \leq i' < i$.
+	Since $g_j$ is monotonously non-increasing, $g_j(i) \leq g_j(i') \leq \max\left\{f(i'), g_j(i')\right\}$. Therefore, $\max\left\{f(i), g_j(i)\right\} \leq \max\left\{f(i'), g_j(i')\right\}$ if and only if $f(i) \leq \max\left\{f(i'), g_j(i')\right\}$. By the definition of dominance, $i \in D_j$ if and only if the latter inequality holds for every $0 \leq i' < i$.
 \end{proof}
 
 \begin{claim}
 	\label{clm:dominance_b}
-	If an index $i$ is dominant with respect to $j-1$, then it is also dominant with respect to $j$.
+	If $i \in D_{j-1}$ then $i \in D_j$.
 \end{claim}
 
 \begin{proof}
-	Let $i$ be a dominant index with respect to $j-1$. Due to Claim~\ref{clm:dominance_a}, to prove the claim we only need to show that $f(i) \leq \max\left\{f(i'), g_j(i')\right\}$ for every $0 \leq i' < i$.
+	Let $i$ be an index such that $i \in D_{j-1}$. Due to Claim~\ref{clm:dominance_a}, to prove the claim we only need to show that $f(i) \leq \max\left\{f(i'), g_j(i')\right\}$ for every $0 \leq i' < i$.
 	Let $i'$ be any such index.
 	If $f(i) \leq f(i')$, it immediately follows that $f(i) \leq \max\left\{f(i'), g_j(i')\right\}$.
-	Otherwise  $f(i) > f(i')$. Since $i$ is dominant with respect to $j-1$ we get that $f(i) \leq \max\left\{f(i'), g_{j-1}(i)\right\}$. This means that $f(i) \leq g_{j-1}(i') \stackrel{\text{Type 1}}{\leq} g_j(i')$, and in particular $f(i) \leq \max\left\{f(i'), g_j(i')\right\}$.
+	Otherwise  $f(i) > f(i')$. Since $i \in D_{j-1}$ we get that $f(i) \leq \max\left\{f(i'), g_{j-1}(i)\right\}$. This means that $f(i) \leq g_{j-1}(i') \stackrel{\text{Type 1}}{\leq} g_j(i')$, and in particular $f(i) \leq \max\left\{f(i'), g_j(i')\right\}$.
 \end{proof}
 
 
-Note that if $i$ is a dominant index with respect to $j$ and $i = j-1$, it must be that $i = i^\star_j$. Otherwise, Claim~\ref{clm:dominance_next} below describes a property that allows, given \emph{some} dominant index $i$ with respect to $j$, to traverse an increasing sequence of dominant indices in order to identify $i^\star_j$ without considering non-dominant indices. More importantly, it provides a condition that allows to identify $i^\star_j$ once it has reached.
+Note that if $i \in D_j$ and $i = j-1$, it must be that $i = i^\star_j$. Otherwise, Claim~\ref{clm:dominance_next} below describes a property that allows, given \emph{some} dominant index $i$ with respect to $j$, to traverse an increasing sequence of dominant indices in order to identify $i^\star_j$ without considering non-dominant indices. More importantly, it provides a condition that allows to identify $i^\star_j$ once it has been reached.
 
 \begin{claim}
 	\label{clm:dominance_next}
-	Let $i$ be a dominant index with respect to $j$ where $i < j-1$, and let $k = \argmin_{i < i' < j} f(i')$. 
-	If $f(k) > \max\left\{f(i), g_j(i)\right\}$ then $i = i^\star_j$, and otherwise $k$ is dominant with respect to $j$.
+	Let $i < j-1$ be an index such that $i \in D_j$, and let $k = \argmin_{i < i' < j} f(i')$. 
+	If $f(k) > \max\left\{f(i), g_j(i)\right\}$ then $i = i^\star_j$, and otherwise $k \in D_j$.
 \end{claim}
 
 \begin{proof}
 	For the case when $f(k) > \max\left\{f(i), g_j(i)\right\}$, it follows from the selection of $k$ that for every $i < i' < j$ it holds that $\max\left\{f(i), g_j(i)\right\} < f(k) \leq f(i') \leq \max\left\{f(i'), g_j(i')\right\}$, and so $i = i^\star_j$.
 	
-	For the case when $f(k) \leq \max\left\{f(i), g_j(i)\right\}$, we need to show that $k$ is dominant with respect to $j$. From Claim~\ref{clm:dominance_a}, it is sufficient to show that $f(k) \leq \max\left\{f(i'), g_j(i')\right\}$ for every $0 \leq i' < k$. For $i' \leq i$ this follows immediately from the fact that $i$ is dominant respect to $j$. For $i < i' < k$, the inequality holds since $f(k) \leq f(i') \leq \max\left\{f(i'), g_j(i')\right\}$.
+	For the case when $f(k) \leq \max\left\{f(i), g_j(i)\right\}$, we need to show that $k \in D_j$. From Claim~\ref{clm:dominance_a}, it is sufficient to show that $f(k) \leq \max\left\{f(i'), g_j(i')\right\}$ for every $0 \leq i' < k$. For $i' \leq i$ this follows immediately from the fact that $i$ is dominant respect to $j$. For $i < i' < k$, the inequality holds since $f(k) \leq f(i') \leq \max\left\{f(i'), g_j(i')\right\}$.
 \end{proof}
 
-In order to utilize Claim~\ref{clm:dominance_next} for the efficient identification of $i^\star_j$, there is also a need to be able to efficiently find an index $k$ such that $k = \argmin_{i < i' < j} f(i')$. This is known as the Range Minimum Query problem [TODO: add citations], for which there are efficient implementations that allow, after linear preprocessing time, to execute each query in a constant time. In our case, as will be shown later, the function $f$ is not available in its entirety for preprocessing - values of the form $f(j)$ will be sequentially computed throughout the algorithm's run, while range minimum queries over $f$ will have to be performed prior to the full computation of $f$. Nevertheless the series of queries executed throughout the computation has the property of having monotonously increasing endpoints (that is, for every pair of endpoints $(i, j)$ and $(i', j')$ in two consecutive queries, it holds that $i \leq i'$ and $j \leq j'$). This is known as the \emph{Sliding RMQ} problem, for which there is a significantly simpler solution than those for general RMQ~\cite{lee2007simple}. Besides its simplicity, this solution does not require the entire array over which the queries are performed to be given prior to the series of queries. It maintains a data structure that allows the sequential addition of elements at the end of the array, and to execute queries given that their endpoints are within the current array length. In this paper, we will denote such a structure by the letter $D$. The procedure ARG-MIN$(D, i, j)$ corresponds to finding an index $i < k < j$ that minimizes $f(k)$. After executing such a query we will write $D = D_{i, j}$ to indicate the internal state of $D$ allows to execute a consecutive query ARG-MIN$(D, i', j')$ such that $i' \geq i$ and $j' \geq j$, provided that $f(i'+1), f(i'+2), \ldots, f(j'-1)$ are available to the ARG-MIN procedure.
+In order to utilize Claim~\ref{clm:dominance_next} for the efficient identification of $i^\star_j$, there is also a need to be able to efficiently find an index $k$ such that $k = \argmin_{i < i' < j} f(i')$. This is known as the Range Minimum Query problem [TODO: add citations], for which there are efficient implementations that allow, after linear preprocessing time, to execute each query in a constant time. In our case, as will be shown later, the function $f$ is not available in its entirety for preprocessing - values of the form $f(j)$ will be sequentially computed throughout the algorithm's run, while range minimum queries over $f$ will have to be performed prior to the full computation of $f$. Nevertheless the series of queries executed throughout the computation has the property of having monotonously increasing endpoints (that is, for every pair of endpoints $(i, j)$ and $(i', j')$ in two consecutive queries, it holds that $i \leq i'$ and $j \leq j'$). This is known as the \emph{Sliding RMQ} problem, for which there is a significantly simpler solution than those for general RMQ~\cite{lee2007simple}. Besides its simplicity, this solution does not require the entire array over which the queries are performed to be given prior to the series of queries. It maintains a data structure that allows the sequential addition of elements at the end of the array, and to execute queries given that their endpoints are within the current array length. In this paper, we will denote such a structure by the letter $R$. The procedure ARG-MIN$(R, i, j)$ returns an index $i < k < j$ that minimizes $f(k)$ when $i < j-1$, or NULL when $i \geq j-1$. We will write $R \sim R_{i, j}$ to indicate the internal state of $R$ allows to execute a query ARG-MIN$(R, i', j')$ such that $i' \geq i$ and $j' \geq j$, provided that $f(i'+1), f(i'+2), \ldots, f(j'-1)$ are available to the ARG-MIN procedure.
 While some queries might take more than a constant time for their execution, the overall running time for executing $m$ queries over an array whose final length is $n$, is $O(m+n)$. 
-[TODO: consider adding an appendix with implementation details.] Algorithm~\ref{algo:maxDominant} computes $i^\star_j$, given some initial dominant index $i$ with respect to $j$ (later we use $i^\star_{j-1}$ as the initial index when applying this procedure) and the data structure $D$.
+[TODO: consider adding an appendix with implementation details.] Algorithm~\ref{algo:maxDominant} computes $i^\star_j$, given some $i \in D_j$ (later we use $i^\star_{j-1}$ as the initial index when applying this procedure) and the data structure $R$.
+
+%\begin{algorithm}
+%	\Precondition{$i$ is dominant with respect to $j$, and $D ~ D_{i, j}$ for some $i' \leq i$ and $j' \leq j$}
+%	\If{$i < j-1$}{
+%		$k \gets \text{GetMin}(D, i, j)$\;
+%		\LoopInv{$i < j-1$, $i$ is dominant with respect to $j$, $k = \argmin_{i < i' < j} f(i')$, and $D = D_{i, j}$ }
+%		\While{$f(k) \leq \max\left\{f(i), g_j(i)\right\}$}{
+%			\Condition{$k$ is dominant with respect to $j$ and $k > i$}
+%			$i \gets k$\;
+%			\If{$i = j-1$}{\Break}
+%			$k \gets \text{GetMin}(D, i, j)$\;
+%		}
+%	}
+%	\Postcondition{$i = i^\star_j$}
+%	\Return{$i$}\;
+%	\caption{MaxDominant$(f, g_j, D, i, j)$}
+%	\label{algo:maxDominant}
+%\end{algorithm}
 
 \begin{algorithm}
-	\Precondition{$i$ is dominant with respect to $j$, and $D = D_{i', j'}$ for some $i' \leq i$ and $j' \leq j$}
-	\If{$i < j-1$}{
-		$k \gets \text{GetMin}(D, i, j)$\;
-		\LoopInv{$i < j-1$, $i$ is dominant with respect to $j$, $k = \argmin_{i < i' < j} f(i')$, and $D = D_{i, j}$ }
-		\While{$f(k) \leq \max\left\{f(i), g_j(i)\right\}$}{
-			\Condition{$k$ is dominant with respect to $j$ and $k > i$}
-			$i \gets k$\;
-			\If{$i = j-1$}{\Break}
-			$k \gets \text{GetMin}(D, i, j)$\;
-		}
+	\Precondition{$i \in D_j$, and $R \sim R_{i, j}$}
+	$k \gets \text{GetMin}(R, i, j)$\;
+	\LoopInv{$i \in D_j$, $k = \argmin_{i < i' < j} f(i')$ (or NULL if $i \geq j-1$), and $R \sim R_{i, j}$ }
+	\While{$i < j-1$ \And $f(k) \leq \max\left\{f(i), g_j(i)\right\}$}{
+		\Condition{$k \in D_j$ and $k > i$}
+		$i \gets k$\;
+		$k \gets \text{GetMin}(R, i, j)$\;
 	}
-	\Postcondition{$i = i^\star_j$}
+	\Postcondition{$i = i^\star_j$, and $R \sim R_{i^\star_j, j}$}
 	\Return{$i$}\;
-	\caption{MaxDominant$(f, g_j, D, i, j)$}
+	\caption{MaxDominant$(f, g_j, R, i, j)$}
 	\label{algo:maxDominant}
 \end{algorithm}
 
 
 \paragraph{Time complexity.}
-Consider the sequential execution of Algorithm~\ref{algo:maxDominant} in order to compute $i^\star_j$ for $j = 1, 2, \ldots, n$. For each such index $j$, $i^\star_j$ is set to be the result of MaxDominant$(f, g_j, D^{j-1}, i^\star_{j-1}, j)$, where $D^{j-1}$ denotes the state of $D$ at the end of the previous iteration, with the initial settings $i^\star_0 = 0$ and $D^0 = D_{0, 0}$. It can be noticed that the condition $D^{j-1} = D_{i', j'}$ for some $i' \leq i^\star_j$ and $j' \leq j$ is maintained throughout the run. Also, it can be seen that the running time of each call to the procedure is dictated by the running time of its internal calls to the GetMin procedure, plus additional $O(1)$ (in cases where there are no calls to GetMin). In each call to GetMin either the index $i$ or the index $j$ used in the query strictly increases with respect to the previous call, and therefore there are overall at most $2n$ calls to GetMin throughout the run. As shown in~\cite{lee2007simple}, the overall running time of all GetMin queries is $O(n)$.
+Consider the sequential execution of Algorithm~\ref{algo:maxDominant} in order to compute $i^\star_j$ for $j = 1, 2, \ldots, n$. For each such index $j$, $i^\star_j$ is set to be the result of MaxDominant$(f, g_j, R^{j-1}, i^\star_{j-1}, j)$, where $R^{j-1}$ denotes the state of $R$ at the end of the previous iteration, with the initial settings $i^\star_0 = 0$ and $R^0 = R_{0, 0}$. It can be noticed that the condition $R^{j-1} \sim R_{i^\star_{j-1}, j}$ is maintained throughout the run. Also, it can be seen that the running time of each call to the procedure is dictated by the running time of its internal calls to the GetMin procedure (as there are $O(1)$ additional operations per call tp GetMin). In each call to GetMin either the index $i$ or the index $j$ used in the query strictly increases with respect to the previous call, and therefore there are overall at most $2n$ calls to GetMin throughout the run. As shown in~\cite{lee2007simple}, the overall running time of all GetMin queries is $O(n)$.
 
 
 \subsubsection{Type 2}
