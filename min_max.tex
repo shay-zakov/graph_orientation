@@ -110,4 +110,156 @@ Consider the sequential execution of Algorithm~\ref{algo:maxDominant} in order t
 
 
 \subsubsection{Type 2}
-A series of functions $g_1, g_2, \ldots, g_n$ is of \emph{Type 1} if for every two consecutive functions $g_{j-1}$ and $g_j$ there exists some constant $c$ such that for every integer $i$ in the function's domain, $g_j(i) = g_{j-1}(i) + c$.
+In this section we consider a different set of restrictions over the sequence of functions $g_j$. 
+A series of functions $g_1, g_2, \ldots, g_n$ is of \emph{Type 2} if for every $j$ there exists some constant $c_j$ such that for every $0 \leq i < j-1$, $g_j(i) = g_{j-1}(i) + c_j$, and $g_j(j-1) = c_j$. For convenience, we will write $g(i) \equiv g_i(0)$, define that $g(0) = 0$, and assume that querying the minimum or maximum values in an empty set of values yield $\infty$ or $-\infty$ values, respectively..
+
+We next assume a function $f$ and a Type 2 function series $g_1, g_2, \ldots, g_n$ are given, where the function $g$ is implied from the latter series. 
+
+\begin{claim}
+\label{clm:type_2}
+	For every $0 < j \leq n$ and every $0 \leq i < j$, $g_j(i) = g(j) - g(i)$.
+\end{claim} 
+
+\begin{proof}
+	For $j=1$ and $i=0$, we have by definition that $g_1(0) = g_1(0) - 0 = g(1) - g(0)$. 
+	Assuming inductively the claim holds for every $j' < j$, we show it holds for $j$ too. Let $0 \leq i < j$. Then,
+	$g_j(i) \stackrel{\text{Type 2}}{=} g_{j-1}(i) + c_j \stackrel{\text{induction}}{=} g(j-1) - g(i) + c_j \stackrel{\text{Type 2}}{=} g(j) - g(i)$.
+\end{proof}
+
+Consider the expression $\max\left\{f(i), g_j(i)\right\}$ for some $0 \leq i < j$. If $\max\left\{f(i), g_j(i)\right\} = f(i)$, it follows that $f(i) \geq g_j(i) \stackrel{\text{Clm~\ref{clm:type_2}}}{=} g(j) - g(i)$, and so $g(j) \leq f(i) + g(i)$. Similarly, if $\max\left\{f(i), g_j(i)\right\} = g_j(i)$ it implies that $g(j) \geq f(i) + g(i)$. Therefore,  Equation~\ref{eq:MM} can now be rewritten for the Type 2 scenario as follows:
+
+\begin{equation}
+\label{eq:MM2} 
+	\begin{array}{rcl}
+		\text{MM}(f, g_j, j) & = & \min\left\{
+			\hspace{-.5em}\min\limits_{{\tiny\begin{array}{c}
+				0 \leq i < j, \\
+				g(j) \leq f(i) + g(i)
+			\end{array}}} \hspace{-1em} f(i),
+			\min\limits_{{\tiny \begin{array}{c}
+				0 \leq i < j, \\
+				g(j) \geq f(i) + g(i)
+			\end{array}}} \hspace{-1em} g_j(i)
+		\right\} \\
+		& \stackrel{\text{Clm:~\ref{clm:type_2}}}{=} & \min\left\{
+			\hspace{-.5em}\min\limits_{{\tiny \begin{array}{c}
+				0 \leq i < j, \\
+				g(j) \leq f(i) + g(i)
+				\end{array}}} \hspace{-1em} f(i), \ 
+			g(j) - \hspace{-2em}\max\limits_{{\tiny\begin{array}{c}
+				0 \leq i < j, \\
+				g(j) \geq f(i) + g(i)
+				\end{array}}} \hspace{-1em} g(i)
+		\right\}
+	\end{array}
+\end{equation}
+
+In order to compute the right-hand side of Equation~\ref{eq:MM2}, we next describe two data structures $F$ and $G$, that given $g(j)$ will allow the efficient retrievals of the values 
+$\hspace{-.5em}\min\limits_{{\tiny \begin{array}{c}
+	0 \leq i < j, \\
+	g(j) \leq f(i) + g(i)
+	\end{array}}} \hspace{-1em} f(i)$ and
+$\hspace{-2em}\max\limits_{{\tiny\begin{array}{c}
+		0 \leq i < j, \\
+		g(j) \geq f(i) + g(i)
+		\end{array}}} \hspace{-1em} g(i)$, respectively.
+These two data structures will be implemented using \emph{sorted sets}.
+
+A sorted set $S$ is a set of elements form $(k, v)$, where $k$ and $v$ are respectively referred to as the \emph{key} and \emph{value} of an element. We assume here the keys of $S$ are unique, and there is a total order "$\leq$" which is defined over the domain of keys.
+In addition, the following operations are supported: 
+\begin{enumerate}
+	\item Find$(S, x)$ / FindPrev$(S, x)$ return an element $(k, v)$ in $S$ such that $x \leq k$ / $x > k$  and $k$ is minimal / maximal with respect to the order over the keys (or NULL if no such element exists), respectively;
+%	\item FindPrev$(S, y)$ returns an element $s = (x, v)$ in $S$ such that $y > x$ and $x$ is maximal with respect to the order over the keys; % or NULL if $x \leq x'$ for every key $x'$ in $S$.
+	\item Insert$(S, k, v)$ inserts an element $(k, v)$ into $S$, replacing if necessary an element $(k, v')$ with identical key if such an element exists in $S$;
+	\item Min$(S)$ returns the minimal key in $S$.
+\end{enumerate}
+
+A standard efficient implementation for such a sorted set would be by using RB-trees [TODO: citations]. Such a data structure supports all of the above operations in $O(\log |S|)$ running time.
+
+The $F$ sorted set is designed to compute values of the form $\hspace{-.5em}\min\limits_{{\tiny \begin{array}{c}
+		0 \leq i < j, \\
+		g(j) \leq f(i) + g(i)
+		\end{array}}} \hspace{-1em} f(i)$.
+Given an index $j$, we will say that \emph{$F$ is valid for $x$} if the result of Find$(F, x)$ is a pair $(k, v)$ such that $\hspace{-.5em}\min\limits_{{\tiny \begin{array}{c}
+		0 \leq i < j, \\
+		x \leq f(i) + g(i)
+		\end{array}}} \hspace{-1em} f(i)$.
+The following two invariants will be used to describe the state of $F$ during the algorithm's run:
+
+\paragraph{The $j$-invariant for $F$:}
+$|F| = O(j)$, and $F$ is valid for any number $x$.
+
+\paragraph{The relaxed $j$-invariant for $F$ and $(k, v)$:}
+$|F| = O(j)$, $F$ is valid for any number $x$ such that $k \leq x$ or Find$(F, x) = (k_x, v_x)$ and $v_x < v$.
+\bigskip
+
+[TODO: write the symmetric text to describe $G$.]
+
+Initializing the sets $F$ and $G$ so they would admit the $0$-invariant is simply creating a set $F$ with the single element $(\infty, \infty)$ and a set $G$ with the single element $(-\infty, -\infty)$.
+Let $F$ and $G$ admit the $j$-invariant for some $j > 0$. 
+Consider the values $(k_F, v_f)$ and $(k_G, v_G)$ returned from executing Find$(F, g(j), \leq)$ and Find$(G, g(j), >)$. From the $j$-invariant,
+$$
+v_F = \hspace{-1em}\min\limits_{{\tiny \begin{array}{c}
+		0 \leq i < j, \\
+		g(j) \leq f(i) + g(i)
+		\end{array}}} \hspace{-1em} f(i), \ 
+v_G = \hspace{-1em}\max\limits_{{\tiny \begin{array}{c}
+		0 \leq i < j, \\
+		g(j) \geq f(i) + g(i),
+		\end{array}}} \hspace{-1em} g_{i}(0)
+$$ 
+and so from Equation~\ref{eq:MM2} we have that $\text{MM}(f, g_j, j) = \min\{v_F, g(j) - v_G\}$.
+
+
+
+In order to update $F$ and $G$ so they would sustain the $(j+1)$-invariant we do the following. For $F$, denote by $F^j$ the set which sustains the $j$ invariant, from which we show how to construct a set $F^{j+1}$ that sustains the $(j+1)$ invariant. In the latter set we need to consider a new possible value $f(j)$, which might be the value in some element returned due to a query of the form Find$(F^{j+1}, x)$. By definition, for $f(j)$ to be the returned element value, it must be that $f(j) + g(j) \geq x$. In particular, for every $y$ such that $f(j) + g(j) < y$, $f(j)$ should not be considered, and so the returned values from Find$(F^{j+1}, y)$ and Find$(F^{j}, y)$ should be te same. In addition, if Find$(F^{j}, x) = (k, v)$ such that $v < f(j)$, then clearly Find$(F^{j+1}, x)$ should also return an element whose value is $v$. Thus, $F^j$ admits the relaxed $(j+1)$-invariant for $(f(j) + g(j), f(j))$.
+
+The following algorithm shows how given a data structure $F$ that maintains the $j$-invariant, it is updated to maintain the $(j+1)$-invariant.
+
+\begin{algorithm}
+	\Precondition{$F$ maintains the $j$-invariant}
+	%	\tcp{Updating the data structures:}
+	denote $x = f(j) + g(j)$, and let $(k, v) \gets \text{Find}(F, x)$\;
+	\Condition{$F$ maintains the relaxed $(j+1)$-invariant for $(x^+, f(j))$}
+	\If{$f(j) \leq v$}{
+		Insert$(F, x, f(j))$\;
+		\Condition{$F$ maintains the relaxed $(j+1)$-invariant for $(x, f(j))$}
+		\If{$x > \text{Min}(S)$}{
+			$(k, v) \gets \text{FindPrev}(F, x)$\;
+			\LoopInv{$F$ maintains the relaxed $(j+1)$-invariant for $(k^+, f(j))$}
+			\While{$f(j) \leq v$}{
+				Remove$(F, k)$\;
+				\Condition{$F$ maintains the relaxed $(j+1)$-invariant for $(k, f(j))$}
+				\lIf{$x > \text{Min}(S)$}{$(k, v) \gets \text{FindPrev}(F, x)$}
+				\lElse{\Break}
+			}
+		}
+	}
+	\Postcondition{$F$ maintains the $(j+1)$-invariant}
+	\Return{$F$}\;
+	\caption{Update-F$(F, f(j), g(j))$}
+	\label{algo:MM2}
+\end{algorithm}
+
+
+
+\begin{algorithm}
+	\Precondition{$S$ sustains the $S$-invariant for $j-1$}
+%	\tcp{Updating the data structures:}
+	set $x \gets f(j-1) + g_j(0)$\;
+	let $s' \gets \text{Find}(S, x)$\;
+	if $s'$ is not NULL, it is of the form $s' = (x', (k', F', G'))$. For the case where $s'$ is NULL, define $F'$
+	\If{$s' = \text{NULL}$}{
+		set $F \gets \min\left\{f(j-1), F'\right\}$ if $i < j-1$, otherwise $F_{j-1} \gets f(j-1)$\; 
+		set $G_{j-1} \gets \max\left\{g_j(j-1), G_{K_i-1}\right\}$ if $i > 0$, otherwise $G_{j-1} \gets g_j(j-1)$\; 
+	}
+	\Else{
+		set $F \gets \min\left\{f(j-1), F'\right\}$\; 
+		set $G \gets \max\left\{g_j(0), G'\right\}$\; 
+	}
+	Insert$(S, x, (j-1, F, G))$\; 
+	\Condition{$S$ sustains the $S$-invariant for $j$}
+	\Return{$\min\{F, g_j(0) - G\}$}\;
+	\caption{MM2$(f^d[\cdot], g^d[\cdot], d[\cdot], g_{j-1}(0), c_j, j)$}
+	\label{algo:MM2}
+\end{algorithm}
