@@ -106,7 +106,7 @@ While some queries might take more than a constant time for their execution, the
 
 
 \paragraph{Time complexity.}
-Consider the sequential execution of Algorithm~\ref{algo:maxDominant} in order to compute $i^\star_j$ for $j = 1, 2, \ldots, n$. For each such index $j$, $i^\star_j$ is set to be the result of MaxDominant$(f, g_j, R^{j-1}, i^\star_{j-1}, j)$, where $R^{j-1}$ denotes the state of $R$ at the end of the previous iteration, with the initial settings $i^\star_0 = 0$ and $R^0 = R_{0, 0}$. It can be noticed that the condition $R^{j-1} \sim R_{i^\star_{j-1}, j}$ is maintained throughout the run. Also, it can be seen that the running time of each call to the procedure is dictated by the running time of its internal calls to the GetMin procedure (as there are $O(1)$ additional operations per call tp GetMin). In each call to GetMin either the index $i$ or the index $j$ used in the query strictly increases with respect to the previous call, and therefore there are overall at most $2n$ calls to GetMin throughout the run. As shown in~\cite{lee2007simple}, the overall running time of all GetMin queries is $O(n)$.
+Consider the sequential execution of Algorithm~\ref{algo:maxDominant} in order to compute $i^\star_j$ for $j = 1, 2, \ldots, n$. For each such index $j$, $i^\star_j$ is set to be the result of MaxDominant$(f, g_j, R^{j-1}, i^\star_{j-1}, j)$, where $R^{j-1}$ denotes the state of $R$ at the end of the previous iteration, with the initial settings $i^\star_0 = 0$ and $R^0 = R_{0, 0}$. It can be noticed that the condition $R^{j-1} \sim R_{i^\star_{j-1}, j}$ is maintained throughout the run. Also, it can be seen that the running time of each call to the procedure is dictated by the running time of its internal calls to the GetMin procedure (as there are $O(1)$ additional operations per call to GetMin). In each call to GetMin either the index $i$ or the index $j$ used in the query strictly increases with respect to the previous call, and therefore there are overall at most $2n$ calls to GetMin throughout the run. As shown in~\cite{lee2007simple}, the overall running time of all GetMin queries is $O(n)$.
 
 
 \subsubsection{Type 2}
@@ -126,7 +126,14 @@ We next assume a function $f$ and a Type 2 function series $g_1, g_2, \ldots, g_
 	$g_j(i) \stackrel{\text{Type 2}}{=} g_{j-1}(i) + c_j \stackrel{\text{induction}}{=} g(j-1) - g(i) + c_j \stackrel{\text{Type 2}}{=} g(j) - g(i)$.
 \end{proof}
 
-Consider the expression $\max\left\{f(i), g_j(i)\right\}$ for some $0 \leq i < j$. If $\max\left\{f(i), g_j(i)\right\} = f(i)$, it follows that $f(i) \geq g_j(i) \stackrel{\text{Clm~\ref{clm:type_2}}}{=} g(j) - g(i)$, and so $g(j) \leq f(i) + g(i)$. Similarly, if $\max\left\{f(i), g_j(i)\right\} = g_j(i)$ it implies that $g(j) \geq f(i) + g(i)$. Therefore,  Equation~\ref{eq:MM} can now be rewritten for the Type 2 scenario as follows:
+Consider the expression $\max\left\{f(i), g_j(i)\right\} \stackrel{\text{Clm~\ref{clm:type_2}}}{=} \max\left\{f(i), g(j) - g(i)\right\}$ for some $0 \leq i < j$. Clearly, $\max\left\{f(i), g_j(i)\right\} = f(i)$ when $g(j) \leq f(i) + g(i)$ and $\max\left\{f(i), g_j(i)\right\} = g_j(i) = g(j) - g(i)$ when $g(j) \geq f(i) + g(i)$. Denote $f^j = \hspace{-.5em}\min\limits_{{\tiny\begin{array}{c}
+		0 \leq i < j, \\
+		g(j) \leq f(i) + g(i)
+		\end{array}}} \hspace{-1em} f(i)$
+and $g^j = \hspace{-2em}\max\limits_{{\tiny\begin{array}{c}
+		0 \leq i < j, \\
+		g(j) \geq f(i) + g(i)
+		\end{array}}} \hspace{-1em} g(i)$. Equation~\ref{eq:MM} can now be rewritten for the Type 2 scenario as follows:
 
 \begin{equation}
 \label{eq:MM2} 
@@ -135,13 +142,13 @@ Consider the expression $\max\left\{f(i), g_j(i)\right\}$ for some $0 \leq i < j
 			\hspace{-.5em}\min\limits_{{\tiny\begin{array}{c}
 				0 \leq i < j, \\
 				g(j) \leq f(i) + g(i)
-			\end{array}}} \hspace{-1em} f(i),
+			\end{array}}} \hspace{-1em} \max\{f(i), g_j(i)\},
 			\min\limits_{{\tiny \begin{array}{c}
 				0 \leq i < j, \\
 				g(j) \geq f(i) + g(i)
-			\end{array}}} \hspace{-1em} g_j(i)
+			\end{array}}} \hspace{-1em} \max\{f(i), g_j(i)\}
 		\right\} \\
-		& \stackrel{\text{Clm:~\ref{clm:type_2}}}{=} & \min\left\{
+		& = & \min\left\{
 			\hspace{-.5em}\min\limits_{{\tiny \begin{array}{c}
 				0 \leq i < j, \\
 				g(j) \leq f(i) + g(i)
@@ -150,19 +157,12 @@ Consider the expression $\max\left\{f(i), g_j(i)\right\}$ for some $0 \leq i < j
 				0 \leq i < j, \\
 				g(j) \geq f(i) + g(i)
 				\end{array}}} \hspace{-1em} g(i)
-		\right\}
+		\right\} \\
+		& = & \min\left\{f^j, g(j) - g^j\right\}.
 	\end{array}
 \end{equation}
 
-In order to compute the right-hand side of Equation~\ref{eq:MM2}, we next describe two data structures $F$ and $G$, that given $g(j)$ will allow the efficient retrievals of the values 
-$\hspace{-.5em}\min\limits_{{\tiny \begin{array}{c}
-	0 \leq i < j, \\
-	g(j) \leq f(i) + g(i)
-	\end{array}}} \hspace{-1em} f(i)$ and
-$\hspace{-2em}\max\limits_{{\tiny\begin{array}{c}
-		0 \leq i < j, \\
-		g(j) \geq f(i) + g(i)
-		\end{array}}} \hspace{-1em} g(i)$, respectively.
+In order to compute the values $f^j$ and $g^j$ appearing at right-hand side of Equation~\ref{eq:MM2}, we next describe two data structures $F$ and $G$, that given $g(j)$ will allow the efficient retrievals of these values.
 These two data structures will be implemented using \emph{sorted sets}.
 
 A sorted set $S$ is a set of elements form $(k, v)$, where $k$ and $v$ are respectively referred to as the \emph{key} and \emph{value} of an element. We assume here the keys of $S$ are unique, and there is a total order "$\leq$" which is defined over the domain of keys.
@@ -176,11 +176,8 @@ In addition, the following operations are supported:
 
 A standard efficient implementation for such a sorted set would be by using RB-trees [TODO: citations]. Such a data structure supports all of the above operations in $O(\log |S|)$ running time.
 
-The $F$ sorted set is designed to compute values of the form $\hspace{-.5em}\min\limits_{{\tiny \begin{array}{c}
-		0 \leq i < j, \\
-		g(j) \leq f(i) + g(i)
-		\end{array}}} \hspace{-1em} f(i)$.
-Given an index $j$, we will say that \emph{$F$ is valid for $x$} if the result of Find$(F, x)$ is a pair $(k, v)$ such that $\hspace{-.5em}\min\limits_{{\tiny \begin{array}{c}
+The $F$ sorted set is designed to compute values of the form $f^j$.
+Given an index $j$, we will say that \emph{$F$ is valid for $x$} if the result of Find$(F, x)$ is a pair $(k, v)$ such that $v = \hspace{-.5em}\min\limits_{{\tiny \begin{array}{c}
 		0 \leq i < j, \\
 		x \leq f(i) + g(i)
 		\end{array}}} \hspace{-1em} f(i)$.
@@ -197,16 +194,16 @@ $|F| = O(j)$, $F$ is valid for any number $x$ such that $k \leq x$ or Find$(F, x
 
 Initializing the sets $F$ and $G$ so they would admit the $0$-invariant is simply creating a set $F$ with the single element $(\infty, \infty)$ and a set $G$ with the single element $(-\infty, -\infty)$.
 Let $F$ and $G$ admit the $j$-invariant for some $j > 0$. 
-Consider the values $(k_F, v_f)$ and $(k_G, v_G)$ returned from executing Find$(F, g(j), \leq)$ and Find$(G, g(j), >)$. From the $j$-invariant,
+Consider the values $(k_F, v_f)$ and $(k_G, v_G)$ returned from executing Find$(F, g(j))$ and FindPrev$(G, g(j))$. From the $j$-invariant,
 $$
 v_F = \hspace{-1em}\min\limits_{{\tiny \begin{array}{c}
 		0 \leq i < j, \\
 		g(j) \leq f(i) + g(i)
-		\end{array}}} \hspace{-1em} f(i), \ 
+		\end{array}}} \hspace{-1em} f(i) = f^j, \ 
 v_G = \hspace{-1em}\max\limits_{{\tiny \begin{array}{c}
 		0 \leq i < j, \\
 		g(j) \geq f(i) + g(i),
-		\end{array}}} \hspace{-1em} g_{i}(0)
+		\end{array}}} \hspace{-1em} g(i) = g^j
 $$ 
 and so from Equation~\ref{eq:MM2} we have that $\text{MM}(f, g_j, j) = \min\{v_F, g(j) - v_G\}$.
 
