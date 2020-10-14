@@ -43,6 +43,7 @@
 \newtheorem{property}{Property}[section]
 \newtheorem{problem}{Problem}[section]
 \newtheorem{definition}{Definition}[section]
+\newtheorem{remark}{Remark}[section]
 
 
 %\makeatletter
@@ -80,6 +81,11 @@
 \newcommand{\vecG}{\vec{G}}
 \newcommand{\dir}[1]{\stackrel{\rightarrow}{#1}}
 \newcommand{\dirO}[1][O]{\stackrel{\rightarrow}{#1}}
+%\newcommand{\rdir}[1]{\rho ({#1})}
+%\newcommand{\ldir}[1]{\lambda ({#1})}
+\newcommand{\rdir}[1]{\vec{#1}}
+\newcommand{\ldir}[1]{\cev{#1}}
+
 
 \maketitle
 %\tableofcontents
@@ -88,7 +94,6 @@
 \include{linears}
 \include{min_max}
 \include{cycles}
-
 % bibliography, glossary and index would go here.
 
 \bibliography{orientation.bib}{}
