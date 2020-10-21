@@ -1,0 +1,412 @@
+
+\section{An Algorithm for Linear Graphs}
+\label{sec:linear}
+
+A \emph{linear graph} $P$ of length $n$ is an undirected graph with $n+1$
+vertices $V = \{0, 1, \ldots, n\}$ and $n$ edges $E = \left\{\left\{i, i+1\right\} : 0\leq i < n\right\}$. 
+%Given a bi-weighted linear graph $P$ we denote the weights of
+%edges $(v_i, v_{i+1})$ and  $(v_{i+1}, v_i)$ by $w(i, i+1)$ and $w(i+1, i)$, respectively.
+%
+We describe here an algorithm for finding an optimal orientation 
+of a linear bi-weighted graph. The high level version of the algorithm makes no use of the details
+of the cost function, be it $W_m$ or $W_s$. The description therefore uses the subscript $x$ to indicate that either $x=s$ or $x=m$. Then, we show how different properties of the specific cost functions may be exploited to improve the efficiency of the computation in each one of the cases. In the rest of this section we make use of the following notation:
+%\bigskip
+%
+%{\bf Notation}:
+\begin{itemize}
+	\item $P_{i, j}$ is the sub-graph of $P$ induced by the vertices $i,  \ldots, j$, and $P=P_{0,n}$. 
+	\item $\rdir{P}_{i, j}$ denotes the oriented version 
+	of $P_{i, j}$ in which all edges are directed to the right (i.e. of the form $(k, {k+1})$),	
+	and $\ldir{P}_{i, j}$ denotes the oriented version 
+	of $P_{i, j}$ in which all edges are directed to the left.
+	\item When using the cost measure $W_x$, $\rlast{H}_x(j)$ and $\llast{H}_x(j)$ are the values of optimal orientations of $P_{0, j}$ , under the constraints	that edge $\{j-1, j\}$ is directed either towards $j$ or towards $j-1$, respectively. Using this notation we are assuming the original instance graph $P$ is clear from the context.
+\end{itemize}
+
+As any orientation of $P$ either includes the edge $(n-1, n)$ or the edge $(n, n-1)$, it is straightforward to observe the following equation is correct:
+
+\begin{equation}
+\label{eq:Hx}
+H_x(P) = \min \left\{\rlast{H}_x(n), \llast{H}_x(n)\right\}.
+\end{equation}
+
+%Therefore, the problem of computing $H_x(P)$ can be reduced to the problem of computing $\rlast{H}_x(n)$ and $\llast{H}_x(n)$.
+Algorithm~\ref{algo:H} applies Equation~\ref{eq:Hx} for the computation of $H_x(P)$ given a bi-weighted linear graph $P$. It iteratively computes values of the form $\rlast{H}_x(j)$ and $\llast{H}_x(j)$ for $j = 0, 1, \ldots n$, and returns the value $\min\{\rlast{H}_x(n), \llast{H}_x(n)\}$. The computation of $\rlast{H}_x(j)$ and $\llast{H}_x(j)$ is implemented using designated data structures $\rlast{S}_x$ and $\llast{S}_x$, whose descriptions are given in Sections~\ref{sec:type1} and~\ref{sec:type2} with respect to the two cost functions $H_s$ and $H_m$, respectively.
+
+Structures $\rlast{S}_x$ will support two operations: Update-$x(\rlast{S}_x, H, w)$ and Next-$x(\rlast{S}_x)$. The Update-$x$ procedure is executed over $\rlast{S}_x$ in each iteration $j$ with the values $H = \llast{H}_x(j-1)$ and $w = w(j-1, j)$. We will write $\rlast{S}_x \sim \rlast{S}_{x, 0}$ to indicate $\rlast{S}_x$ is in its initial state, and $\rlast{S}_x \sim \rlast{S}_{x, j}$ to indicate that a sequence of $j$ Update-$x$ operations were applied to $\rlast{S}_x$ after its initialization, with the corresponding sequence of arguments $\left(\llast{H}_x(0), w(0, 1)\right), \left(\llast{H}_x(1), w(1, 2)\right), \ldots, \left(\llast{H}_x(j-1), w(j-1, j)\right)$. We will require that when $\rlast{S}_x \sim \rlast{S}_{x, j}$, the operation Next-$x(\rlast{S}_x)$ returns the value $\rlast{H}_x(j)$. The notation and requirements from $\llast{S}_x$ are defined similarly.
+
+%this implementation, utilizing two arrays $\rlast{H}[\cdot]$ and $\llast{H}[\cdot]$ to store values of the forms $\rlast{H}_x(i)$ and $\llast{H}_x(i)$ respectively (we use rectangle brackets to distinguish the algorithm entity from the formal one to which it corresponds). For now, we keep abstract the manner in which values of the form $h_x(\rdir{P}_{i, j})$ and $h_x(\ldir{P}_{i, j})$ are being computed in the algorithm. Though it is not difficult to show all such values can be computed in quadratic running time and match the algorithm's running time (as explained below), we later show how can all components of the algorithm be computed more efficiently.
+
+\begin{algorithm}
+%	For $n$ the length of $P$, allocate two $n+1$-length arrays $\rlast{H}$ and $\llast{H}$, and initialize both $\rlast{H}[0]$ and $\llast{H}[0]$ to $0$\;
+	Initialize data structures $\rlast{S}_x \sim \rlast{S}_{x, 0}$ and $\llast{S}_x \sim \llast{S}_{x, 0}$\; 
+%	(to support the efficient computation of expressions of the form $\min\limits_{0\leq i <j} \max \{ \llast{H}_x(i), h_x(\rdir{P}_{i, j})\}$ and $\min\limits_{0\leq i <j} \max \{ \rlast{H}_x(i), h_x(\ldir{P}_{i, j})\}$, respectively)\;
+	Set $\rlast{H} \gets 0, \ \llast{H} \gets 0$\;
+	\LoopInv{$\rlast{H} = \rlast{H}_x(j-1), \ \llast{H} = \llast{H}_x(j-1), \ \rlast{S}_x \sim \rlast{S}_{x, j-1}$, and $\llast{S}_x \sim \llast{S}_{x, j-1}$}
+	\For{$j=1$ to $n$}{
+		Update-$x(\rlast{S}_x, \llast{H}, w(j-1, j))$\;
+		Update-$x(\llast{S}_x, \rlast{H}, w(j, j-1))$\;
+		\Condition{$\rlast{S}_x \sim \rlast{S}_{x, j}$ and $\llast{S}_x \sim \llast{S}_{x, j}$}
+		Set $\rlast{H} \gets \text{Next-}x(\rlast{S}_x), \llast{H} \gets \text{Next-}x(\llast{S}_x)$\;
+		\Condition{$\rlast{H} = \rlast{H}_x(j)$ and $\llast{H} = \llast{H}_x(j)$}
+	}
+	\Condition{$\rlast{H} = \rlast{H}_x(n)$ and $\llast{H} = \llast{H}_x(n)$}
+	\Return{$\min \{\rlast{H},\ \llast{H}\}$}\;
+	\caption{BestCostPath-$x$ $(P)$}
+	\label{algo:H}
+\end{algorithm}
+
+\paragraph{Time and space complexities of Algorithm~\ref{algo:H}.}
+The running time of Algorithm BestCostPath-$x$ depends on the implementation of the structures $\rlast{S}_x$ and $\llast{S}_x$. In each iteration there's a single call to the Update-$x$ and Next-$x$ over each one of these structures, and overall there are $n$ such iterations. As we show in Sections~\ref{sec:type1} and~\ref{sec:type1}, a sequence of length $n$ of such operations is executed in $O(n)$ and $O(n \log n)$ running time for $x = s$ and $x = m$ respectively. In both cases we will show the space complexity for maintaining the data structures is $O(n)$.
+
+Before describing the specific implementation details for each of the cost functions, we show generic recursive relations which apply to both.
+
+\subsection{Recursive Relations}
+
+In this section we show recursive relations which are satisfied in the problem, i.e. how solutions for general linear graphs may be computed given solutions for all prefixes of the graph. 
+
+Denote by $\rlast{\mathcal{O}}_j$ and $\llast{\mathcal{O}}_j$ the subset of all orientations of $P_{0, j}$ in which the orientation of $\{j-1, j\}$ is directed towards $j$ or $j-1$, respectively. Then, by definition, $\rlast{H}_x(j) = \min\limits_{P' \in \rlast{\mathcal{O}}_j} h_x(P')$ and $\llast{H}_x(j) = \min\limits_{P' \in \llast{\mathcal{O}}_j} h_x(P')$. 
+
+In any orientation $P' \in \rlast{\mathcal{O}}_j$ there exists some unique $0 \leq i < j$ such that for every $i \leq k < j$ the edges $\{k, k+1\}$ are oriented as $(k, k+1)$, and either $i = 0$ or the edge $\{i-1, i\}$ is oriented as $(i, i-1)$. Any path in such an orientation, and in particular a heaviest path, is fully contained in either the induced orientation $P'_{0, i} \in \llast{\mathcal{O}}_i$ of the prefix $P_{0, i}$ of $P_{0, j}$, or the induced orientation $\rdir{P}_{i, j}$ of the suffix $P_{i, j}$ of $P_{0, j}$ (as both edges $(i, i-1)$ and $(i, i+1)$ cannot participate in the same path in $P'$). Therefore, $h_x(P') = \max \left\{h_x(P'_{0, i}), h_x(\rdir{P}_{i, j})\right\}$. By definition, the minimal value $h_x(P'_{0, i})$ can get is $\llast{H}_x(i)$, and such a value is achievable if $i = 0$ and $P'_{0, 0}$ is the trivial empty orientation, or if $i > 0$ and $P'_{0, i}$ is an orientation for $P_{0, i}$ with a minimal heaviest path in $\llast{\mathcal{O}}_i$. Thus, for a particular split index $i$ the minimum weight of an orientation as describe above would be $\max\left\{\llast{H}_x(i), h_x(\rdir{P}_{i, j})\right\}$, and considering all possible split indices we get the following:
+
+\begin{equation}\label{eq:Hr}
+\rlast{H}_x(j) = \left\{\begin{array}{ll}
+0, & j = 0\\
+\min\limits_{0 \leq i < j}\max\left\{\llast{H}_x(i), h_x(\rdir{P}_{i, j})\right\}, & \text{otherwise}\\
+\end{array}\right.
+\end{equation}
+
+Symmetrically: 
+
+\begin{equation}\label{eq:Hl}
+\llast{H}_x(j) = \left\{\begin{array}{ll}
+0, & j = 0\\
+\min\limits_{0 \leq i < j}\max\left\{\rlast{H}_x(i), h_x(\ldir{P}_{i, j})\right\}, & \text{otherwise}\\
+\end{array}\right.
+\end{equation}
+
+
+\subsection{Data structure implementations}
+We now turn to describe data structure implementations designated specifically to each of the cost functions $h_s$ and $h_m$. Instead of using graph orientation notation, we describe the settings applicable to these structures in a more general manner.
+
+Both utilize the following observation:
+
+\begin{observation}
+	\label{obs:subpath}
+	The weights of the directed paths $\rdir{P}_{i, j}$ and $\ldir{P}_{i, j}$ are given by 	
+	$$ \begin{array}{l}
+		w(\rdir{P}_{i, j}) = w(\rdir{P}_{0, j}) - w(\rdir{P}_{0, i}), \\	
+		w(\ldir{P}_{i, j}) = w(\ldir{P}_{0, j}) - w(\ldir{P}_{0, i}).
+	\end{array}	$$
+\end{observation}
+
+Therefore, given arrays $\rdir{w}[\cdot]$ and $\ldir{w}[\cdot]$ that store in their $j$-th entries the corresponding values $w(\rdir{P}_{0, j})$ and $w(\ldir{P}_{0, j})$, it is possible to obtain any value of the forms $w(\rdir{P}_{i, j})$ or $w(\ldir{P}_{i, j})$ in constant time by applying Observation~\ref{obs:subpath}. Algorithm~\ref{algo:prefix_weights} computes such arrays for a given edge bi-weighted linear graph $P$.	
+
+\begin{algorithm}
+	For $n$ the length of $P$, allocate two $n+1$-length arrays $\vec{w}[\cdot]$ and $\cev{h}[\cdot]$, and initialize both $\vec{w}[0]$ and $\cev{w}[0]$ to $0$\;
+	\For{$j=1$ to $n$}{
+		$\vec{w}[j] \gets \vec{w}[j-1] + w(j-1, j)$\;
+		$\cev{w}[j] \gets \cev{w}[j-1] + w(j, j-1)$\;
+	}
+	\Return{$\vec{w}[\cdot],\ \cev{w}[\cdot]$}\;
+	\caption{ComputePrefixWeights $(P)$}
+	\label{algo:prefix_weights}
+\end{algorithm}
+
+%\comments{
+%\subsubsection{Computing $h_s(\alr{P}_{i, j})$ for a monotonous series of endpoints}
+%
+%
+%A series of pairs $(i_0, j_0), (i_1, j_1), \ldots, (i_p, j_p)$ is said to be \emph{monotonous} if for every $0 \leq q < p$, $i_q \leq i_{q+1}$ and $j_q \leq j_{q+1}$. 
+%%The algorithm described below for the $HS$ problem over linear graphs requires the computation of values of the form $h_s(\vec{P}_{i, j})$ with respect to some monotonous series of path endpoints $(i, j)$. 
+%We next describe data structures $\rdir{D}$ and $\ldir{D}$ that support the operation \emph{HeaviestSubPath}, where HeaviestSubPath$(\rdir{D}, i, j)$ returns $h_s(\rdir{P}_{i, j})$ and HeaviestSubPath$(\ldir{D}, i, j)$ returns $h_s(\ldir{P}_{i, j})$, provided that the series of path endpoints used for these queries is monotonous. In particular, the implementation is efficient in the sense that if $p$ heaviest subpath queries are being executed, the overall running time for all queries is $O(n + p)$ ($n$ being the length of $P$). We denote by $\alr{D}$ either of the data structures $\rdir{D}$ or $\ldir{D}$, to unify the description for both cases.
+%To describe $\alr{D}$ we make use of the following definitions:
+%
+%\begin{definition}
+%	\label{def:rightmost_heaviest}
+%	A rightmost heaviest subpath of $\alr{P}_{i, j}$ is a heaviest subpth $\alr{P}_{l, r}$ of $\alr{P}_{i, j}$, such that $r$ is maximal with respect to all such paths.
+%\end{definition}
+%
+%[TODO: illustrate the definition with an example.]
+%
+%
+%\begin{definition}
+%	\label{def:h-series}
+%	An \emph{$h$-series} of $\alr{P}_{i, j}$ is a list of pairs $(l_0, r_0), (l_1, r_1), \ldots, (l_z, r_z)$ defined as follows. If $i > j$ then it is an empty list. Otherwise, $(l_0, r_0)$ are the endpoints of a rightmost heaviest subpath of $\alr{P}_{i, j}$ (where $l_0 \leq r_0$), and the rest of the series $(l_1, r_1), \ldots, (l_z, r_z)$ is a $h$-series of $\alr{P}_{r_0 + 1, j}$.
+%\end{definition}
+%
+%\begin{definition}
+%	\label{def:t-series}
+%	A \emph{$t$-series} with respect to a pair $\alr{P}_{i, j}$  is a list of indices $t_0, t_1, \ldots, t_k$ defined as follows. If $i \geq j$ then it is an empty list. Otherwise, $t_0 = \argmin_{i < t \leq j} w(\alr{P}_{0, t})$, and the rest of the series $t_1, \ldots, t_k$ is a $t$-series with respect to $(t_0, j)$.
+%\end{definition}
+%
+%
+%The data structure $\alr{D}$ is in fact composed of three data structures: the array $\alr{w}[\cdot]$ as computed by Algorithm~\ref{algo:prefix_weights} with respect to $\alr{P}$, and two \emph{deque} data structures $A$ and $B$\footnote{A \emph{deque} data structure $Q$ is a double-ended queue, that supports the operations of AppendLeft$(Q, x)$, AppendRight$(Q, x)$, PeekLeft$(Q)$, PeekRight$(Q)$, RemoveLeft$(Q)$, and RemoveRight$(Q)$, to add an element $x$, observe element, and remove element in either its left or right ends. Each of these operations is performed in $O(1)$ running time.}. 
+%The following invariant is maintained for $\alr{D}$:
+%
+%\paragraph{$D$-invariant for $(i, j)$:}
+%Right after performing a query HeaviestSubPath$(\alr{D}, i, j)$, $A$ contains an $h$-series of $\alr{P}_{i, j}$, and for the first pair $(l_0, r_0)$ in $A$, $B$ contains a $t$-series of $\alr{P}_{l_0, r_0}$.
+%
+%Algorithm~\ref{algo:D} gives an implementation of the HeaviestSubPath procedure, which maintains the $D$-invariant [TODO: break this algorithm to smaller procedures, use one that merges a current $A$ structure for $(i, j)$ with a rightmost heaviest path $(l, r)$ with respect to $(j'+1, j)$, given that $r = j'$].
+%
+%\begin{algorithm}
+%	\LoopInv{$\alr{D} = (\alr{w}[\cdot], A, B)$ satisfies the $D$-invariant for some $(i', j')$ such that $i' \leq i$ and $j' \leq j$}
+%	\While{$j' < j$}{
+%		$j' \gets j'+1$\;
+%		$l \gets j'$ \;
+%		$(l', r') \gets \text{PeekRight}(A)$ \tcp*[r]{By definition, $r = j'-1$}
+%		\LoopInv{$\alr{D}$ satisfies the $D$-invariant for $(i', r')$, where $i' \leq i$ and $r' < j' \leq j$, and $\alr{P}_{l, j'}$ is a rightmost heaviest subpath of $\alr{P}_{r'+1, j'}$}
+%		\While{$\alr{w}[j'] - \min\left\{\alr{w}[l'], \alr{w}[l]\right\} \geq \alr{w}[r'] - \alr{w}[l']$}{
+%			$l \gets \argmin\left\{\alr{w}[l'], \alr{w}[l]\right\}$\;
+%			\Condition{$\alr{P}_{l, j'}$ is a rightmost heaviest path in $\alr{P}_{r''+1, j'}$, where $r''$ the second element in the pair $(l'', r'')$ preceding $(l', r')$ in $A$ if such a pair exists, or $i' - 1$ if $(l', r')$ is the first pair in $A$}
+%			RemoveRight$(A)$\;
+%			$(l', r') \gets \text{PeekRight}(A)$\;
+%		}
+%		AppendRight$(A, (l, j'))$ \;
+%	}
+%	\tcp{TODO: update the $B$ structure in case $A$ contains a single pair (ending at $r = j$).}
+%	\LoopInv{$\alr{D}$ satisfies the $D$-invariant for $(i', j)$, where $i' \leq i$}
+%	\While{$i' < i$}{
+%		$(l, r) \gets \text{PeekLeft}(A)$ \;
+%		\If{$l = i'$}{
+%			RemoveLeft$(A)$\;
+%			$l \gets \text{RemoveLeft}(B)$ \;
+%			\If{$A$ is not empty}{
+%				$(l', r') \gets \text{PeekLeft}(A)$ \;
+%				\If{$\alr{w}[r] - \alr{w}[l] > \alr{w}[r'] - \alr{w}[l']$}{
+%					AppendLeft$(A, (l, r))$ \;
+%				}
+%				\Else{
+%					\tcp{TODO: update the $B$ for the current first pair $(l', r')$ in $A$.}
+%				}
+%			}
+%			\Else{
+%				AppendLeft$(A, (l, r))$ \;
+%			}
+%		}
+%		$i' \gets i' + 1$ \;
+%	}
+%	\Condition{$\alr{D}$ satisfies the $D$-invariant for $(i, j)$}
+%	$(l, r) \gets \text{PeekLeft}(A)$\;
+%	\Return{$\alr{w}[r] - \alr{w}[l]$}\;
+%	\caption{HeaviestSubPath$(\alr{D}, i, j)$}
+%	\label{algo:D}
+%\end{algorithm}
+%
+%
+%
+%
+%}
+
+\subsubsection{An algorithm for the $h_s$ cost function}
+
+In this section we refine the implementation for the $h_s$ cost function. We start by describing an explicit way to compute values of the form $h_s(\vec{P_{i, j}})$ and $h_s(\cev{P_{i, j}})$. Then, we show how Lemma~\ref{lem:sprop} can exploited in order to improve the computation efficiency for this particular cost function.
+
+
+Consider the computation of $H^r_s(j)$ given in Equation~\ref{eq:Hr} with respect to the specific costs $h_s$, and assume that $j > 0$. Say that an index $0 \leq i < j$ is \emph{dominant} with respect to $H^r_s(j)$, if for every $0 \leq i' < i$ it holds that $\max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\} \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$. Denote by $i^r_j$ the maximal dominant index with respect to $H^r_s(j)$, and observe that for every $0 \leq i < j$, $\max\left\{H^\ell_s(i^r_j), h_s(\vec{P}_{i^r_j, j})\right\} \leq \max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$. Therefore, a recursive computation for $H^r_s(j)$ can replace Equation~\ref{eq:Hr} by the following equation:
+
+\begin{equation}\label{eq:Hr1}
+H^r_s(j) = \left\{\begin{array}{ll}
+0, & j = 0,\\
+\max\left\{H^\ell_s(i^r_j), h_s(\vec{P}_{i^r_j, j})\right\}, & \text{otherwise.}\\
+\end{array}\right.
+\end{equation}
+
+In what follows, we show how can indices of the form $i^r_j$ can be efficiently computed.
+
+\begin{claim}
+	\label{clm:dominance_a}
+	An index $i$ is dominant with respect to $H^r_s(j)$ if and only if $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$ for every $0 \leq i' < i$.
+\end{claim}
+
+\begin{proof}
+	Let $i'$ be an index such that $0 \leq i' < i$.
+	From Property~\ref{prop:sub_path}, $h_s(\vec{P}_{i, j}) \leq h_s(\vec{P}_{i', j}) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$. Therefore, $\max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\} \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$ if and only if $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$. By the definition of dominance, $i$ is dominant with respect to $H^r_s(j)$ if and only if the latter inequality holds for every $0 \leq i' < i$.
+\end{proof}
+
+Note that if $i$ is a dominant index with respect to $H^r_s(j)$ and $i = j-1$, it must be that $i = i^r_j$. Otherwise, Claim~\ref{clm:k} below describes a property that allows, given \emph{some} dominant index $i$ with respect to $H^r_s(j)$, to traverse an increasing sequence of dominant indices in order to identify $i^r_j$ without considering non-dominant indices. More importantly, it provides a condition that allows to identify $i^r_j$ once it has reached.
+
+
+\begin{claim}
+	\label{clm:k}
+	Let $i$ be a dominant index with respect to $H^r_s(j)$ where $i < j-1$, and let $k = \argmin_{i < i' < j} H^\ell_s(i')$. 
+	If $H^\ell_s(k) > \max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$ then $i = i^r_j$, and otherwise $k$ is dominant with respect to $H^r_s(j)$.
+\end{claim}
+
+\begin{proof}
+	For the case when $H^\ell_s(k) > \max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$, it follows from the selection of $k$ that for every $i < i' < j$ it holds that $\max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\} < H^\ell_s(k) \leq H^\ell_s(i') \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$, and so $i = i^r_j$.
+	
+	For the case when $H^\ell_s(k) \leq \max\left\{H^\ell_s(i), h_s(\vec{P}_{i, j})\right\}$, we need to show that $k$ is dominant with respect to $H^r_s(j)$. From Claim~\ref{clm:dominance_a}, it is sufficient to show that $H^\ell_s(k) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$ for every $0 \leq i' < k$. For $i' \leq i$ this follows immediately from the fact that $i$ is dominant respect to $H^r_s(j)$. For $i < i' < k$, the inequality holds since $H^\ell_s(k) \leq H^\ell_s(i') \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$.
+\end{proof}
+
+In order to utilize Claim~\ref{clm:k} for the efficient identification of $i^r_j$, there is also a need to be able to efficiently find an index $k$ such that $k = \argmin_{i < i' < j} H^\ell_s(i')$. This is known as the Range Minimum Query problem [TODO: add citations], for which there are efficient implementations that allow, after linear preprocessing time, to execute each query in a constant time. In our case, as will be shown later, the series of queries executed throughout the computation has the property of having monotonously increasing endpoints (that is, for every pair of endpoints $(i, j)$ and $(i', j')$ in two consecutive queries, it holds that $i \leq i'$ and $j \leq j'$). For this case there is a simple solution using the \emph{Deque} data structure [TODO: add citations]. Besides its simplicity, this solution does not require the entire array over which the queries are performed to be given prior to the series of queries. It allows the sequential addition of elements at the end of the array, and to execute queries given that their endpoints are within the current array length. While some queries might take more than a constant time for their execution, the overall running time for executing $m$ queries over an array whose final length is $n$, is $O(m+n)$. In this paper, we will denote such structures over the arrays $H^r[\cdot]$ and $H^\ell[\cdot]$  by $D^r$ and $D^\ell$, respectively. The procedure GetMin$(D^r, i, j)$ correspond to finding an index $i < k < j$ that minimizes $H^r[k]$, and the procedure Append$(D^r, H^r[j])$ corresponds to updating the internal structure of $D^r$ due to the addition of the element $H^r[j]$ at the end of the currently computed array $H^r[\cdot]$. [TODO: consider adding an appendix with implementation details.] Algorithm~\ref{algo:maxDominant} computes $i^r_j$, given some initial dominant index $i$ with respect to $H^r_s(j)$ and the data structure $D^\ell$, under the assumption $D^\ell$ can execute a range minimum query with respect to the endpoints $i$ and $j$ [TODO: make the notation more generic to work with both $r$ and $\ell$ directions].
+
+\begin{algorithm}
+	\If{$i < j-1$}{
+		$i' \gets \text{GetMin}(D^\ell, i, j)$\;
+		\While{$H^\ell[i'] \leq \max\left\{H^\ell[i], h_s(\vec{P}_{i, j})\right\}$}{
+			$i \gets i'$\;
+			\If{$i = j-1$}{\Break}
+			$i' \gets \text{GetMin}(D^\ell, i, j)$\;
+		}
+	}
+	\Return{$i$}\;
+	\caption{MaxDominant$(i, \ j, \ D^\ell, \ H^\ell)$}
+	\label{algo:maxDominant}
+\end{algorithm}
+
+
+\begin{claim}
+	\label{clm:dominance}
+	If an index $i$ is dominant with respect to $H^r_s(j-1)$, then it is also dominant with respect to  $H^r_s(j)$.
+\end{claim}
+
+\begin{proof}
+	Let $i$ be a dominant index with respect to $H^r_s(j-1)$. Due to Claim~\ref{clm:dominance_a}, to prove the claim we only need to show that $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$ for every $0 \leq i' < i$.
+	Let $i'$ be any such index.
+	If $H^\ell_s(i) \leq H^\ell_s(i')$, it immediately follows that $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$.
+	Otherwise  $H^\ell_s(i) > H^\ell_s(i')$. Since $i$ is dominant with respect to $H^r_s(j-1)$ we get that $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j-1})\right\}$. This means that $H^\ell_s(i) \leq h_s(\vec{P}_{i', j-1}) \stackrel{\text{Prop.~\ref{prop:sub_path}}}{\leq} h_s(\vec{P}_{i', j})$, and in particular $H^\ell_s(i) \leq \max\left\{H^\ell_s(i'), h_s(\vec{P}_{i', j})\right\}$.
+\end{proof}
+
+For $j = 1$, $i^r_1 = 0$. For $j > 1$, from Claim~\ref{clm:dominance} we get that $i^r_{j-1}$ is also dominant with respect to $H^r_s(j)$, and can be used as an input for Algorithm~\ref{algo:maxDominant} for computing $i^r_j$.
+
+
+
+\begin{algorithm}
+	For $n$ the length of $P$, allocate two $n+1$-length arrays $H^r$ and $H^\ell$, and initialize both $H^r[0]$ and $H^{\ell}[0]$ to $0$\;
+	Set $i^r \gets 0, \ i^\ell \gets 0$\;
+	Initialize the data structures $D^r$ and $D^\ell$ with respect to $H^r[0]$ and $H^{\ell}[0]$\;
+	\For{$j=1$ to $n$}{
+		$i^r \gets \text{MaxDominant}(i^r, \ j, \ D^\ell, \ H^\ell)$\;
+		$H^{r}[j] \gets \max \{ H^{\ell}[i^r], h_s(\vec{P}_{i^r, j})\}$\;
+		$i^\ell \gets \text{MaxDominant}(i^\ell, \ j, \ D^r, \ H^r)$\;
+		$H^{\ell}[j] \gets \max \{ H^r[i^\ell], h_s(\cev{P}_{i^\ell, j})\}$\;
+		Append$(D^r, H^{r}[j])$\;
+		Append$(D^\ell, H^{\ell}[j])$\;
+	}
+	\Return{$\min \{H^{r}[n],\ H^{\ell}[n]\}$}\;
+	\caption{EfficientBestCostPath-$s$ $(P)$}
+	\label{algo:effH}
+\end{algorithm}
+
+[TODO: complete the details for the computation of $k^r_{i^r, j}$ and $h_s(\vec{P}_{i, j})$ (using deques)]
+
+****************************************
+
+
+Turning now to the running time analysis, we note first of all that the values 
+$ h(\vec{P_{i, j}}), h(\cev{P_{i, j}})$ used in statements (\ref{i.1}) and (\ref{i.2})
+can be computed in constant time if the cost function is $h_m$. Namely, if the $2n$ values 
+$ h_m(\vec{P_{0, j}})$, $h_m(\cev{P_{0, j}})$, $1\leq j \leq n$ are precomputed in $O(n)$ time,
+then
+$h_m(\vec{P_{i, j}})=h_m(\vec{P_{0, j}})-h_m(\vec{P_{0, i}})
+%=\sum_{k=i}^{j-1} w(k,k+1).$
+$.
+
+To prove that this is true also for the cost function $h_s$ takes more doing.
+
+%It remains to determine the time needed for the computation of the minimum values 
+%in those statements.
+%On the face of it, it takes $O(n)$ time to compute one such value.
+%We show now that the totality of these computations takes $O(n)$ time
+%if the cost function is $h_s$.
+%
+%\begin{theorem}
+%When the cost function used in Algorithm BestCostPath ($P$) is $h_s$ its running time is $O(n)$.
+%\end{theorem}
+%
+%\noindent {\bf Proof}.
+%According to the foregoing analysis we need to show that the total time needed for the computations of all minimum values in statements (\ref{i.1}) and (\ref{i.2}) is $O(n)$.
+%The key to the proof is the following fact.
+%\begin{claim}
+%	Denote 
+%	$$a^{\ell}[j]=\argmin_{0\leq i <j} \max \{ H_s^{\ell}[i], h_s(\vec{P_{i, j}}) \},
+%   a^{r}[j]=\argmin_{0\leq i <j} \max \{ H_s^{r}[i], h_s(\vec{P_{i, j}}) \}.
+%	$$
+%	Then $a^{\ell}[j]\leq a^{\ell}[j+1]$, and $a^{r}[j]\leq a^{r}[j+1]$, $0\leq j <n$.
+%\end{claim}
+%
+%\noindent The proof of the Claim rests on two observations:
+%\begin{enumerate}
+%	\item $h_s(\vec{P_{i, j}}$ is non-increasing as a function of $i$ and non-decreasing as a function of $j$. 
+%\end{enumerate}
+%\qed
+%
+%-----------------------------------------------------------------------------------------
+%
+%Let $P$ be a bi-weighted linear graph of length $n$. Denote:
+%\begin{itemize}
+%	\item $P_{i, j}$: the sub-graph of $P$ induced by the vertices $\left\{v_i, v_{i+1}, \ldots, v_j \right\}$. For short, denote by $P_j$ the prefix $P_{0, j}$ of $P$;
+%	\item $\vec{P'} \vec{P''}$: an orientation of $P$ obtained by concatenating the orientations $\dir[P']$ and $\dir[P'']$ for some prefix $P_{k}$ and suffix $P_{k, n}$ of $P$, respectively;
+%	\item $\dir[P^r]$, $\dir[P^l]$: the orientations of $P$ in which all edges are directed "rightward" (i.e. of the form $(v_i, v_{i+1})$) or "leftwards" (i.e. of the form $(v_{i+1}, v_i)$), respectively;
+%	\item $\mathcal{O}^r(P) = \left\{\dir[P'] \dir[P^r]_{n-1,n} : \dir[P'] \in \mathcal{O}(P_{n-1})\right\}$ (i.e. the subset of $\mathcal{O}(P)$ containing all orientations of $P$ ending with the directed edge $(v_{n-1}, v_n)$);
+%	\item $\mathcal{O}^l(P) = \mathcal{O}(P) \setminus \mathcal{O}^r(P) = \left\{\dir[P'] \dir[P^l]_{n-1,n} : \dir[P'] \in \mathcal{O}(P_{n-1})\right\}$ (i.e. the subset of $\mathcal{O}(P)$ containing all orientations of $P$ ending with the directed edge $(v_n, v_{n-1})$);
+%	\item $H^r(P) = \min_{\dir[P] \in \mathcal{O}^r(P)} h(\dir[P])$;
+%	\item $H^l(P) = \min_{\dir[P] \in \mathcal{O}^l(P)} h(\dir[P])$.
+%\end{itemize}
+%
+%Before describing the computation of $H(P)$, we first describe an auxiliary computation of values of the form $h(\dir[P^r]_{i, j})$ which will be used within the computation of $H(P)$. This computation utilizes the \emph{deque} data structure to store information about $\dir[P^r]_{i, j}$ that will allow the efficient computation of $h(\dir[P^r]_{i, j})$. In addition, given the structure for the segment $\dir[P^r]_{i, j}$, the updated structure with respect to segments $\dir[P^r]_{i+1, j}$ and $\dir[P^r]_{i, j+1}$ can be computed efficiently. The computation of values of the form $h(\dir[P^l]_{i, j})$ is symmetric and we omit its explicit description. 
+%
+%Let $S = \langle s_0, s_1, ..., s_{m-1}\rangle$ be a series of numbers. When $m > 0$, denote by $k_S$ the index $0 \leq k < m$ so that $s_{k_S}$ is the maximum of $S$, and $k_S$ is the biggest such index if there are multiple maximal values in $S$. In other words, for every $k_S < k < m$, $s_{k_S} > s_k$. The \emph{decreasing maximum indices} $S^{\downarrow}$ of $S$ is inductively defined as follows. When $S$ is empty then $S^{\downarrow}$ is empty, and otherwise $S^{\downarrow}$ is the series of indices starting with $k_S$ and continuing with the decreasing maximum indices of the suffix $\langle s_{k_S+1}, s_{k_S+2}, ..., s_{m-1}\rangle$ of $S$. For example, for $S = \langle 5, 4, 5, 2, 3, -1, 0, 1\rangle$, $S^\downarrow = \langle 2, 4, 7\rangle$, which corresponds to the decreasing subsequence $\langle 5, 3, 1\rangle$ of $S$.
+%
+%Assume the decreasing maximum indices $S^\downarrow_{i, j}$ is given with respect to some interval $S_{i, j} = \langle s_i, s_{i+1}, ..., s_{j-1}\rangle$ in $S$, and consider the corresponding indices $S^\downarrow_{i, j+1}$ with respect to $S_{i, j+1} = \langle s_i, s_{i+1}, ..., s_{j}\rangle$. It is simple to assert that $S^\downarrow_{i, j+1}$ can be obtained by removing from the suffix of $S^\downarrow_{i, j}$ all indices $k$ such that $s_k \leq s_j$, and adding the index $j$ at the end of the resulting sequence. To compute $S^\downarrow_{i+1, j}$, one just remove the index $i$ from $S^\downarrow_{i, j}$ in case it is the first index in this series, and otherwise it is identical to $S^\downarrow_{i, j}$. In both cases, the time required for updating the data structure is proportional to the total number of element insertions and deletions from the index sequence.
+%
+%
+%
+%
+%********************************
+%
+%
+%In what follow, we describe a recursive computation for $H(P_j)$ for every prefix $P_j$ of $P$ (and in particular for $P = P_n$). Clearly,
+%
+%\begin{equation}\label{eq:H}
+%H(P_j) = \min\left(H^r(P_j), H^l(P_j)\right).
+%\end{equation}
+%
+%
+%Consider an orientation $\dir[P_j] \in \mathcal{O}^r(P_j)$. By definition, there exists some $0 \leq i < j$ such that $\dir[P_j] = \dir[P'] \dir[P^r]_{i, j}$, where $\dir[P'] \in \mathcal{O}^l(P_i)$. Observe that any path in $\dir[P_j]$ cannot contain edges from both $\dir[P']$ (which is either empty when $i=0$, or otherwise ending with a leftward edge $(v_i, v_{i-1})$) and $\dir[P^r]_{i, j}$ (starting with a rightward edge $(v_i, v_{i+1})$). In particular, a heaviest path in $\dir[P_j]$ is fully contained in either $\dir[P']$ or $\dir[P^r]_{i, j}$. Therefore, $h(\dir[P_j]) = \max\left(h(\dir[P']), h(\dir[P^r]_{i, j})\right)$. An orientation that would minimize the heaviest path weight among all orientations of this form with the same $i$ value would thus have the weight $\max\left(H^l(P_i), h(\dir[P^r]_{i, j})\right)$, and we get that 
+%
+%\begin{equation}\label{eq:Hr}
+%H^r(P_j) = \left\{\begin{array}{ll}
+%0, & j = 0\\
+%\min_{0 \leq i < j}\left(\max\left(H^l(P_i), h(\dir[P^r]_{i, j})\right)\right), & \text{otherwise}\\
+%\end{array}\right.
+%\end{equation}
+%
+%Symmetrically: 
+%
+%\begin{equation}\label{eq:Hl}
+%H^l(P_j) = \left\{\begin{array}{ll}
+%0, & j = 0\\
+%\min_{0 \leq i < j}\left(\max\left(H^r(P_i), h(\dir[P^l]_{i, j})\right)\right), & \text{otherwise}\\
+%\end{array}\right.
+%\end{equation}
+%
+%
+%Next, we describe how to efficiently compute the above recursion. 
+%
+%
+%\begin{observation}
+%	\label{obs:subpath}
+%	For every $0 \leq i \leq j \leq n$, $H(P_{i, j}) \leq H(P)$, $h(P^r_{i, j}) \leq h(P^r)$, and $h(P^l_{i, j}) \leq h(P^l)$.
+%\end{observation}
+%
+%The correctness of the observation follows from the fact that any orientation for $P$ induces an orientation for $P_{i, j}$ in which the weight of a heaviest path can only decrease. Next, consider equation~\ref{eq:Hr}, and denote by $k_P$ the maximal integer that minimizes the equation term for $n > 0$. 
+%
+%\begin{claim}
+%	\label{clm:kp}
+%	$H(P_{0, k_P}) < H(P_{0, k_P+1})$.
+%\end{claim}
+%
+%\begin{proof}
+%	By definition of $K_P$, $\max\left(H^l(P_{0, k_P}), h(P^r_{k_P, n})\right) < \max\left(H^l(P_{0, k_P + 1}), h(P^r_{k_P + 1, n})\right)$. Since $h(P^r_{k_P, n}) \geq h(P^r_{k_P+1, n})$ (from Obs.~\ref{obs:subpath}), it must be that $H(P_{0, k_P}) < H(P_{0, k_P+1})$
+%\end{proof}
+%
+%
+%\begin{claim}
+%	\label{clm:kp_monotonicity}
+%	For every $0 \leq j < n$, $K_{P_{0, j}} \leq K_P$.
+%\end{claim}
+%
+%\begin{proof}
+%	
+%\end{proof}
