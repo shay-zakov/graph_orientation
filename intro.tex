@@ -20,61 +20,62 @@ fails to specify whether the minimum is taken only over maximal
 simple paths or over all simple subpaths. To distinguish between these two possibilities we define two measures.
 
 \begin{definition}
-	Given a directed path $\vec{P}=<v_0,\ldots,v_n>$ let 
-	\begin{equation}\label{e.h}
+	Given a directed path $\vec{P}=<v_0,\ldots,v_n>$ denote its cost
+	\begin{equation}\label{eq.W}
 		W(\vec{P})=\sum_{k=0}^{n-1} w(v_k,v_{k+1}).
 	\end{equation}
 	We define two cost measures for an oriented graph $\vec{G}$:
 	\begin{align} 
-		W_s(\vecG) &= \max\{W(\vec{P})\mid \vecP \mbox{ is a simple path in }\vecG \}, \\
-		W_m(\vecG) &= \max\{W(\vec{P})\mid \vecP \mbox{ is a maximal simple path in }\vecG \}.
+		h_s(\vecG) &= \max\{W(\vec{P})\mid \vecP \mbox{ is a simple path in }\vecG \},\label{eq.hs} \\
+		h_m(\vecG) &= \max\{W(\vec{P})\mid \vecP \mbox{ is a maximal simple path in }\vecG \}.
 	\end{align}
 	The corresponding cost functions for orienting an undirected graph are 
 	\begin{align}
-		W_s(G) &= \min\{W_s(\vecG)\mid \vecG \in \mathcal{O}(G)\}, \\
-		W_m(G) &= \min\{W_m(\vecG)\mid \vecG \in \mathcal{O}(G)\}.
+		H_s(G) &= \min\{h_s(\vecG)\mid \vecG \in \mathcal{O}(G)\}, \\
+		H_m(G) &= \min\{h_m(\vecG)\mid \vecG \in \mathcal{O}(G)\}.
 	\end{align}
 \end{definition}
 
- To illustrate the differences between the two cost functions consider\\
+\noindent {\bf Example}: To illustrate the differences between the two cost functions consider
  $\vec{P}=<v_0,v_1,v_2,v_3>$, with $w(v_0,v_1)=2, w(v_1,v_2)=-3,w(v_2,v_3)=6$.
- Then $W_m(\vec{P})=5, W_s(\vec{P})=6$.
+ Then $h_m(\vec{P})=W(\vec{P})=5, h_s(\vec{P})=6$.
+ \qed
 
-A very useful property of $W_s$ is that it is monotone: the cost of a graph is never less than the cost of a subgraph.
+A very useful property of $H_s$ is that it is monotone: the cost of a graph is never less than the cost of a subgraph.
 \begin{lemma}\label{lem:sprop}
 	Given any edge bi-weighted graph G,
-	$W_{s}(G)\geq  W_{s}(G')$ for any subgraph $G'$ of $G$. 
+	$H_{s}(G)\geq  H_{s}(G')$ for any subgraph $G'$ of $G$. 
 \end{lemma}
 
-\noindent {\bf Proof:}
-It is clear from the definition (\ref{e.h}) of $W_s$ that $W_s(\vecP)\geq W_s(\vecP ')$for any subpath 
+\begin{proof}
+It is clear from the definition (\ref{eq.hs}) of $h_s$ that $h_s(\vecP)\geq h_s(\vecP ')$for any subpath 
 $\vecP '$ of $\vecP$.  
-\qed
+\end{proof}
 
-This property sets $W_m$ apart from $W_s$,  as the above example shows:
-$W_{m}(\vecP)=5 <  W_{m}(\vecP')=6$ for the subgraph $\vecP '=<v_2,v_3>$ of $\vecP$.
+This property sets $H_m$ apart from $H_s$,  as the above example shows:
+$h_{m}(\vecP)=5 <  h_{m}(\vecP')=6$ for the subgraph $\vecP '=<v_2,v_3>$ of $\vecP$.
 
-However, if all weights are non-negative $W_m$, too, is monotonic. In fact, in that case the two definitions coincide.
+However, if all weights are non-negative $H_m$, too, is monotonic. In fact, in that case the two definitions coincide.
 
 \begin{lemma}
 	If all of the weights an edge-bi-weighted graph $G$ are non-negative 
-	then $W_{s}( \vecG )= W_{m}( \vecG )$ for any orientation $\vecG$.
-	In particular,  $W_{s}(G)= W_{m}(G)$,  and 
-	$\vecG$ is an optimal orientation of $G$ with respect to $W_{s}$
-	if and only if it is optimal with respect to $ W_{m} $.
+	then $h_{s}( \vecG )= h_{m}( \vecG )$ for any orientation $\vecG$ of $G$.
+	In particular,  $H_{s}(G)= H_{m}(G)$,  and 
+	$\vecG$ is an optimal orientation of $G$ with respect to $h_{s}$
+	if and only if it is optimal with respect to $ h_{m} $.
 \end{lemma}
-\noindent {\bf Proof:}
-From the definitions of $W_m$ and $W_s$ it is clear that for any path graph P  $W_{m}(P)\leq  W_{s}(P)$, and that the inequality is in fact an equality if all the weights 
-are non-negative. This implies $W_{s}(G)= W_{m}(G)$.
+\begin{proof}
+From the definitions of $H_m$ and $H_s$ it is clear that for any path graph P  $H_{m}(P)\leq  H_{s}(P)$, and that the inequality is in fact an equality if all the weights 
+are non-negative. This implies $H_{s}(G)= H_{m}(G)$.
 
-Clearly any orientation of $G$ that is optimal with respect to $W_m$ is also 
-optimal with respect to $W_s$. 
-\qed
+Clearly any orientation of $G$ that is optimal with respect to $h_m$ is also 
+optimal with respect to $h_s$. 
+\end{proof}
 
 \bigskip
 {\bf Conjecture}:
 \textit{Given an edge bi-weighted graph $G$, any orientation that is optimal with 
-	respect to $W_{m}$ is also optimal with respect to $W_{s} $.}
+	respect to $h_{m}$ is also optimal with respect to $h_{s} $.}
 
 \bigskip
 In the coming sections we will consider the following two problems
@@ -84,7 +85,7 @@ for various classes of graphs.
 %	Minimizing the heaviest subpath - 
 	HS]
 	Given a class of edge bi-weighted graphs find an algorithm to compute
-	$W_s(G) $
+	$H_s(G) $
 	for any $G$
 	in the class.
 \end{problem}
@@ -92,7 +93,7 @@ for various classes of graphs.
 \begin{problem}[
 %	Minimizing the heaviest maximal path - 
 	HM]
-	Given a class of edge bi-weighted graphs find an algorithm to compute $W_m(G) $
+	Given a class of edge bi-weighted graphs find an algorithm to compute $H_m(G) $
 	for any $G$
 	in the class.
 \end{problem}

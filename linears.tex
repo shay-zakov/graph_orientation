@@ -1,124 +1,139 @@
 \section{An algorithm for linear graphs}\label{s.2}
-Number the vertices of the linear graph  $P_n$ from \textit{0} to \textit{n}, and denote the weights of
+Number the vertices of the linear graph  $L_n$ from \textit{0} to \textit{n}, and denote the weights of
 edges $(i,i+1)$ and  $(i+1,i)$ by $w(i,i+1)$ and $w(i+1,1)$, respectively.
 
 We describe here an algorithm for finding an optimal orientation 
 of a linear graph. The high level version of the algorithm makes no use of the details
-of the cost function, be it $W_m$ or $W_s$. The description therefore uses the subscript $x$ with $x\in \{s,m\}$. However, upon implementing the high level version, the difference between 
-the two cost functions leads to a surprising difference in running times: it is linear 
-under $W_s$ but quadratic under $W_m$.
+of the cost function, be it $H_m$ or $H_s$. The description therefore uses the subscript $x$ with $x\in \{s,m\}$. However, upon implementing the high level version, the difference between 
+the two cost functions leads to a surprising difference in running times.
 \bigskip
 
 {\bf Notation}:
 \begin{itemize}
-\item $P_{i, j}$ is the sub-graph of $P$ induced by the vertices $i,  \ldots, j$, and $P=P_{0,n}$. 
+\item $L_{i, j}$ is the sub-graph of $L_n$ induced by the vertices $i,  \ldots, j$. 
 \item $\rdir{P}_{i, j}$ denotes the oriented version 
 of $P_{i, j}$ in which all edges are directed to the right (i.e. of the form $(i, {i+1})$),
 and $\ldir{P}_{i, j}$ denotes the oriented version 
 of $P_{i, j}$ in which all edges are directed to the left.
-\item When using the cost measure $W_x$, $\rlast{H}_x[i]$ is the value of an optimal orientaton of $P_{0, i}$ under the constraint
+\item $\rlast{H}_x[i]$ is the value of an optimal orientaton of $P_{0, i}$ under the constraint
 that edge $\{i-1,i\}$ is directed towards $i$, and $H_x^{\prec}[i]$ is the value of an optimal orientaton of $P_{0, i}$ under the constraint
-that edge $\{i-1,i\}$ is directed towards $i-1$.
+that edge $\{i-1,i\}$ is directed towards $i-1$.\\
+In particular, the cost of an optimal orientation of $L_n$ under $h_x$ is 
+$\min \{H_x^{\succ}[n],\ H_x^{\prec}[n]\}$.
 \end{itemize}
 
-The algorithm is recursive, locating in its basic step the last 
-vertex of an optimal solution whose two edges are either both
-ingoing or both outgoing. 
+The basic step of the recursive algorithm is to locate the last 
+vertex of an optimal orientation of $P_{0, j}$ at which there is a change in direction,
+given that the very last edge has a specified direction. 
 \bigskip
 
 \begin{algorithm}
-	For $n= length(P)$, allocate two arrays $H^{\succ}$ and $H^{\prec}$ of length $n+1$,  initialized to $0$\;
+	Allocate two null arrays $H^{\succ}$ and $H^{\prec}$ of length $n=length(P)+1$\;
 	\For{$j=1$ to $n$}{
-		$H^{\succ}[j] \gets \min_{0\leq i <j} \max \{ H^{\prec}[i], h_x(\vec{P}_{i, j})\}$\;
-		$H^{\prec}[j] \gets \min_{0\leq i <j} \max \{ H^{\succ}[i], h_x(\cev{P}_{i, j})\}$\;
+		set $H^{\succ}[j]$ to the minimum over $0\leq i <j$ of $\max \{ H^{\prec}[i], h_x(\vec{P}_{i, j})\}$\;
+		\label{st.1}
+		set $H^{\prec}[j]$ to the minimum over $0\leq i <j$ of  $\max \{ H^{\succ}[i], h_x(\cev{P}_{i, j})\}$\;
+			\label{st.2}
 	}
 	\Return{$\min \{H^{\succ}[n],\ H^{\prec}[n]\}$}\;
 	\caption{BestCostPath-$x$ $(P)$}
 	\label{algo:H}
 \end{algorithm}
 \begin{theorem}
-When the cost function used in Algorithm BestCostPath-x is $W_s$ its running time is $O(n)$.
+Algorithm BestCostPath-x finds an optimal orientation.
 \end{theorem}
 
-\noindent {\bf Proof}.
-We will show that the total time needed for the computations of all minimum values in statements 3 and 4 is $O(n)$.
-The first key element of the proof is that the search for a minimum over $i$ 
-in these statements, when using $W_s$, can be limited to increasing values of $i$, e.g. the search over $i$ in statement 3
-for given $j+1$, can start with the last value of $i$ used in that statement during the 
-search for $j$. Lemma \ref{l.arg} is a formal formulation of this idea.
-It is worth noting that this Lemma does not necessarily hold for $W_m$.
 
-Since $H_s^{\prec}[i]$ is accessed in constant time, the upshot of Lemma \ref{l.arg} 
-is that the total time needed for the execution of statement 3 is $O(n)$ plus
-the time needed to compute  $W_s(\vec{P_{i_k, j_k}})$ for a sequence  of pairs $(i_k,j_k)$ 
-such that 
-$$i_0=j_0=0, i_k\leq  i_{k+1},\  j_k \leq j_{k+1}, 
-i_{k+1}+j_{k+1}=i_k+j_k+1,
-k=0, \ldots 2n-1,$$
-i.e. such that exactly one of the indices increases by 1 with each increase in $k$.
-Since $W_s(\vec{P_{i_k, j_k}})=\sum_{p=i_k}^{j_k-1} w(p,p+1)$ we can rephrase
-this task as an instance of the following Problem.
-\begin{problem}[Maximum-sum-subarray one-way moving queries - MSSM]\label{p.msmm}\ \\
-	\noindent {\bf Input}: a one-dimensional array $A[1\ldots n]$ of numbers
-	that can be positive, negative, or zero; and a sequence of query pairs $(i_k,j_k)$ 
+\subsection{Running time of \emph{BestCostPath-s}}
+In this subsection we show that 
+Algorithm BestCostPath-s can be made to run in time $O(n)$ by maintaining appropriate 
+data structures.
+Two issues have to addressed.
+
+	The first is the time needed to compute $h_s(\vec{P}_{i, j})$ for given $0\leq i<j\leq n$.\\
+	Combining equations (\ref{eq.W}) and (\ref{eq.hs}) shows that
+	\begin{equation}\label{eq.hsij}
+	h_s(\vec{P}_{i, j})=\max \{ \sum_{t=i'}^{j'-1}w(t,t+1) \mid i\leq i' \leq j' \leq j\}.
+	\end{equation}
+	Computing $h_s(\vec{P}_{i, j})$ for a series of pairs $(i,j)$ is therefore an instance
+	of the Range Maximum-sum Segment On-line Query problem, 
+	RMSOQ for short:
+	given a nonempty sequence $A[1] ,\ldots A[ n]$ of real numbers,  
+	the task is to
+	respond to each query of the form $RMSOQ( i, j)$ by returning a pair of indices $(i', j')$ 
 	such that 
-	$$i_0=j_0=0, i_k\leq  i_{k+1},\  j_k \leq j_{k+1}, 
-	i_{k+1}+j_{k+1}=i_k+j_k+1,
-	k=0, \ldots 2n-1.$$
-	\noindent  {\bf Find}: for each query $(i_k,j_k)$ a contiguous subarray of 
-	$A[i_k,j_k]$ with the largest sum,
-	i.e. find indices $x_k$ and 
-	$y_k$ with $i_k \leq x_k\leq y_k-1\leq j_k-1$, such that 
-	$ \sum_{i=x_k}^{y_k}A[i] $
-	is as large as possible. 
-\end{problem}
-
-This is a special case of the more general problem of answering a series of queries without any restrictions on the set of pairs $(i_k,j_k)$, for which an algorithm was
- presented by~\cite{chen2007range}. They showed
-that, after preprocessing the input
-in linear time, each query can be answered in constant time.
-
-Taken together these two results prove the Theorem.
-\qed
-
-\begin{lemma}\label{l.arg}
-	Denote 
-	$$a^{\succ}[j]=\argmin_{0\leq i <j} \max \{ H_s^{\prec}[i], W_s(\vec{P_{i, j}}) \},
-	a^{\prec}[j]=\argmin_{0\leq i <j} \max \{ H_s^{\succ}[i], W_s(\cev{P_{i, j}}) \}.
-	$$
-	Then $a^{\prec}[j]\leq a^{\prec}[j+1]$, and $a^{\succ}[j]\leq a^{\succ}[j+1]$, $0\leq j <n$.
+	$\sum_{t=i'}^{j'}A[t]$ is maximized over all $i\leq i' \leq j' \leq j$.
+	Chen and Chao  \cite{chen2007range} established  that each such query can be answered in constant time after  $A$ is preprocessed in $O(n)$ time. The following Lemma 
+	summarizes the discussion and its relevance.
+\begin{lemma}
+	Suppose $h_s(\vec{P}_{0, n})$ and $h_s(\cev{P}_{0, n})$ have been preprocessed 
+	in linear time for the RMSOQ problem.
+	After  $H^{\prec}[i]$ and $H^{\succ}[i]$ have been computed for $0\leq i <j$ all 
+	values $\max \{ H^{\prec}[i], h_s(\vec{P}_{i, j})\}$ and $\max \{ H^{\succ}[i], h_s(\cev{P}_{i, j})\}$ appearing in statements \ref{st.1} and \ref{st.2} in iteration $j$
+	can be evaluated in constant time.
 \end{lemma}
 
-\noindent {\bf Proof}: We focus attention on $a^{\prec}[j]$, the proof for $a^{\succ}[j]$ 
-is entirely analogous.
+The second issue is the time needed to find all minimum values in statements \ref{st.1} and \ref{st.2}.
+The form of the minima to be found in the two statements is identical, namely
+\begin{equation}\label{eq.fg}
+\min_{0\leq i <j} \max \{ f[i], g[i,j]\}.
+\end{equation}
+Two points should be noted.
+\begin{enumerate}
+	\item \label{i.1} $g[i,j]$, 
+	 is non-increasing in $i$,
+	$g[i, j]\geq g[i+1, j], 0\leq i \leq j$, and non-decreasing in $j$,
+	$g[i, j]\leq g[i, j+1], 0\leq j \leq n-1$. This follows from equation (\ref{eq.hsij})
+	(irrespective of whether  $g[i,j]$ is $h_s(\vec{P}_{i, j})$ or $h_s(\cev{P}_{i, j})$.
+	\item The computation is on-line, in the sense that the values $f[i], \ 0\leq i <j$
+	must have been computed before the start of the computation.
+\end{enumerate}
+%In addition we know from equation (\ref{eq.hsij}) that  $g[i,j]$, 
+%which is either $h_s(\vec{P}_{i, j})$ or $h_s(\cev{P}_{i, j})$, is non-increasing in $i$,
+%	$g[i, j]\geq g[i+1, j], 0\leq i \leq j$, and non-decreasing in $j$,
+%	$g[i, j]\leq g[i, j+1], 0\leq j \leq n-1$.
 
-%The definition of $W_s$ ensures the following properties:
-%\begin{enumerate}
-%	\item $H_s^{\prec}[i]$ is non-decreasing as a function of $i$;
-%	\item $W_s(\vec{P_{i, j}})$ is non-increasing as a function of $i$ and non-decreasing as a function of $j$;
-%	\item $W_s(\vec{P_{i, j}})$ is non-decreasing as a function of $j$. 
-%\end{enumerate}
-%It follows from the first two properties that 
-%$\max \{ H_s^{\ell}[i], h_s(\vec{P_{i, j}}) \}$ is a convex function 
-%of $i$ for fixed $j$, with a unique minimum. The third property shows that 
-%for $j+1$ the unique minimum is achieved at a value of $i$ that is no less than
-%$a^{\ell}[j]$.
-\qed
+Before proceeding with our analysis using this formulation, we remind the reader of the notion of 
+a totally monotone matrix.
+\begin{definition}\label{d.tm}
+	Given an $n \times n$ matrix $M$, denote
+	by $R(j)$ the largest row index at which the minimum in column $j$ of $M$ is achieved, 
+	i.e.,
+	$R(j) = \max \{k :M_{k,j} = min_{1\leq i \leq n} M_{i,j}\}$.
+	The matrix $M$ is monotone if $R(1) \leq  R(2)\leq \cdots \leq R(n)$, and it is totally monotone 
+	if all $2\times 2$
+	submatrices of $M$ formed by choosing two rows and two columns are monotone.
+\end{definition}
+Somewhat surprisingly, all values $R(j),\ 1\leq j \leq n$ 
+can be computed off-line in $O(n)$ time by the SMAWK algorithm \cite{smawk1987}.
+	
+Define the upper triangular matrix $U[i,j]=\max \{ f[i], g[i, j]\}$, $ 0\leq i <j \leq n$,
+setting $U[i,j]=\infty$ for $i\geq j$.
+In these terms equation (\ref{eq.fg}) computes the minimum value of column $j$ of $U$.
 
-%This problem is a non-trivial extension of the well known 
-%\begin{problem}[Maximum-sum-subarray problem]\ \\
-%\noindent {\bf Input}: a one-dimensional array $A[1\ldots n]$ of numbers
-%that can be positive, negative, or zero.\\
-%\noindent  {\bf Find}: a contiguous subarray of $A$ with the largest sum. 
-%\end{problem}
-%By precomputing $S[j]=\sum_{x=1}^{j}A[x] $ in $O(n)$ time 
-%$ S[i,j]=\sum_{x=i}^{j}A[x]$ can be computed in constant time as $S[j]-S[i-1]$ for any $i$ and $j$.
-%Note that when the subarray is empty, the sum of all values is zero. 
+ Next we prove that $U$ is in fact totally monotone.
+\begin{proposition}
+	$U$ is totally monotone. Thus 
+	$R(1) \leq  R(2)\leq \cdots \leq R(n)$, with $R$ as in Definition \ref{d.tm}.
 
-% However, their method has a weighty overhead since it makes use of algorithms for both the range minimum query problem and the least common ancestor problem. 
-% Therefore we present in the next subsection a more elementary algorithm for the
-% problem at hand.
-% 
+\end{proposition}
+\begin{proof}
+	We prove that any $2 \times 2$ submatrix induced by $i_1<i_2$ and $j_1<j_2$ is monotone,
+	i.e. if $U[i_1,j_1]\geq U[i_2,j_1]$ then $U[i_1,j_2]\geq U[i_2,j_2]$.
+		
+		 $U[i_1,j]\geq U[i_2,j]$ means that
+$\max \{ f[i_1], g[i_1, j]\}\geq \max \{ f[i_2], g[i_2, j]\}$. Now $g[i_1, j]\geq g[i_2, j]$
+since $i_1<i_2$, see item \ref{i.1}. Hence $U[i_1,j]\geq U[i_2,j]$ if and only if 
+$\max \{ f[i_1], g[i_1, j]\}\geq \ f[i_2]$, from which we get that  
+$$ f[i_2]\leq \max \{ f[i_1], g[i_1, j_1]\}\leq \max \{ f[i_1], g[i_1, j_2]\},$$
+since $g[i_1, j_1]\leq g[i_1, j_2]$.
+Thus $U[i_1,j_2]\geq U[i_2,j_2]$.
+\end{proof}
 
 
 
+\begin{theorem}
+	When the cost function used in Algorithm BestCostPath-x is $W_s$ its running time is $O(n)$.
+\end{theorem}
+
+\
