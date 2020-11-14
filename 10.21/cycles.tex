@@ -1,0 +1,277 @@
+\section{Algorithms for cycles}\label{s.c}
+Given a cycle graph $C_n$ on $n$ vertices, number its vertices from \textit{0} to \textit{n-1}, 
+clockwise from an arbitrary node. 
+Denote the weight of a directed
+edge $(i,i+1)$ by $w(i,i+1)$. When a node $j$ with $j\geq n$ is referred to it 
+should be understood as referring to node $j \mod n$. 
+For example, $w(n-1,n)=w(n-1,0)$.
+
+\subsection{An algorithm for cost function $W_s$.}
+\begin{algorithm}
+		let \textit{OneWayCost-s} be the least cost of a one-way orientation of the cycle, and let $\dvec{C_n}$ be that orientation\;
+	create a linear graph $L$ of 
+	length $3n$ by unrolling the cycle three times starting from vertex $0$,
+	 number its vertices \textit{0} to \textit{3n}, and
+	equip edge $\{i,i+1\}$ of $L$ with the same weights as edge 
+	$\{i ,i+1\}$ of $C_n$\;
+	let $\vec{L}^*$ be the oriented graph returned by BestCostLinear-$s(L)$, and $W_s(\vec{L}^*)$ its cost\;
+	\lIf{$W_s(\vec{L}^*) \geq$ \textit{OneWayCost-s}}
+     {\Return $\dvec{C_n}$}
+     \Condition{$W_s(\vec{L}^*) < \textit{OneWayCost-s}$}
+    \uIf{$n$ is odd and every two consecutive edges in  $\vec{L}^*$ have opposite directions}
+    {find two successive edges of the cycle that form a directed path $\dvec{P_2}$ of length 2 with minimal weight\; 
+    	construct $\vec{C_n}$ beginning with $\dvec{P_2}$ and directing each successive edge of the cycle oppositely to its predecessor;}
+	\uElseIf{there are two edges $\{i,i+1\}$ and $\{i+n-1,i+n\}$ that
+           have opposite directions in $\vec{L}^*$}
+      {\For {$j=i$ to $i+n-1$}
+	     {copy the direction of edge $\{j,j+1\}$ from $\vec{L}^*$ to $\vec{C_n}$\;
+	    }
+    }
+   \Else
+     { \If{there are edges $(i,i+1),(i+1,i+2),(i+3,i+2)$ with $i\leq n$ in $\vec{L}^*$}
+     	{initialize $\vec{C_n}$  with edge $(i+1,i)$\;
+     	\For {$j=i+1$ to $i+n-1$}
+     	{copy the direction of edge $\{j,j+1\}$ from $\vec{L}^*$ to $\vec{C_n}$\; }}
+     	\Else{find edges $(i,i-1),(i-1,i-2),(i-3,i-2)$ with $i\geq n$ in $\vec{L}^*$\;
+     	          initialize $\vec{C_n}$  with edge $(i-1,i)$\;
+               	\For {$j=i-1$ to $i-n+1$}
+               {copy the direction of edge $\{j,j-1\}$ from $\vec{L}^*$ to $\vec{C_n}$\; }}
+       }
+       \Return $\vec{C_n}$;
+	\caption{BestOrientCycle-$s$ $(C_n)$}
+	\label{algo:c-s}
+\end{algorithm}
+
+For ease of reading we break up the proof of correctness of the algorithm into a series of Lemmas, in which
+we will adopt the following conventions.
+\begin{definition}
+The orientation $\vec{L}$ of $L$ \emph{induced} by an orientation $\vec{C_n}$ 
+of $C_n$ is obtained by equipping edge $\{i,i+1\}$ of $L$ with the direction it 
+has in $\vec{C_n}$.
+\end{definition}
+
+\noindent {\bf Notation}: To indicate that a given orientation is optimal 
+we will add a superscript $^*$.
+For example, $\vec{L}^*$ and $\vec{C_n^*}$ are optimal orientations of $L$ and $C_n$,
+respectively.
+\qed
+
+\begin{lemma}\label{l.cd}
+	If $\vec{C_n}$ includes a change in direction then the orientation it induces,  $\vec{L}$, satisfies $W_s(\vec{C_n})= W_s(\vec{L})$.
+\end{lemma}
+\noindent {\bf Proof}:
+Any orientation of the cycle reverses direction at an even number of vertices. In particular, if $\vec{C_n}$  includes a change in direction then its longest directed path is
+shorter than $n$. Each directed path of the induced orientation $\vec{L}$ is therefore a subpath 
+of some path in $\vec{C_n}$ so that $W_s(\vec{L}) \leq W_s(\vec{C_n})$, 
+by the monotonicity of $W_s$. 
+Since $L$ is longer than $2n$, any path of $\vec{C_n}$ appears in its entirety in $\vec{L}$,
+whence also $W_s(\vec{C_n})\leq W_s(\vec{L})$. 
+\qed
+
+\begin{remark} The orientation $\vec{L}$ induced 
+	by $\vec{C_n^*}$ may not be optimal, even if $\vec{C_n^*}$ includes a change in direction,
+	but this happens only when $n$ is odd and the optimal orientation $\vec{L}^*$ reverses 
+	direction at each vertex, see equation (\ref{e.odd}). 
+\end{remark}
+Here is an example: $n=3$ and $w(i,i+1)=w(i+1,i)=2$ for $i=0,1$,
+and  $w(2,0)=w(0,2)=3$. Then  $W_s(\vec{C_n^*})=4> W_s(\vec{L}^*)=3$.
+\qed
+\begin{remark} 
+	If $\vec{C_n^*}$ 
+	has a single direction then the induced $\vec{L}$ is not optimal unless 
+	$W_s(\vec{C_n^*})=W_s(\vec{L})=0$. 
+\end{remark}
+
+Lemma \ref{l.cd} implies the correctness of statement 4 of the algorithm:
+\begin{lemma}
+	If $W_s(\vec{L}^*) \geq$ \textit{OneWayCost-s} then \textit{OneWayCost-s} is the cost 
+	of an optimal orientation of $C_n$. 
+\end{lemma}
+\noindent {\bf Proof}: Suppose to the contrary that there is an $\vec{C_n^*}$ such that 
+$W_s(\vec{C_n^*})<\textit{OneWayCost-s}$. Then there is a direction change in 
+$\vec{C_n^*}$, and the induced orientation $\vec{L}$ satisfies, according to Lemma \ref{l.cd},
+$W_s(\vec{L}^*) \leq W_s(\vec{L}) =W_s(\vec{C_n^*}) <\textit{OneWayCost-s}$,
+a contradiction.
+\qed
+
+%\begin{lemma}
+%	If $W_s(\vec{L}^*) < \textit{OneWayCost-s}$ then any optimal orientation of $C_n$
+%	includes a change of direction. 
+%\end{lemma}
+%\noindent {\bf Proof}: Suppose to the contrary that $W_s(\vec{C_n^*})<\textit{OneWayCost-s}$.
+%Since $W_s(\vec{L}^*) < \textit{OneWayCost-s}$ all paths in $\vec{L}^*$ are shorter than $n$.
+%\qed
+
+\begin{lemma}\label{l.odd}
+	Suppose $W_s(\vec{L}^*) < \textit{OneWayCost-s}$. Suppose further that  $n>1$ is odd and that every two consecutive edges in  $\vec{L}^*$ have opposite directions.
+	Construct an orientation of the cycle, $\vec{C_n}$, as follows:
+	\begin{enumerate}
+		\item among all possible directed paths of length 2 find one, $\dvec{P_2}$,
+		whose weight is minimal; 
+		\item 	starting with this path direct each successive edge of the cycle in the direction opposite to that of its predecessor.
+	\end{enumerate}
+This orientation of the cycle is optimal, and 
+\begin{equation}\label{e.odd}
+W_s(\vec{C_n}) = max \{W_s(\vec{L}^*), W_s(\dvec{P_2})\}.
+\end{equation}
+\end{lemma}
+\noindent {\bf Proof}:
+
+Observe first of all that every edge appears in  $\vec{L}^*$ at least once in each of its directions
+because the cycle is odd and $L$ contains 3 full cycles. For example, if $(1,2)$ appears in $\vec{L}^*$, then so does
+$(n+2,n+1)$. Therefore
+$$W_s(\vec{L}^*)= \max_{0\leq i \leq n-1}\{w(i,i+1),w(i+1,i)\}.$$ 
+It follows that $W_s(\vec{C_n})\leq \max \{W_s(\vec{L}^*), W_s(\dvec{P_2})\}$.
+Let $\vec{C_n^*}$ be an optimal orientation of the cycle. Since the cycle is odd $\vec{C_n^*}$
+contains at least two successive edges that form a directed path, so that 
+$W_s(\vec{C_n^*})\geq W_s(\dvec{P_2})$. 
+
+We prove next that there is change of direction in $\vec{C_n^*}$. 
+Suppose to the contrary that $W_s(\vec{C_n^*})=\textit{OneWayCost-s}$.
+Since $0\leq W_s(\vec{L}^*) < \textit{OneWayCost-s}$ there is an edge with positive weight on $\vec{C_n^*}$, say the edge $(0,1)$. 
+Replacing that edge with $(1,0)$ we get an orientation 
+$\vec{C_n'}$ with weight $W_s(\vec{C_n'})=\max \{W_s(\vec{C_n^*})-w(0,1), w(1,0)\}$.
+Now 
+$$w(1,0)\leq \max_{0\leq i \leq n-1}\{w(i,i+1),w(i+1,i)\}= W_s(\vec{L}^*) <\textit{OneWayCost-s},$$
+resulting in the contradiction $\textit{OneWayCost-s}=W_s(\vec{C_n^*})\leq W_s(\vec{C_n'})<\textit{OneWayCost-s}$.
+
+ Lemma \ref{l.cd} ensures, therefore, that the orientation $\vec{L}'$ of $L$ 
+induced by $\vec{C_n^*}$ satisfies $W_s(\vec{C_n^*})=W_s(\vec{L}')\geq W_s(\vec{L}^*)$.
+Hence $W_s(\vec{C_n}) \leq max \{W_s(\vec{L}^*), W_s(\dvec{P_2})\} \leq W_s(\vec{C_n^*})$.
+\qed
+
+\begin{lemma}\label{l.subo}
+	Suppose $W_s(\vec{L}^*) < \textit{OneWayCost-s}$.
+	If there is an $i,\ 0\leq i \leq n$, such that the edges $\{i,i+1\}$ and $\{i+n-1,i+n\}$ 
+	have opposite directions in $\vec{L}^*$,
+	then its subgraph $\vec{L'}$ induced by the vertices $i,\ldots,i+n$ induces
+	an orientation $\vec{C_n}$ of the cycle that is optimal, and $W_s(\vec{C_n})= W_s(\vec{L}^*)$.
+\end{lemma}
+\noindent {\bf Proof}:
+There is a change of direction at vertex $i$ in $\vec{C_n}$,
+because the edges $\{i,i+1\}$ and $\{i+n-1,i+n\}$ have opposite directions.
+Hence $W_s(\vec{C_n}) =W_s(\vec{L'})\leq W_s(\vec{L}^*)$.
+
+There is also a change of direction in any optimal $\vec{C_n^*}$, because $W_s(\vec{C_n})\leq W_s(\vec{C_n^*}) <\textit{OneWayCost-s}$. 
+By Lemma \ref{l.cd},  the orientation $L''$ induced by $\vec{C_n}^*$
+satisfies $W_s(\vec{L''})= W_s(\vec{C_n^*})$. Hence
+$$W_s(\vec{L}^*)\leq W_s(\vec{L''})= W_s(\vec{C_n^*})\leq W_s(\vec{C_n})\leq W_s(\vec{L}^*) .$$
+\qed
+
+\begin{lemma}\label{l.last}
+	Suppose $\vec{L}^*$ is such that 
+	\begin{enumerate}
+		\item $W_s(\vec{L}^*) < \textit{OneWayCost-s}$;
+		\item \label{i.o1}every pair of edges $\{j,j+1\}$ and $\{j+n-1,j+n\}$, $0\leq j \leq 2n$,
+		 have the same direction in $\vec{L}^*$;
+		\item there are two consecutive edges in  $\vec{L}^*$ that point in the same direction.
+	\end{enumerate} 
+Construct an orientation of the cycle, $\vec{C_n}$ as follows:
+\begin{enumerate}
+	\item find three consecutive edges in $\vec{L}^*$ such that the first two point in the same direction and the third points in the opposite direction;
+	\item add the first edge to $\vec{C_n}$ but reverse its direction;
+	\item starting with the second edge copy the directions of the following $n-1$ edges 
+	from $\vec{L^*}$.
+\end{enumerate}
+This orientation is optimal and $W_s(\vec{L}^*) = W_s(\vec{C_n})$.
+	\end{lemma}
+\noindent {\bf Proof}: 
+Note that it is possible to find the three consecutive edges of step 1 of the construction, because 
+all paths in $\vec{L}^*$ are shorter than $n$ since $W_s(\vec{L}^*) < \textit{OneWayCost-s}$.
+The first two edges in such a triple can be directed to the left or to the right.
+For simplicity and w.l.o.g we assume that they are $(0,1), (1,2),(3,2)$. Precondition
+	 \ref{i.o1} ensures that $\vec{L}^*$ also contains the edges $(n-1,n),(n,n+1),(n+2,n+1)$ and $(2n-2,2n-1),(2n-1,2n), (2n+1,2n) $. Note that  $\vec{C_n}$ has edges 
+	 $(1,0), (1,2),(3,2),(n-1,0)$, among others.
+	
+	We show next that any directed path in $\vec{C_n}$ appears in $\vec{L}^*$. Consider first a directed path $\vec{P}'$ that contains the edge $(1,0)$. 
+	Since this edge is surrounded by the edges $(1,2), (n-1,0)$ it is the only one in $\vec{P}'$. Moreover, edge $(1,0)$ is identical to edge $(2n+1,2n)$, an edge that belongs to 
+	$\vec{L}^*$, proving that  $\vec{P}'$ is a path in $\vec{L}^*$.
+	Any other path in $\vec{C_n}$ does not contain the edge $(1,0)$ and is therefore by its construction a path in $\vec{L}^*$. 
+	Consequently, $W_s(\vec{C_n})\leq W_s(\vec{L}^*)<\textit{OneWayCost-s}$.
+	
+	Let $\vec{C_n}^*$ be an optimal orientation of the cycle. It contains a direction reversal
+	because $W_s(\vec{C_n}^*)\leq W_s(\vec{C_n})<\textit{OneWayCost-s}$.
+	Hence the orientation of $L$ it induces, $\vec{L}'$, satisfies
+	$W_s(\vec{C_n}^*)=W_s(\vec{L}')\geq W_s(\vec{L}^*)\geq W_s(\vec{C_n})$.
+\qed
+
+We summarize the previous analysis as a Theorem.
+\begin{theorem}
+	BestOrientCycle-$s$  finds an orientation for a cycle graph that is optimal under the cost function $W_s$ in linear time.
+\end{theorem}
+%\noindent {\bf Proof}: The algorithm reduces the problem of finding an optimal 
+%orientation of the cycle to finding one on the linear graph $L$.
+
+Another conclusion from Lemmas \ref{l.odd}, \ref{l.subo} and \ref{l.last} is
+\begin{corollary}
+	If $W_s(\vec{L}^*) < \textit{OneWayCost-s}$ then $W_s(\vec{L}^*)$ is the cost of an optimal orientation of the cycle, unless $n$ is odd and $\vec{L}^*$ reversess direction at each vertex.
+\end{corollary}
+In particular, if only the cost of an optimal orientation is of interest then the
+algorithm becomes much shorter and deceptively simple:
+\begin{algorithm}
+	let \textit{OneWayCost-s} be the least cost of a one-way orientation of the cycle\;
+	create a linear graph $L$ of 
+	length $3n$ by unrolling the cycle three times starting from vertex $0$,
+	number its vertices \textit{0} to \textit{3n}, and
+	equip edge $\{i,i+1\}$ of $L$ with the same weights as edge 
+	$\{i ,i+1\}$ of $C_n$\;
+	let $\vec{L}^*$ be the oriented graph returned by BestCostLinear-$s(L)$, and $W_s(\vec{L}^*)$ its cost\;
+	\lIf{$W_s(\vec{L}^*) \geq$ \textit{OneWayCost-s}}
+	{\Return \textit{OneWayCost-s}}
+	\If{$n$ is odd and every two consecutive edges in  $\vec{L}^*$ have opposite directions}
+	{
+%		find two successive edges of the cycle that form a directed path $\dvec{P_2}$ of length 2 with minimal weight\; 
+	\Return the maximum of $W_s(\vec{L}^*)$, and 
+	$\min\{W_s(\dvec{P_2})\mid \dvec{P_2}\mbox{ is a directed path formed by two successive edges of the cycle }\}$;
+	}
+	\lElse{\Return $W_s(\vec{L}^*)$}
+	\caption{BestCostCycle-$s$ $(C_n)$}
+	\label{algo:c-s}
+\end{algorithm}
+
+\newpage
+\subsection{An algorithm for cost function $W_m$.}
+The following algorithm uses the $\mbox{BestCost}_m$Path algorithm as a building block. 
+
+\noindent \textbf{Algorithm $\mbox{BestCost}_m$Cycle ($C_n$)}:
+
+\begin{enumerate}
+	\item $BestCost \leftarrow \min\{\sum_{i=0}^{n-1}w(i,i+1), \sum_{i=0}^{n-1}w(i+1,i)\}$;
+	\item \label{ac.i1} for $i= 0$ to $n-1$ do:
+	\begin{enumerate}
+		\item break the cycle at vertex $i$ by making two copies of vertex 
+		$i$, $i'$ and $i''$, and setting $L$ as the path $i', i+1,\ldots ,0,\ldots i-1, i''$
+		with weights the same as in $C_n$ except for the edges involving $i', i''$;  
+		\item \label{i.c1}let $L^{out}$ be the path $L$
+		with $w(i',i+1)=w(i,i+1),\ w(i+1,i')=\infty$ and 
+		$w(i-1,i'')=\infty,\  w(i'',i-1)=w(i,i-1)$;
+		\item \label{i.c2}
+%		$Cost(P_1)\leftarrow BestCostPath(P_1)$; 
+		if $BestCost_m Path(L^{out})< BestCost$ then update $BestCost$;
+%		\item \label{i.c3} let $P^{in}$ be the path $P$
+%		with $w(i',i+1)=\infty,\ w(i+1,i')=w(i+1,i)$ and 
+%		$w(i-1,i'')=w(i-1,i),\  w(i'',i-1)=\infty$;
+%		\item \label{i.c4}
+%%		$Cost(P_2)\leftarrow BestCostPath(P_2)$; 
+%		if $BestCostPath(P^{in})< BestCost$ then update $BestCost$.
+	\end{enumerate}		
+	\item return $BestCost$; 
+\end{enumerate}	
+\noindent \textbf{End of Algorithm $\mbox{BestCost}_m$Cycle}
+\bigskip
+
+To prove the correctness of the algorithm let \textit{O} be an optimal orientation 
+of $C_n$.
+If \textit{O} is a clockwise or counterclockwise cycle then it will be found in step 1.
+Otherwise, there is at least one vertex \textit{i} such that both of the edges $\{i-1,i\}$ and $\{i,i+1\}$
+are oriented away from \textit{i} in \textit{O}, because in any such orientation of the edges
+of a cycle each vertex whose edges are oriented towards it can be paired with a 
+vertex whose edeges are oriented away from it.
+Any optimal orientation of the path $L^{out}$ formed in 
+the $i$-the execution of the loop yields an
+orientation of $C_n$, because both edges involving $i$ are outward oriented
+by the construction of $L^{out}$ in step \ref{i.c1}. This orientation has the same cost 
+as \textit{O}, and it will be found in step \ref{i.c2}.
+
+Since a call to $\mbox{BestCost}_m$Path(L) takes $O(n^2)$ time the algorithm runs in $O(n^3)$ time.
+\qed

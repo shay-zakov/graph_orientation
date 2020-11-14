@@ -17,26 +17,12 @@
 
 % Commands for annotating path directions - either entire path or just last edge
 % TODO: workout the appropriate arrow styls
-
-\newcommand{\vecP}{\vec{P}}
-\newcommand{\vecO}{\vec{O}}
-\newcommand{\vecG}{\vec{G}}
-\newcommand{\dir}[1]{\stackrel{\rightarrow}{#1}}
-\newcommand{\dirO}[1][O]{\stackrel{\rightarrow}{#1}}
-%\newcommand{\rdir}[1]{\rho ({#1})}
-%\newcommand{\ldir}[1]{\lambda ({#1})}
-%\newcommand{\rdir}[1]{\vec{#1}}
-%\newcommand{\ldir}[1]{\cev{#1}}
-
-\newcommand{\rdir}[1]{\ensuremath{\vec{#1}}} % All edges pointing right
-\newcommand{\ldir}[1]{\ensuremath{\cev{#1}}} % All edges pointing left
-\newcommand{\rlast}[1]{\ensuremath{#1^\succ}} % Last edge pointing right
-\newcommand{\llast}[1]{\ensuremath{#1^\prec}} % Last edge pointing left
-%\newcommand{\elr}[1]{\ensuremath{#1^\leftrightarrow}} % Last edge pointing either right or left
-%\newcommand{\alr}[1]{\ensuremath{\dvec{#1}}} % All edges pointing either right or left
-\newcommand{\optIx}[1][j]{\ensuremath{i^\star_{#1}}} % Last edge pointing left
-\newcommand{\tildeb}[1]{\stackrel{\sim}{\smash{#1}\rule{0pt}{1.1ex}}}
-
+\newcommand{\er}[1]{\ensuremath{#1^\rightarrow}} % Last edge pointing right
+\newcommand{\el}[1]{\ensuremath{#1^\leftarrow}} % Last edge pointing left
+\newcommand{\elr}[1]{\ensuremath{#1^\leftrightarrow}} % Last edge pointing either right or left
+\newcommand{\ar}[1]{\ensuremath{\vec{#1}}} % All edges pointing right
+\newcommand{\al}[1]{\ensuremath{\cev{#1}}} % All edges pointing left
+\newcommand{\alr}[1]{\ensuremath{\dvec{#1}}} % All edges pointing either right or left
 
 
 \usepackage[linesnumbered,ruled,vlined,scleft]{algorithm2e}
@@ -50,8 +36,7 @@
 
 
 \newtheorem{theorem}{Theorem}[section]
-\newtheorem{proposition}{Proposition}[section]
-\newtheorem{corollary}{Corollary}[section]
+\newtheorem{corollary}{Corollary}[theorem]
 \newtheorem{lemma}{Lemma}[section]
 \newtheorem{observation}{Observation}[section]
 \newtheorem{claim}{Claim}[section]
@@ -91,21 +76,41 @@
 \date{}
 
 
+\newcommand{\vecP}{\vec{P}}
+\newcommand{\vecO}{\vec{O}}
+\newcommand{\vecG}{\vec{G}}
+\newcommand{\dir}[1]{\stackrel{\rightarrow}{#1}}
+\newcommand{\dirO}[1][O]{\stackrel{\rightarrow}{#1}}
+%\newcommand{\rdir}[1]{\rho ({#1})}
+%\newcommand{\ldir}[1]{\lambda ({#1})}
+\newcommand{\rdir}[1]{\vec{#1}}
+\newcommand{\ldir}[1]{\cev{#1}}
+
 
 \maketitle
 %\tableofcontents
 
 \include{intro}
-\include{stars}
 \include{linears}
-%\include{linear_graphs}
-%\include{min_max}
+\include{min_max}
 \include{cycles}
 % bibliography, glossary and index would go here.
 
-\bibliography{orientation}{}
+\bibliography{orientation.bib}{}
 \bibliographystyle{plain}
 
-
+%\begin{thebibliography}{99}
+%	\bibitem{chen2004} Chen, Kuan-Yu and Chao, Kun-Mao,
+%	On the range maximum-sum segment query problem,
+%	{\it Discrete Applied Mathematics}, 155, pp. 2043-- 2052, 2007.
+%	%@inproceedings{chen2004range,
+%	%	title={},
+%	%	author={Chen, Kuan-Yu and Chao, Kun-Mao},
+%	%	booktitle={International Symposium on Algorithms and Computation},
+%	%	pages={294--305},
+%	%	year={2004},
+%	%	organization={Springer}
+%	%}
+%\end{thebibliography}
 
 \end{document}

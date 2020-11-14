@@ -1,0 +1,124 @@
+\section{An algorithm for linear graphs}\label{s.2}
+Number the vertices of the linear graph  $P_n$ from \textit{0} to \textit{n-1}, and denote the weights of
+edges $(i,i+1)$ and  $(i+1,i)$ by $w(i,i+1)$ and $w(i+1,1)$, respectively.
+
+We describe here an algorithm for finding an optimal orientation 
+of a linear graph. The high level version of the algorithm makes no use of the details
+of the cost function, be it $W_m$ or $W_s$. The description therefore uses the subscript $x$ with $x\in \{s,m\}$. However, upon implementing the high level version, the difference between 
+the two cost functions leads to a surprising difference in running times: it is linear 
+under $W_s$ but quadratic under $W_m$.
+\bigskip
+
+{\bf Notation}:
+\begin{itemize}
+\item $P_{i, j}$ is the sub-graph of $P$ induced by the vertices $i,  \ldots, j$, and $P=P_{0,n}$. 
+\item $\rdir{P_{i, j}}$ denotes the oriented version 
+of $P_{i, j}$ in which all edges are directed to the right (i.e. of the form $(i, {i+1})$),
+and $\ldir{P_{i, j}}$ denotes the oriented version 
+of $P_{i, j}$ in which all edges are directed to the left.
+\item When using the cost measure $W_x$, $H_x^{\succ}[i]$ is the value of an optimal orientaton of $P_{0, i}$ under the constraint
+that edge $\{i-1,i\}$ is directed towards $i$, and $H_x^{\prec}[i]$ is the value of an optimal orientaton of $P_{0, i}$ under the constraint
+that edge $\{i-1,i\}$ is directed towards $i-1$.
+\end{itemize}
+
+The algorithm is recursive, locating in its basic step the last 
+vertex of an optimal solution whose two edges are either both
+ingoing or both outgoing. 
+\bigskip
+
+\begin{algorithm}
+	For $n= length(P)$, allocate two arrays $H^{\succ}$ and $H^{\prec}$ of length $n+1$,  initialized to $0$\;
+	\For{$j=1$ to $n$}{
+		$H^{\succ}[j] \gets \min_{0\leq i <j} \max \{ H^{\prec}[i], W_x(\vec{P}_{i, j})\}$\;
+		$H^{\prec}[j] \gets \min_{0\leq i <j} \max \{ H^{\succ}[i], W_x(\cev{P}_{i, j})\}$\;
+	}
+	\Return{$\min \{H^{\succ}[n],\ H^{\prec}[n]\}$}\;
+	\caption{BestCostPath-$x$ $(P)$}
+	\label{algo:H}
+\end{algorithm}
+\begin{theorem}
+When the cost function used in Algorithm BestCostPath-x is $W_s$ its running time is $O(n)$.
+\end{theorem}
+
+\noindent {\bf Proof}.
+We will show that the total time needed for the computations of all minimum values in statements 3 and 4 is $O(n)$.
+The first key element of the proof is that the search for a minimum over $i$ 
+in these statements, when using $W_s$, can be limited to increasing values of $i$, e.g. the search over $i$ in statement 3
+for given $j+1$, can start with the last value of $i$ used in that statement during the 
+search for $j$. Lemma \ref{l.arg} is a formal formulation of this idea.
+It is worth noting that this Lemma does not necessarily hold for $W_m$.
+
+Since $H_s^{\prec}[i]$ is accessed in constant time, the upshot of Lemma \ref{l.arg} 
+is that the total time needed for the execution of statement 3 is $O(n)$ plus
+the time needed to compute  $W_s(\vec{P_{i_k, j_k}})$ for a sequence  of pairs $(i_k,j_k)$ 
+such that 
+$$i_0=j_0=0, i_k\leq  i_{k+1},\  j_k \leq j_{k+1}, 
+i_{k+1}+j_{k+1}=i_k+j_k+1,
+k=0, \ldots 2n-1,$$
+i.e. such that exactly one of the indices increases by 1 with each increase in $k$.
+Since $W_s(\vec{P_{i_k, j_k}})=\sum_{p=i_k}^{j_k-1} w(p,p+1)$ we can rephrase
+this task as an instance of the following Problem.
+\begin{problem}[Maximum-sum-subarray one-way moving queries - MSSM]\label{p.msmm}\ \\
+	\noindent {\bf Input}: a one-dimensional array $A[1\ldots n]$ of numbers
+	that can be positive, negative, or zero; and a sequence of query pairs $(i_k,j_k)$ 
+	such that 
+	$$i_0=j_0=0, i_k\leq  i_{k+1},\  j_k \leq j_{k+1}, 
+	i_{k+1}+j_{k+1}=i_k+j_k+1,
+	k=0, \ldots 2n-1.$$
+	\noindent  {\bf Find}: for each query $(i_k,j_k)$ a contiguous subarray of 
+	$A[i_k,j_k]$ with the largest sum,
+	i.e. find indices $x_k$ and 
+	$y_k$ with $i_k \leq x_k\leq y_k-1\leq j_k-1$, such that 
+	$ \sum_{i=x_k}^{y_k}A[i] $
+	is as large as possible. 
+\end{problem}
+
+This is a special case of the more general problem of answering a series of queries without any restrictions on the set of pairs $(i_k,j_k)$, for which an algorithm was
+ presented by~\cite{chen2007range}. They showed
+that, after preprocessing the input
+in linear time, each query can be answered in constant time.
+
+Taken together these two results prove the Theorem.
+\qed
+
+\begin{lemma}\label{l.arg}
+	Denote 
+	$$a^{\succ}[j]=\argmin_{0\leq i <j} \max \{ H_s^{\prec}[i], W_s(\vec{P_{i, j}}) \},
+	a^{\prec}[j]=\argmin_{0\leq i <j} \max \{ H_s^{\succ}[i], W_s(\cev{P_{i, j}}) \}.
+	$$
+	Then $a^{\prec}[j]\leq a^{\prec}[j+1]$, and $a^{\succ}[j]\leq a^{\succ}[j+1]$, $0\leq j <n$.
+\end{lemma}
+
+\noindent {\bf Proof}: We focus attention on $a^{\prec}[j]$, the proof for $a^{\succ}[j]$ 
+is entirely analogous.
+
+%The definition of $W_s$ ensures the following properties:
+%\begin{enumerate}
+%	\item $H_s^{\prec}[i]$ is non-decreasing as a function of $i$;
+%	\item $W_s(\vec{P_{i, j}})$ is non-increasing as a function of $i$ and non-decreasing as a function of $j$;
+%	\item $W_s(\vec{P_{i, j}})$ is non-decreasing as a function of $j$. 
+%\end{enumerate}
+%It follows from the first two properties that 
+%$\max \{ H_s^{\ell}[i], h_s(\vec{P_{i, j}}) \}$ is a convex function 
+%of $i$ for fixed $j$, with a unique minimum. The third property shows that 
+%for $j+1$ the unique minimum is achieved at a value of $i$ that is no less than
+%$a^{\ell}[j]$.
+\qed
+
+%This problem is a non-trivial extension of the well known 
+%\begin{problem}[Maximum-sum-subarray problem]\ \\
+%\noindent {\bf Input}: a one-dimensional array $A[1\ldots n]$ of numbers
+%that can be positive, negative, or zero.\\
+%\noindent  {\bf Find}: a contiguous subarray of $A$ with the largest sum. 
+%\end{problem}
+%By precomputing $S[j]=\sum_{x=1}^{j}A[x] $ in $O(n)$ time 
+%$ S[i,j]=\sum_{x=i}^{j}A[x]$ can be computed in constant time as $S[j]-S[i-1]$ for any $i$ and $j$.
+%Note that when the subarray is empty, the sum of all values is zero. 
+
+% However, their method has a weighty overhead since it makes use of algorithms for both the range minimum query problem and the least common ancestor problem. 
+% Therefore we present in the next subsection a more elementary algorithm for the
+% problem at hand.
+% 
+
+
+

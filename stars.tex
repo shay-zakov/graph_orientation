@@ -1,0 +1,107 @@
+ \section{Algorithms for stars}\label{s.1}
+ A star $S_k$ is a tree with one internal node $c$ and $k$ leaves.
+
+ \subsection{An algorithm for cost function $H_m$}
+ \begin{algorithm}
+Orient each edge $\{u,c\}$ inwards to \textit{c} if $w(u,c)<w(c,u)$,
+and outward from $c$ otherwise\; \label{i0}
+ 	 
+denote by $\vec{S_n}$ the resulting directed graph, by $BestCost$ its cost, 
+by $E_{in}=\{(u_1,c),\ldots, (u_{\ell},c)\}$ the list of its inward edges, 
+and by $E_{out}=\{(c,v_1),\ldots, (c,v_r)\}$ the list of its outward edges\;
+\label{i00} reorder each of $E_{in}$ and $E_{out}$ so that
+the weights of its edges are in non-increasing order\;
+
+set $\vec{S}$ to $\vec{S_n}$\;
+
+\For {$k= 1$ to $\ell$}
+  {update $\vec{S}$ by flipping the direction of edge $(u_k,c)$, and update $BestCost$ if necessary}
+   \label{i1} 
+set $\vec{S}$ to $\vec{S_n}$\;
+\For {$k= 1$ to $r$}
+   {update $\vec{S}$ by flipping the direction of edge $(c,v_k)$, and update $BestCost$ if necessary}
+  \label{i2}
+ 	\Return an orientation whose cost is $BestCost$\;
+ 	\caption{Algorithm BestOrientStar-m ($S_n$)}
+ 	\label{algo:oc-s}
+ \end{algorithm}
+
+\bigskip
+
+To establish the correctness of the algorithm we first prove its key observation:  
+if initially  each edge is oriented
+so that it points in its lighter direction then an optimal orientation can be
+found by only flipping edges that were initially pointing inwards or only
+flipping edges that were initially pointing outwards. 
+\begin{lemma}\label{l.best}
+	There is no optimal orientation in which both the largest inward edge weight is less than $w(u_1,c)$ 
+	and the largest outward edge weight is less than $w(c,v_1)$.
+	%, where $(u_1,c)$ is an edge with largest weight in $E_{in}$, and $(c,v_1)$ an edge with largest weight in $E_{out}$.
+\end{lemma}
+
+\noindent \textbf{Proof:}
+Note that the cost of the initial orientation is $h_m(\vec{S_n})=w(u_1,c)+w(c,v_1)$.
+Suppose, by contradiction, that there is an optimal orientation $\vec{S^*}$ 
+with largest inward weight $w(x,c)< w(u_1,c)$,
+and largest outward weight $w(c,y)<w(c,v_1)$.
+Then $h_m(\vec{S^*})=w(x,c)+w(c,y)$.
+The initial orientation implies that $w(c,u_1) > w(u_1,c)$, and $w(v_1,c) \geq w(c,v_1)$.
+Since $\{u_1,c\}$ is an outward edge in $\vec{S^*}$ and $\{v_1,c\}$ an inward edge,
+$h_m(\vec{S^*})\geq  
+w(v_1,c)+w(c,u_1) >  w(u_1,c)+w(c,v_1) =h_m(\vec{S_n})$, a contradiction.
+\qed
+
+\begin{theorem}
+%	[Correctness of the algorithm]
+Algorithm BestOrientStar-m finds an optimal orientation in  $O(n \log n)$ steps.
+\end{theorem}  
+
+\noindent \textbf{Proof:}
+
+ Let $\vec{S^*}$ be an optimal orientation of the input star graph $S_n$.
+ 
+ If in $\vec{S^*}$ the edges are all oriented outwards, or all oriented 
+ inwards, then the algorithm will find an optimal orientation
+ at the completion of the loop of statement \ref{i1}, or
+of statement \ref{i2}, respectively.
+ 
+ Otherwise at least one of the edges $(u_1,c)$ and $(c,v_1)$ takes part 
+ in $\vec{S^*}$, according to Lemma \ref{l.best}. If both participate then an optimal orientation is found in step \ref{i0}.
+ If not, we consider and prove the case that $(c,v_1)$ participates. 
+ 
+ Note first of all that if there is an inward edge in $S^*$ that is oriented as
+ an outward edge in $\vec{S_n}$ then flipping that edge cannot
+ increase the cost of the orientation, because its outward weight does not exceed $w(c,v_1)$.
+ We can assume, therefore, that all edges in $E_{out}$ participate in $S^*$. 
+ Let $(u_j,c)$ be the 
+ edge from $E_{in}$ with least index that participates in $S^*$, 
+  $w(u_j,c)<w(u_1,c)$, i.e. all edges $\{u_i,c\}, 1\leq i<j$, are outward edges in $S^*$. 
+ The cost of $S^*$ is therefore at least
+ $$h_m(\vec{S^*})=w(u_j,c)+\max \{w(c,v_1),\max \{w(c,u_i):1\leq i<j)\}\}.$$
+To complete the proof we observe that $h_m(\vec{S^*})$ is precisely the value of the orientation
+obtained by the algorithm after flipping the edge  $\{u_{j-1},c\}$
+ in iteration $k=j-1$ of the loop of step \ref{i1}.
+
+The running time  analysis is straightforward: the reordering of step \ref{i00} takes
+$O(n \log n)$, and each update of $BestCost$ in loops \ref{i1} and \ref{i2} takes 
+constant time if  auxiliary variables are maintained for the values of 
+$\max \{w(c,u_i):1\leq i<j)\}$ and $\max \{w(v_i,c):1\leq i<j)\}$.
+ \qed
+ 
+  \subsection{An algorithm for cost function $H_s$}
+  An algorithm for cost function $H_s$ is obtained by slightly modifying Algorithm BestOrientStar-m using the following observation.
+  
+  \begin{lemma}
+  	Only  the weights of positive weight edges contribute to the cost of an oriented star 
+  	under $h_s$.
+  \end{lemma} 
+\begin{proof}
+	The length of a path in an oriented star is no more than 2. If a path of length 2 contains a negative weight edge it is either first or last and consequently does not contribute to the cost of the path. 
+\end{proof}
+
+Here is the outline of the resulting algorithm for cost function $H_s$:
+\begin{enumerate}
+	\item Remove from $S_n$ every edge one of whose directions has negative weight. Denore the resulting star $S$.
+	\item $\vec{S}\leftarrow \mbox{BestOrientStar-m} (S)$.
+	\item Add to $\vec{S}$ each negative weigh edge removed in step 1.
+\end{enumerate}
