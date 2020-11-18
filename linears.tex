@@ -44,14 +44,15 @@ Algorithm BestCostPath-x finds an optimal orientation.
 \end{theorem}
 
 
-\subsection{Algorithm running time with cost function $h_s$}
+\subsection{Running time under cost function $H_s$}
 In this subsection we show that 
-Algorithm BestCostPath-s can be made to run in time $O(n)$ by maintaining appropriate 
-data structures.
+Algorithm BestCostPath-s can be made to run in time $O(n)$ by carefully implementing
+the computational operations of the algorithm.
 Two issues have to addressed.
 
-	The first is the time needed to compute $h_s(\vec{L}_{i, j})$ for given $0\leq i<j\leq n$.\\
-	Combining equations (\ref{eq.W}) and (\ref{eq.hs}) shows that
+	The first is the time needed to compute $h_s(\vec{L}_{i, j})$ 
+	and $h_s(\cev{L}_{i, j})$ for given $0\leq i<j\leq n$.\\
+	Focusing on $h_s(\vec{L}_{i, j})$, and combining equations (\ref{eq.W}) and (\ref{eq.hs}):
 	\begin{equation}\label{eq.hsij}
 	h_s(\vec{L}_{i, j})=\max \{ \sum_{t=i'}^{j'-1}w(t,t+1) \mid i\leq i' \leq j' \leq j\}.
 	\end{equation}
@@ -73,25 +74,8 @@ Two issues have to addressed.
 	can be evaluated in constant time.
 \end{lemma}
 
-The second issue is the time needed to find all minimum values in statements \ref{st.1} and \ref{st.2}.
-The form of the minima to be found in the two statements is identical, namely
-\begin{equation}\label{eq.fg}
-\min_{0\leq i <j} \max \{ f[i], g[i,j]\}.
-\end{equation}
-Two points should be noted.
-\begin{enumerate}
-	\item \label{i.1} $g[i,j]$, 
-	 is non-increasing in $i$,
-	$g[i, j]\geq g[i+1, j], 0\leq i \leq j$, and non-decreasing in $j$,
-	$g[i, j]\leq g[i, j+1], 0\leq j \leq n-1$. This follows from equation (\ref{eq.hsij})
-	(irrespective of whether  $g[i,j]$ is $h_s(\vec{L}_{i, j})$ or $h_s(\cev{L}_{i, j})$.
-	\item The computation is on-line, in the sense that the values $f[i], \ 0\leq i <j$
-	must have been computed before the start of the computation.
-\end{enumerate}
-
-Before proceeding with our analysis using this formulation, we remind the reader of the notion of 
-a totally monotone matrix. To emphasize that this monotinicity is columnwise we will call it 
-c-monitinicity.
+The second issue is the time needed to find all minimum values in statements \ref{st.1} and \ref{st.2}. Here the notion of a totally monotone matrix will be helpful. 
+To emphasize that this monotinicity is columnwise we call it c-monitinicity.
 \begin{definition}\label{d.tm}
 	Given an $n \times n$ matrix $M$, denote
 	by $R(j)$ the largest row index at which the minimum in column $j$ of $M$ is achieved, 
@@ -101,41 +85,76 @@ c-monitinicity.
 	if all $2\times 2$
 	submatrices of $M$ formed by choosing two rows and two columns are c-monotone.
 \end{definition}
-Somewhat surprisingly, all values $R(j),\ 1\leq j \leq n$ 
-can be computed off-line in $O(n)$ time by the SMAWK algorithm \cite{smawk1987}.
+\begin{lemma}\label{l.cmono}
+	$M$ is totally c-monotone if and only if $M[i_1,j_2]\geq M[i_2,j_2]$
+	whenever $M[i_1,j_1]\geq M[i_2,j_1]$,
+for all $i_1<i_2$ and $j_1<j_2$.
+\end{lemma}
+Whereas for an arbitrary square matrix it takes quadratic time to 
+compute all values $R(j)$, for a c-monotone matrix the SMAWK algorithm \cite{smawk1987} 
+is able to do so, off-line, in linear time.
 	
-Define the upper triangular matrix $U[i,j]=\max \{ f[i], g[i, j]\}$, $ 0\leq i <j \leq n$,
-setting $U[i,j]=\infty$ for $i\geq j$.
-In these terms equation (\ref{eq.fg}) computes the minimum value of column $j$ of $U$.
-
- Next we prove that $U$ is in fact totally c-monotone.
+Define the matrices $M^{\succ}[i,j]$ and $M^{\prec}[i,j]$ as follows.
+\begin{itemize}
+	\item For $1\leq i<j \leq n$,
+$$M^{\succ}[i,j]=\max \{ H^{\prec}[i], h_s(\vec{L}_{i, j})\},\ 
+M^{\prec}[i,j]=\max \{ H^{\succ}[i], h_s(\cev{L}_{i, j})\}.$$	
+	\item $M^{\succ}[i,j]=M^{\prec}[i,j]=\infty$  for $1\leq j \leq i \leq n $.
+	\item $M^{\succ}[0,j]=h_s(\vec{L}_{0, j})$, $M^{\prec}[0,j]=h_s(\cev{L}_{0, j})$, $1\leq j\leq n$.
+\end{itemize}
+In these terms the algorithm computes the minimum value in column $j$ of 
+the matrices $M^{\succ}$
+and $M^{\prec}$, for $1\leq j \leq n$.
+Two features of this computation deserve particular attention.
+\begin{enumerate}
+	\item The computation of $M^{\succ}$
+	and $M^{\prec}$ has to be performed on-line: before computing the minimum value in column $j$ of 
+	the matrix $M^{\succ}$, or $M^{\prec}$, the minimum values of all columns $j'<j$ of 
+	the matrix $M^{\prec}$, respectively $M^{\succ}$,  have to be available.
+		\item \label{i.1} It follows from equation (\ref{eq.hsij}) that
+	$h_s(\vec{L}_{i, j})$ and $h_s(\cev{L}_{i, j})$ are both non-increasing in $i$ 
+	and non-decreasing in $j$. 
+\end{enumerate}
+According to the first feature, the problem of computing 
+$H^{\succ}[j]$ and $H^{\succ}[j]$ can be dealt with by any method that solves the 
+ following problem
+\begin{problem}[OCM - Online Column Minima]
+	For $1\leq j \leq n$ compute $H[j]=\min \{M[i,j] \mid 0\leq i \leq n\}$, where 
+	the values of $H[j'],\ 1\leq j'<j$ have to be computed before $M[i,j]$ can be evaluated.
+\end{problem}
+In our case $M$ is of the form $M[i,j]=\max \{f[i],g[i,j]\}$.
+The second feature, that $g$ is non-increasing in $i$ and non-decreasing in $j$, is the key to proving that our $M$ is in fact totally c-monotone.
 \begin{proposition}
-	$U$ is totally c-monotone, i.e.
-	$R(1) \leq  R(2)\leq \cdots \leq R(n)$, with $R$ as in Definition \ref{d.tm}.
-
+	$M$ is totally c-monotone.
 \end{proposition}
 \begin{proof}
-	We prove that any $2 \times 2$ submatrix induced by $i_1<i_2$ and $j_1<j_2$ is c-monotone,
-	i.e. if $U[i_1,j_1]\geq U[i_2,j_1]$ then $U[i_1,j_2]\geq U[i_2,j_2]$.
-		
-		 $U[i_1,j]\geq U[i_2,j]$ means that
-$\max \{ f[i_1], g[i_1, j]\}\geq \max \{ f[i_2], g[i_2, j]\}$. Now $g[i_1, j]\geq g[i_2, j]$
-since $i_1<i_2$, see item \ref{i.1}. Hence $U[i_1,j]\geq U[i_2,j]$ if and only if 
-$\max \{ f[i_1], g[i_1, j]\}\geq \ f[i_2]$, from which we get that  
+	According to Lemma \ref{l.cmono} we have to prove that for any $i_1<i_2$ and $j_1<j_2$,
+	 if $M[i_1,j_1]\geq M[i_2,j_1]$ then $M[i_1,j_2]\geq M[i_2,j_2]$.
+
+For any $j$ and  $i_1<i_2$, $M[i_1,j]\geq M[i_2,j]$, i.e.
+$\max \{ f[i_1], g[i_1, j]\}\geq \max \{ f[i_2], g[i_2, j]\}$,
+if and only if 
+$\max \{ f[i_1], g[i_1, j]\}\geq \ f[i_2]$, since $g[i_1, j]\geq g[i_2, j]$.
+
+Consequently,  if $M[i_1,j]\geq M[i_2,j]$ then
 $$ f[i_2]\leq \max \{ f[i_1], g[i_1, j_1]\}\leq \max \{ f[i_1], g[i_1, j_2]\},$$
 since $g[i_1, j_1]\leq g[i_1, j_2]$.
-Thus $U[i_1,j_2]\geq U[i_2,j_2]$.
+Thus $M[i_1,j_2]\geq M[i_2,j_2]$.
 \end{proof}
-
-The values of $R(j)$ is what we are after. Note, however, that the SMAWK algorithm cannot
-be used because it is off-line whereas our computation can compute $R(j)$ only
-after $R(k),\ k<$, have been computed, as noted in point 2 above.
-Fortunately, several such online algorithms have been published, 
-\cite{klawe89}, \cite{galil92}, \cite{larmore91},
-\cite{barnoy09}.
+Summarizing the foregoing discussion, to find all minimum values in statements \ref{st.1} and \ref{st.2} of the algorithm we can employ the solution to the following problem.
+\begin{problem}[OCMM - Online Column Minima of c-Monotone matrix]
+		For $1\leq j \leq n$ compute $H[j]=\min \{M[i,j] \mid 0\leq i \leq n\}$, where 
+		$M$ is c-monotone and
+	the values of $H[j'],\ 1\leq j'<j$ have to be computed before $M[i,j]$ can be evaluated.
+\end{problem}
+Note that the SMAWK algorithm cannot
+be used directly because it is off-line whereas our computation has to be online.
+Fortunately, several linear-time online algorithms have been published, 
+\cite{klawe89,larmore91,galil92,barnoy09}.
+%\cite{klawe89},  \cite{larmore91}, \cite{galil92}, \cite{barnoy09}.
 
 \begin{theorem}
-	When the cost function used in Algorithm BestCostPath-x is $W_s$ its running time is $O(n)$.
+	When the cost function used in Algorithm BestCostPath-x is $H_s$ its running time is $O(n)$.
 \end{theorem}
 
 \
