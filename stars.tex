@@ -101,7 +101,7 @@ $\max \{w(c,u_i):1\leq i<j)\}$ and $\max \{w(v_i,c):1\leq i<j)\}$.
 
 Here is the outline of the resulting algorithm for cost function $H_s$:
 \begin{enumerate}
-	\item Remove from $S_n$ every edge one of whose directions has negative weight. Denore the resulting star $S$.
+	\item Remove from $S_n$ each edge with a direction of negative weight. Denote the resulting star $S$.
 	\item $\vec{S}\leftarrow \mbox{BestOrientStar-m} (S)$.
-	\item Add to $\vec{S}$ each negative weigh edge removed in step 1.
+	\item Add to $\vec{S}$ each edge removed in step 1 with a direction of negative weight.
 \end{enumerate}

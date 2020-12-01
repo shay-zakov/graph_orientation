@@ -27,7 +27,7 @@ simple paths or over all simple subpaths. To distinguish between these two possi
 	We define two cost measures for an oriented graph $\vec{G}$:
 	\begin{align} 
 		h_s(\vecG) &= \max\{W(\vec{P})\mid \vecP \mbox{ is a simple path in }\vecG \},\label{eq.hs} \\
-		h_m(\vecG) &= \max\{W(\vec{P})\mid \vecP \mbox{ is a maximal simple path in }\vecG \}.
+		h_m(\vecG) &= \max\{W(\vec{P})\mid \vecP \mbox{ is a maximal simple path in }\vecG \}.\label{eq.hm}
 	\end{align}
 	The corresponding cost functions for orienting an undirected graph are 
 	\begin{align}
@@ -35,10 +35,12 @@ simple paths or over all simple subpaths. To distinguish between these two possi
 		H_m(G) &= \min\{h_m(\vecG)\mid \vecG \in \mathcal{O}(G)\}.
 	\end{align}
 \end{definition}
+Note that always $h_s(\vecG)\geq 0$ because the empty path is always a possibility in equation (\ref{eq.hs}).
 
 \noindent {\bf Example}: To illustrate the differences between the two cost functions consider
- $\vec{P}=<v_0,v_1,v_2,v_3>$, with $w(v_0,v_1)=2, w(v_1,v_2)=-3,w(v_2,v_3)=6$.
- Then $h_m(\vec{P})=W(\vec{P})=5, h_s(\vec{P})=6$.
+ $\vec{P}=<v_0,v_1,v_2,v_3>$ and $\vec{P_{1,2}}=<v_1,v_2>$, with $w(v_0,v_1)=2, w(v_1,v_2)=-3,w(v_2,v_3)=6$.
+ Then $h_m(\vec{P})=W(\vec{P})=5, h_s(\vec{P})=6$, and 
+ $h_m(\vec{P_{1,2}})=-3, h_s(\vec{P_{1,2}})=0$.
  \qed
 
 A very useful property of $H_s$ is that it is monotone: the cost of a graph is never less than the cost of a subgraph.

@@ -1,4 +1,6 @@
-\section{An generic algorithm for linear graphs}\label{s.2}
+\section{A generic algorithm for linear graphs}\label{s.2}
+We call a bi-weighted graph with $n$ edges and $n+1$ vertices a\emph{ linear graph}, and 
+reserve the term path for a directed linear graph that has a single source.
 Number the vertices of the linear graph  $L_n$ from \textit{0} to \textit{n}, and denote the weights of
 edges $(i,i+1)$ and  $(i+1,i)$ by $w(i,i+1)$ and $w(i+1,1)$, respectively.
 
@@ -14,7 +16,7 @@ the two cost functions leads to a surprising difference in running times.
 \item $\rdir{L}_{i, j}$ denotes the oriented version 
 of $L_{i, j}$ in which all edges are directed to the right (i.e. of the form $(i, {i+1})$),
 and $\ldir{L}_{i, j}$ denotes the oriented version 
-of $L_{i, j}$ in which all edges are directed to the left.
+of $L_{i, j}$ in which all edges are directed to the left. 
 \item $\rlast{H}_x[i]$ is the value of an optimal orientaton of $L_{0, i}$ under the constraint
 that edge $\{i-1,i\}$ is directed towards $i$, and $H_x^{\prec}[i]$ is the value of an optimal orientaton of $L_{0, i}$ under the constraint
 that edge $\{i-1,i\}$ is directed towards $i-1$.\\
@@ -28,7 +30,8 @@ given that the very last edge has a specified direction.
 \bigskip
 
 \begin{algorithm}
-	Allocate two null arrays $H^{\succ}$ and $H^{\prec}$ of length $n=length(L)+1$\;
+%	Allocate two null arrays $H^{\succ}$ and $H^{\prec}$ of length $n=length(L)+1$\;
+	$H^{\succ}[0]=H^{\prec}[0]=-\infty$, $n=length(L)+1$\;
 	\For{$j=1$ to $n$}{
 		set $H^{\succ}[j]$ to the minimum over $0\leq i <j$ of $\max \{ H^{\prec}[i], h_x(\vec{L}_{i, j})\}$\;
 		\label{st.1}
@@ -42,7 +45,8 @@ given that the very last edge has a specified direction.
 \begin{theorem}
 Algorithm BestCostPath-x finds an optimal orientation.
 \end{theorem}
-
+A straightforward implementation of the algorithm runs in $O(n^2)$ time. 
+The implementations described in the next two subsections provide drastic improvements.
 
 \subsection{Running time under cost function $H_s$}
 In this subsection we show that 
@@ -96,11 +100,11 @@ is able to do so, off-line, in linear time.
 	
 Define the matrices $M^{\succ}[i,j]$ and $M^{\prec}[i,j]$ as follows.
 \begin{itemize}
-	\item For $1\leq i<j \leq n$,
+	\item For $0\leq i<j \leq n$,
 $$M^{\succ}[i,j]=\max \{ H^{\prec}[i], h_s(\vec{L}_{i, j})\},\ 
 M^{\prec}[i,j]=\max \{ H^{\succ}[i], h_s(\cev{L}_{i, j})\}.$$	
 	\item $M^{\succ}[i,j]=M^{\prec}[i,j]=\infty$  for $1\leq j \leq i \leq n $.
-	\item $M^{\succ}[0,j]=h_s(\vec{L}_{0, j})$, $M^{\prec}[0,j]=h_s(\cev{L}_{0, j})$, $1\leq j\leq n$.
+%	\item $M^{\succ}[0,j]=h_s(\vec{L}_{0, j})$, $M^{\prec}[0,j]=h_s(\cev{L}_{0, j})$, $1\leq j\leq n$.
 \end{itemize}
 In these terms the algorithm computes the minimum value in column $j$ of 
 the matrices $M^{\succ}$
