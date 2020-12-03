@@ -18,22 +18,22 @@ equation (\ref{eq.hmij}) shows that for $1\leq j \leq n$
 \begin{equation}
 \begin{array}{ll@{}l}
 %\begin{align}
-H^{\succ}[j]
-%&=\min_{0\leq i <j}\max &\{ H^{\prec}[i], h_m(\vec{L}_{i, j})\}\nonumber \\
-&=\min_{0\leq i <j} \max &\{ H^{\prec}[i], W_{j}-W_{i} \}\nonumber.
+H^{\succ}(j)
+%&=\min_{0\leq i <j}\max &\{ H^{\prec}(i), h_m(\vec{L}_{i, j})\}\nonumber \\
+&=\min_{0\leq i <j} \max &\{ H^{\prec}(i), W_{j}-W_{i} \}\nonumber.
 %\end{align}
 \end{array}
 \end{equation}
 Let us split the points of the interval ${0\leq i <j}$ into those that satisfy 
-$H^{\prec}[i]+W_{i}\geq W_{ j}$ and the remainder. Since $H^{\prec}[0]=-\infty$, 
-the point $i=0$ belongs to the latter. In particular, $H^{\succ}[1]=W_1$, and for $j\geq 2$
-$H^{\succ}[j]=\min \{M_1[j],W_{j}-M_2[j]\}$,  with 
+$H^{\prec}(i)+W_{i}\geq W_{ j}$ and the remainder. Since $H^{\prec}(0)=-\infty$, 
+the point $i=0$ belongs to the latter. In particular, $H^{\succ}(1)=W_1$, and for $j\geq 2$
+$H^{\succ}(j)=\min \{M_1(j),W_{j}-M_2(j)\}$,  with 
 \begin{align}
-M_1[j]&=\min_{1\leq i <j } \{H^{\prec}[i] \mid 
-       H^{\prec}[i]+W_{i}\geq W_{ j}
+M_1(j)&=\min_{1\leq i <j } \{H^{\prec}(i) \mid 
+       H^{\prec}(i)+W_{i}\geq W_{ j}
        \}, \label{e.min-m}\\
-M_2[j]& =\min_{0\leq i <j} \{W_{ j}-W_{ i} \mid  
-       H^{\prec}[i]+W_{i}<  W_{j}
+M_2(j)& =\min_{0\leq i <j} \{W_{ j}-W_{ i} \mid  
+       H^{\prec}(i)+W_{i}<  W_{j}
        \}. \label{e.max-m}
 \end{align}
 We turn now to describing the data structures that enable the efficient computation of the minima in equation (\ref{e.min-m});  equation (\ref{e.max-m}) can be handled similarly. 
@@ -46,7 +46,7 @@ Rephrased slightly more abstractly we need to solve the following problem.
 %	with  $(key_{1},value_{1})=(-\infty,-\infty)$, $W_1=0$.
 
 
-\noindent \textbf{Compute:} 
+\noindent \emph{\bf Compute:} 
 \begin{equation}
 min_j(W_j)=\min \{value \mid (key,value)\in Pre_j \mbox{ \emph{and} } key \geq W_j\},  \mbox{ for }1\leq j \leq n, \label{e.min-m-v}
 \end{equation}
