@@ -52,7 +52,8 @@ respectively.
 \begin{definition} Given an optimal orientation $\vec{L}^*$  the algorithm returns one of the 
 	following orientations.
 	\begin{itemize}
-		\item $\vec{C}^{*1way}$ is the better among the two possible one-way orientations of $C$, and \emph{OneWayCost-s} is its cost.
+		\item $\vec{C}^{*1way}$ is the one-way orientation of $C$
+		whose cost, \emph{OneWayCost-s}, is least.
 		\item For a cycle of odd length, $\vec{C}^{2+xx}$ is the orientation of $C$ 
 		obtained 
 		by first finding a minimum weight path of length 2, and then consecutively alternating the directions of the remaining edges. 
@@ -273,52 +274,58 @@ We summarize the previous analysis as a Theorem.
 
 Another conclusion from Lemmas \ref{l.odd}, \ref{l.subo} and \ref{l.last} is
 \begin{corollary}
-	If $h_s(\vec{L}^*) < \textit{OneWayCost-s}$ then $h_s(\vec{L}^*)$ is the cost of an optimal orientation of the cycle, unless $n$ is odd and $\vec{L}^*$ reverses direction at each vertex.
+	If $h_s(\vec{L}^*) < {OneWayCost_s}$ then $h_s(\vec{L}^*)$ is the cost of an optimal orientation of the cycle, unless $n$ is odd and $\vec{L}^*$ reverses direction at each vertex.
 \end{corollary}
-%
-%\newpage
-%\subsection{An algorithm for cost function $H_m$.}
-%The following algorithm uses the $\mbox{BestCost}_m$Path algorithm as a building block. 
-%
-%\noindent \textbf{Algorithm $\mbox{BestCost}_m$Cycle ($C$)}:
-%
-%\begin{enumerate}
-%	\item $BestCost \leftarrow \min\{\sum_{i=0}^{n-1}w(i,i+1), \sum_{i=0}^{n-1}w(i+1,i)\}$;
-%	\item \label{ac.i1} for $i= 0$ to $n-1$ do:
-%	\begin{enumerate}
-%		\item break the cycle at vertex $i$ by making two copies of vertex 
-%		$i$, $i'$ and $i''$, and setting $L$ as the path $i', i+1,\ldots ,0,\ldots i-1, i''$
-%		with weights the same as in $C$ except for the edges involving $i', i''$;  
-%		\item \label{i.c1}let $L^{out}$ be the path $L$
-%		with $w(i',i+1)=w(i,i+1),\ w(i+1,i')=\infty$ and 
-%		$w(i-1,i'')=\infty,\  w(i'',i-1)=w(i,i-1)$;
-%		\item \label{i.c2}
-%%		$Cost(P_1)\leftarrow BestCostPath(P_1)$; 
-%		if $BestCost_m Path(L^{out})< BestCost$ then update $BestCost$;
-%%		\item \label{i.c3} let $P^{in}$ be the path $P$
-%%		with $w(i',i+1)=\infty,\ w(i+1,i')=w(i+1,i)$ and 
-%%		$w(i-1,i'')=w(i-1,i),\  w(i'',i-1)=\infty$;
-%%		\item \label{i.c4}
-%%%		$Cost(P_2)\leftarrow BestCostPath(P_2)$; 
-%%		if $BestCostPath(P^{in})< BestCost$ then update $BestCost$.
-%	\end{enumerate}		
-%	\item return $BestCost$; 
-%\end{enumerate}	
-%\noindent \textbf{End of Algorithm $\mbox{BestCost}_m$Cycle}
-%\bigskip
-%
-%To prove the correctness of the algorithm let \textit{O} be an optimal orientation 
-%of $C$.
-%If \textit{O} is a clockwise or counterclockwise cycle then it will be found in step 1.
-%Otherwise, there is at least one vertex \textit{i} such that both of the edges $\{i-1,i\}$ and $\{i,i+1\}$
-%are oriented away from \textit{i} in \textit{O}, because in any such orientation of the edges
-%of a cycle each vertex whose edges are oriented towards it can be paired with a 
-%vertex whose edeges are oriented away from it.
-%Any optimal orientation of the path $L^{out}$ formed in 
-%the $i$-the execution of the loop yields an
-%orientation of $C$, because both edges involving $i$ are outward oriented
-%by the construction of $L^{out}$ in step \ref{i.c1}. This orientation has the same cost 
-%as \textit{O}, and it will be found in step \ref{i.c2}.
-%
-%Since a call to $\mbox{BestCost}_m$Path(L) takes $O(n^2)$ time the algorithm runs in $O(n^3)$ time.
-%\qed
+
+\subsection{An algorithm for cost function $H_m$}\label{s.c}
+
+The cycle algorithm for cost function $H_m$ is, disappointingly, the simplest one: 
+try all possibilities of breaking up the cycle into a linear graph, applying 
+BestCostLinear$_m$ to that graph, and choose the one with least cost. 
+To describe th algorithm in more detail 
+we denote by $\vec{C}^{*1way}$ the one-way orientation of $C$
+whose cost, ${OneWayCost_m}$, is least; and by $L_{i+1,i-1}$ for $0\leq i \leq n$ 
+the subgraph of $C$
+that is induced by vertices $i+1,i+2,\ldots, i-1$. Recall that sums are 
+always to be taken mod $n$.
+\begin{algorithm}
+set $BestCost$ to $OneWayCost_m$
+%, and set $ \vec{C}$ to $\vec{C}^{*1way}$
+\;
+	\label{ac.i1} \For{$i= 0$ to $n-1$}{	
+construct
+a linear graph  $L^i$ by adding two vertices $i'$ and $i''$ to $L_{i+1,i-1}$ with edge weights
+$w_L(i',i+1)=w(i,i+1)$,\ $w_L(i+1,i')=w_L(i-1,i'')=\infty$ and 
+$w_L(i'',i-1)=w(i,i-1)$\;
+			\If{BestCostLinear$_m(L^i)< BestCost$}
+			{set $BestCost$ to BestCostLinear$_m(L^i)$\;
+%		 	 set $ \vec{C}$ to the orientation of $C$  induced by $L$;
+			}  		
+	}
+	\Return $BestCost$; 
+	\caption{BestCostCycle$_m(C)$}
+	\label{algo:oc-m}
+\end{algorithm}
+
+\bigskip
+\begin{theorem}
+\emph{Algorithm BestCostCycle}$_m(C)$ returns in $O(n^2 \log n)$ time the cost of an optimal 
+orientation of $C$.
+\end{theorem}
+\begin{proof}
+
+Let $C^*$ be an optimal orientation 
+of $C$.
+If $C^*$ is a clockwise or counterclockwise cycle then the opptimal cost will be found in step 1.
+Otherwise, $C^*$ contains at least one vertex $i$ such that both of the edges $\{i-1,i\}$ and $\{i,i+1\}$
+are oriented away from \textit{i} in $C^*$.  Consider the linear graph $L^i$ constructed in
+the $i$-the execution of the loop \ref{ac.i1}. Denote by $\vec{L^i}$ the orientation of $L^i$ 
+induced by $C^*$  (by breaking the cycle at vertex $i$), and note that 
+$h_m(\vec{L^i})=h_m(\vec{C^*})$. Let $\vec{L^{i*}}$ be an optimal orientation of $L^i$.
+$\vec{L^{i*}}$ induces an orientation $\vec{C}$ of $C$ (by identifying $i'$ with $i''$)
+and $h_m(\vec{C})=h_m(\vec{L^{i*}})$.  
+Then $h_m(\vec{C})=h_m(\vec{L^{i*}})\leq h_m(\vec{L^i})=h_m(\vec{C^*})$.
+Since $h_m(\vec{C})\geq h_m(\vec{C^*})$ it follows that $h_m(\vec{L^{i*}})= h_m(\vec{C^*})$.
+
+Because one call to $BestCostPath(P)$ takes $O(n \log n)$ time the algorithm runs in $O(n^2 \log n)$ time.
+\end{proof}

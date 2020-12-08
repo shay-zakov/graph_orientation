@@ -1,11 +1,7 @@
 \section{Introduction}
 
-A \emph{edge bi-weighted graph} is an undirected graph $G = (V, E)$, such that each edge $\{u, v\} \in E$ has a pair of (possibly different) weights $w(u, v)$ and $w(v, u)$ associated with its two possible orientations $(u, v)$ and $(v, u)$, respectively. An \emph{orientation} 
-%$ \vec{O}$ 
-of $G$ creates a directed graph $\vec{G}
-%=\vec{O} (G)
-$ 
-%from $G$ 
+A \emph{edge bi-weighted graph} is an undirected graph $G = (V, E)$ in which each edge $\{u, v\} \in E$ has a pair of (possibly different) weights $w(u, v)$ and $w(v, u)$ associated with its two possible orientations $(u, v)$ and $(v, u)$, respectively. An \emph{orientation} 
+of $G$ creates a directed graph $\vec{G}$ 
 by selecting for each undirected edge $\{u, v\} \in E$ exactly one of its two possible orientations. Denote by $\mathcal{O}(G)$ the set of all orientations of $G$. 
 
 The problem we address is the following.
@@ -16,8 +12,8 @@ The problem we address is the following.
 the heaviest of the resulting simple directed paths.
 
 Actually, there remains an ambiguity in the specification of the cost function because it 
-fails to specify whether the minimum is taken only over maximal 
-simple paths or over all simple subpaths. To distinguish between these two possibilities we define two measures.
+fails to specify what kinds of paths the minimum is to be taken over: all simple 
+directed subpaths or only maximal ones. To distinguish between these two possibilities we define two measures.
 
 \begin{definition}
 	Given a directed path $\vec{P}=<v_0,\ldots,v_n>$ denote its cost
@@ -35,7 +31,7 @@ simple paths or over all simple subpaths. To distinguish between these two possi
 		H_m(G) &= \min\{h_m(\vecG)\mid \vecG \in \mathcal{O}(G)\}.
 	\end{align}
 \end{definition}
-Note that always $h_s(\vecG)\geq 0$ because the empty path is always a possibility in equation (\ref{eq.hs}).
+Note that always $h_s(\vecG)\geq 0$, because the empty path is one of the possible simple paths appearing in equation (\ref{eq.hs}).
 
 \noindent {\bf Example}: To illustrate the differences between the two cost functions consider
  $\vec{P}=<v_0,v_1,v_2,v_3>$ and $\vec{P_{1,2}}=<v_1,v_2>$, with $w(v_0,v_1)=2, w(v_1,v_2)=-3,w(v_2,v_3)=6$.

@@ -1,6 +1,6 @@
 \section{A generic algorithm for linear graphs}\label{s.2}
-We call a bi-weighted graph with $n$ edges and $n+1$ vertices a\emph{ linear graph}, and 
-reserve the term path for a directed linear graph that has a single source.
+We call a bi-weighted graph that has two vertices of degree 1 and all other vertices of degree 2  a \emph{ linear graph}, and 
+reserve the term \emph{path} for a directed linear graph that has a single source.
 Number the vertices of the linear graph  $L_n$ from \textit{0} to \textit{n}, and denote the weights of
 edges $(i,i+1)$ and  $(i+1,i)$ by $w(i,i+1)$ and $w(i+1,1)$, respectively.
 
@@ -39,18 +39,18 @@ given that the very last edge has a specified direction.
 			\label{st.2}
 	}
 	\Return{$\min \{H^{\succ}(n),\ H^{\prec}(n)\}$}\;
-	\caption{BestCostPath-$x$ $(L)$}
+	\caption{BestCostLinear-$x$ $(L)$}
 	\label{algo:H}
 \end{algorithm}
 \begin{theorem}
-Given input $L$, Algorithm \emph{BestCostPath}-$x$ finds the cost of an optimal orientation of $L$.
+Given input $L$, Algorithm \emph{BestCostLinear}-$x$ finds the cost of an optimal orientation of $L$.
 \end{theorem}
 A straightforward implementation of the algorithm runs in $O(n^2)$ time. 
 The implementations described in the next two subsections provide drastic improvements.
 
 \subsection{Running time under cost function $H_s$}
 In this subsection we show that 
-Algorithm BestCostPath-s can be made to run in time $O(n)$ by carefully implementing
+Algorithm BestCostLinear-s can be made to run in time $O(n)$ by carefully implementing
 the computational operations of the algorithm.
 Two issues have to be addressed.
 
@@ -71,14 +71,14 @@ Two issues have to be addressed.
 		which maximize
 		$\sum_{t=i'}^{j'}a_t$ over all $i\leq i' \leq j' \leq j$.	
 	\end{problem}
-	Chen and Chao  \cite{chen2007range} presented a method for answering each such query 
+	Chen and Chao \cite{chen2007range} presented a method for answering each such query 
 	in constant time after  $A$ is preprocessed in $O(n)$ time. The following Lemma 
 	summarizes the discussion and its relevance.
 \begin{lemma}
 	Suppose $w(i,i+1),0\leq i <n$ and $w(i+1,i),0\leq i <n$ have been preprocessed 
 	in linear time for the RMSOQ problem.
-	After  $H^{\prec}(i)$ and $H^{\succ}(i)$ have been computed for $0\leq i <j$ all 
-	values $\max \{ H^{\prec}(i), h_s(\vec{L}_{i, j})\}$ and $\max \{ H^{\succ}(i), h_s(\cev{L}_{i, j})\}$ appearing in statements \ref{st.1} and \ref{st.2} in iteration $j$
+	After  $H^{\prec}(i)$ and $H^{\succ}(i)$ have been computed for $0\leq i <j$ each 
+	value of the form $\max \{ H^{\prec}(i), h_s(\vec{L}_{i, j})\}$ and $\max \{ H^{\succ}(i), h_s(\cev{L}_{i, j})\}$ appearing in statements \ref{st.1} and \ref{st.2} in iteration $j$
 	can be evaluated in constant time.
 \end{lemma}
 A question remains: how many queries $RMSOQ( i, j)$ will the algorithm present?
@@ -162,7 +162,7 @@ Fortunately, several linear-time online algorithms have been published,
 %\cite{klawe89},  \cite{larmore91}, \cite{galil92}, \cite{barnoy09}.
 
 \begin{theorem}
-	When the cost function used in Algorithm BestCostPath-x is $H_s$ its running time is $O(n)$.
+	When the cost function used in Algorithm BestCostLinear-x is $H_s$ its running time is $O(n)$.
 \end{theorem}
 
 \
