@@ -92,3 +92,30 @@ for various classes of graphs.
 	for any $G$
 	in the class.
 \end{problem}
+
+\begin{table*}[h!]
+	\begin{center}
+		\caption{Summary of Results.}
+		\label{tbl:summary}
+		\begin{tabular}{|l|l|l|l|}
+			\hline
+			graph class & time under $H_s$ & time under $H_m$  & Theorems  \\
+			\hline
+			star            &        $O(n \log n)$  & $O(n \log n)$        & \ref{t.star}		\\
+						\hline
+			linear graph & $O(n)$        		&$O(n \log n)$ 	& \ref{t.linear-s}, \ref{t.linear-m} \\
+						\hline
+			cycle 		 & $O(n)$ 		& $O(n^2 \log n)$ 		&  \ref{t.cycle-s}, \ref{t.cycle-m} \\
+%			Theorem 9 & $2 \lceil \log n \rceil$ & $D/D^2/d$ & Encoder & BTN \\
+%			Theorem 15 & $ \lceil \log n \rceil$ & 4 layers ($O(\sqrt{n}+D)$ & Encoder & BTN \\
+%			\hline
+%			Theorem 19 & $2 \lceil \sqrt{n} \rceil$ & $D/({\frac d 2}+D)/d/{\frac {dD} {2}}/D$
+%			& Encoder/Decoder & BTN \\
+%			Theorem 21 & $\lceil \log n \rceil$ &  $D/n/d/n/D$ & Encoder/Decoder & BTN \\
+%			Theorem 22 & 
+%%			$\textcolor{red}
+%			${2\lceil \log \sqrt{n} \rceil}$ & 7 layers ($O(D \sqrt{n})$ nodes) & Encoder/Decoder & BTN \\
+			\hline
+		\end{tabular}
+	\end{center}
+\end{table*}

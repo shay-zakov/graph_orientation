@@ -266,7 +266,7 @@ For simplicity and w.l.o.g we assume that they are $(0,1), (1,2),(3,2)$. Precond
 \qed
 
 We summarize the previous analysis as a Theorem.
-\begin{theorem}
+\begin{theorem}\label{t.cycle-s}
 	BestOrientCycle-$s$  returns  in linear time an orientation for a cycle graph that is optimal under the cost function $h_s$.
 \end{theorem}
 %\noindent {\bf Proof}: The algorithm reduces the problem of finding an optimal 
@@ -308,7 +308,7 @@ $w_L(i'',i-1)=w(i,i-1)$\;
 \end{algorithm}
 
 \bigskip
-\begin{theorem}
+\begin{theorem}\label{t.cycle-m}
 \emph{Algorithm BestCostCycle}$_m(C)$ returns in $O(n^2 \log n)$ time the cost of an optimal 
 orientation of $C$.
 \end{theorem}
