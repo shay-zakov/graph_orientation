@@ -63,34 +63,33 @@ However, if all weights are non-negative $H_m$, too, is monotonic. In fact, in t
 	if and only if it is optimal with respect to $ h_{m} $.
 \end{lemma}
 \begin{proof}
-From the definitions of $H_m$ and $H_s$ it is clear that for any directed path $\vec{P}$ $h_{m}(\vec{P})\leq  h_{s}(\vec{P})$, and that the inequality is in fact an equality if all the weights 
+From the definitions of $H_m$ and $H_s$ it is clear that  $h_{m}(\vec{P})\leq  h_{s}(\vec{P})$
+for any directed path $\vec{P}$, and that the inequality is in fact an equality if all the weights 
 are non-negative. This implies that $h_{s}( \vecG )= h_{m}( \vecG )$ for any orientation $\vecG$ of $G$.
 \end{proof}
 
-\bigskip
 {\bf Conjecture}:
 \textit{Given an edge bi-weighted graph $G$, any orientation that is optimal with 
 	respect to $h_{m}$ is also optimal with respect to $h_{s} $.}
 
-\bigskip
+\medskip
 In the coming sections we will consider the following two problems
 for various classes of graphs.
 
-\begin{problem}[
-%	Minimizing the heaviest subpath - 
-	HS]
-	Given a class of edge bi-weighted graphs find an algorithm to compute
-	$H_s(G) $
-	for any $G$
-	in the class.
+\begin{problem}
+	Find an algorithm to compute
+	$H_s(G) $, or an optimal orientation of $G$ under $H_s$,
+	for any $G$ in a given class of edge bi-weighted graphs.
+%	Given a class of edge bi-weighted graphs find an algorithm to compute
+%	$H_s(G) $, or an optimal orientation of $G$,
+%	for any $G$
+%	in the class.
 \end{problem}
 
-\begin{problem}[
-%	Minimizing the heaviest maximal path - 
-	HM]
-	Given a class of edge bi-weighted graphs find an algorithm to compute $H_m(G) $
-	for any $G$
-	in the class.
+\begin{problem}
+Find an algorithm to compute
+$H_m(G) $, or an optimal orientation of $G$ under $H_m$,
+for any $G$ in a given class of edge bi-weighted graphs.
 \end{problem}
 
 \begin{table*}[h!]
@@ -101,13 +100,13 @@ for various classes of graphs.
 			\hline
 			graph class & time under $H_s$ & time under $H_m$  & Theorems  \\
 			\hline
-			star            &        $O(n \log n)$  & $O(n \log n)$        & \ref{t.star}		\\
+			star            &        $O(n \log n)$  & $O(n \log n)$        & \ref{t.star}, Algorithm \ref{a.stars}		\\
 						\hline
 			linear graph & $O(n)$        		&$O(n \log n)$ 	& \ref{t.linear-s}, \ref{t.linear-m} \\
 						\hline
 			cycle 		 & $O(n)$ 		& $O(n^2 \log n)$ 		&  \ref{t.cycle-s}, \ref{t.cycle-m} \\
 									\hline
-			$k$-legged spider 		 & $O(k^22^k n)$ 		& $O(k^22^kn \log n)$ 		&   \\
+			$k$-legged spider 		 & $O(k^22^k n^2)$ 		& $O(k^22^kn^2 \log n)$ 		&   \\
 %			Theorem 9 & $2 \lceil \log n \rceil$ & $D/D^2/d$ & Encoder & BTN \\
 %			Theorem 15 & $ \lceil \log n \rceil$ & 4 layers ($O(\sqrt{n}+D)$ & Encoder & BTN \\
 %			\hline

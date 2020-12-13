@@ -4,13 +4,13 @@ Algorithm BestCostPath-m can be made to run in time $O(n \log n)$.
 As in the case of cost function $H_s$, the key is the analysis and careful implementation
 of statements \ref{st.1} and \ref{st.2} of the algorithm.
 
-As for computing $h_m(\vec{L}_{i, j})$ 
-and $h_m(\cev{L}_{i, j})$, combining equations (\ref{eq.W}) and (\ref{eq.hm})
+As for computing $h_m(\vec{L}_{i, j})$, combining equations (\ref{eq.W}) and (\ref{eq.hm})
 gives
 \begin{equation}\label{eq.hmij}
 h_m(\vec{L}_{i, j})=W_{j}-W_{i}= \sum_{t=i}^{j-1}w(t,t+1),
 \end{equation}
 where $W_{j}= \sum_{t=0}^{j-1}w(t,t+1)$, $W_0=0$.
+A similar equality holds for $h_m(\cev{L}_{i, j})$.
 Consequently, finding the minimum values in statements \ref{st.1} and \ref{st.2} takes on a form 
 that is very different from the one obtained for $H_s$. Focusing on statement \ref{st.1}, 
 equation (\ref{eq.hmij}) shows that for $1\leq j \leq n$

@@ -1,28 +1,31 @@
  \section{Algorithms for stars}\label{s.1}
- A star $S_k$ is a tree with one internal node $c$ and $k$ leaves.
+ A $n$-star $S$ is a tree with one internal node $c$ and $n$ leaves.
 
  \subsection{An algorithm for cost function $H_m$}
  \begin{algorithm}
+ 	\KwIn{a bi-weighted $n$-star $S$}
+ 	\KwOut{an optimal orientation of $S$ under $H_m$}
+ 	
 Orient each edge $\{u,c\}$ inwards to \textit{c} if $w(u,c)<w(c,u)$,
 and outward from $c$ otherwise\; \label{i0}
  	 
-denote by $\vec{S_n}$ the resulting directed graph, by $BestCost$ its cost, 
+denote by $\vec{S}$ the resulting directed graph, by $BestCost$ its cost, 
 by $E_{in}=\{(u_1,c),\ldots, (u_{\ell},c)\}$ the list of its inward edges, 
 and by $E_{out}=\{(c,v_1),\ldots, (c,v_r)\}$ the list of its outward edges\;
 \label{i00} reorder each of $E_{in}$ and $E_{out}$ so that
 the weights of its edges are in non-increasing order\;
 
-set $\vec{S}$ to $\vec{S_n}$\;
+set $\vec{S'}$ to $\vec{S}$\;
 
 \For {$k= 1$ to $\ell$}
-  {update $\vec{S}$ by flipping the direction of edge $(u_k,c)$, and update $BestCost$ if necessary}
+  {update $\vec{S'}$ by flipping the direction of edge $(u_k,c)$, and update $BestCost$ if necessary;}
    \label{i1} 
-set $\vec{S}$ to $\vec{S_n}$\;
+set $\vec{S'}$ to $\vec{S}$\;
 \For {$k= 1$ to $r$}
-   {update $\vec{S}$ by flipping the direction of edge $(c,v_k)$, and update $BestCost$ if necessary}
+   {update $\vec{S'}$ by flipping the direction of edge $(c,v_k)$, and update $BestCost$ if necessary;}
   \label{i2}
  	\Return an orientation whose cost is $BestCost$\;
- 	\caption{Algorithm BestOrientStar-m ($S_n$)}
+ 	\caption{Algorithm BestOrientStar$_m (S)$}
  	\label{algo:oc-s}
  \end{algorithm}
 
@@ -36,11 +39,10 @@ flipping edges that were initially pointing outwards.
 \begin{lemma}\label{l.best}
 	There is no optimal orientation in which both the largest inward edge weight is less than $w(u_1,c)$ 
 	and the largest outward edge weight is less than $w(c,v_1)$.
-	%, where $(u_1,c)$ is an edge with largest weight in $E_{in}$, and $(c,v_1)$ an edge with largest weight in $E_{out}$.
 \end{lemma}
 
 \noindent \textbf{Proof:}
-Note that the cost of the initial orientation is $h_m(\vec{S_n})=w(u_1,c)+w(c,v_1)$.
+Note that the cost of the initial orientation is $h_m(\vec{S})=w(u_1,c)+w(c,v_1)$.
 Suppose, by contradiction, that there is an optimal orientation $\vec{S^*}$ 
 with largest inward weight $w(x,c)< w(u_1,c)$,
 and largest outward weight $w(c,y)<w(c,v_1)$.
@@ -48,7 +50,7 @@ Then $h_m(\vec{S^*})=w(x,c)+w(c,y)$.
 The initial orientation implies that $w(c,u_1) > w(u_1,c)$, and $w(v_1,c) \geq w(c,v_1)$.
 Since $\{u_1,c\}$ is an outward edge in $\vec{S^*}$ and $\{v_1,c\}$ an inward edge,
 $h_m(\vec{S^*})\geq  
-w(v_1,c)+w(c,u_1) >  w(u_1,c)+w(c,v_1) =h_m(\vec{S_n})$, a contradiction.
+w(v_1,c)+w(c,u_1) >  w(u_1,c)+w(c,v_1) =h_m(\vec{S})$, a contradiction.
 \qed
 
 \begin{theorem}\label{t.star}
@@ -58,7 +60,7 @@ Algorithm BestOrientStar-m finds an optimal orientation in  $O(n \log n)$ steps.
 
 \noindent \textbf{Proof:}
 
- Let $\vec{S^*}$ be an optimal orientation of the input star graph $S_n$.
+ Let $\vec{S^*}$ be an optimal orientation of the input $n$-star $S$.
  
  If in $\vec{S^*}$ the edges are all oriented outwards, or all oriented 
  inwards, then the algorithm will find an optimal orientation
@@ -69,14 +71,14 @@ of statement \ref{i2}, respectively.
  in $\vec{S^*}$, according to Lemma \ref{l.best}. If both participate then an optimal orientation is found in step \ref{i0}.
  If not, we consider and prove the case that $(c,v_1)$ participates. 
  
- Note first of all that if there is an inward edge in $S^*$ that is oriented as
- an outward edge in $\vec{S_n}$ then flipping that edge cannot
+ Note first of all that if there is an inward edge in $\vec{S^*}$ that is oriented as
+ an outward edge in $\vec{S}$ then flipping that edge cannot
  increase the cost of the orientation, because its outward weight does not exceed $w(c,v_1)$.
- We can assume, therefore, that all edges in $E_{out}$ participate in $S^*$. 
+ We can assume, therefore, that all edges in $E_{out}$ participate in $\vec{S^*}$. 
  Let $(u_j,c)$ be the 
- edge from $E_{in}$ with least index that participates in $S^*$, 
-  $w(u_j,c)<w(u_1,c)$, i.e. all edges $\{u_i,c\}, 1\leq i<j$, are outward edges in $S^*$. 
- The cost of $S^*$ is therefore at least
+ edge from $E_{in}$ with least index that participates in $\vec{S^*}$, 
+  $w(u_j,c)<w(u_1,c)$, i.e. all edges $\{u_i,c\}, 1\leq i<j$, are outward edges in $\vec{S^*}$. 
+ The cost of $\vec{S^*}$ is therefore 
  $$h_m(\vec{S^*})=w(u_j,c)+\max \{w(c,v_1),\max \{w(c,u_i):1\leq i<j)\}\}.$$
 To complete the proof we observe that $h_m(\vec{S^*})$ is precisely the value of the orientation
 obtained by the algorithm after flipping the edge  $\{u_{j-1},c\}$
@@ -89,19 +91,27 @@ $\max \{w(c,u_i):1\leq i<j)\}$ and $\max \{w(v_i,c):1\leq i<j)\}$.
  \qed
  
   \subsection{An algorithm for cost function $H_s$}
-  An algorithm for cost function $H_s$ is obtained by slightly modifying Algorithm BestOrientStar-m using the following observation.
+  An algorithm for cost function $H_s$ is obtained by slightly modifying Algorithm BestOrientStar$_m$ using the following observation.
   
   \begin{lemma}
-  	Only  the weights of positive weight edges contribute to the cost of an oriented star 
-  	under $h_s$.
+  	Only the weights of positive weight edges can contribute to the value of $h_s(\vec{S})$ for an oriented star $\vec{S}$.
   \end{lemma} 
 \begin{proof}
-	The length of a path in an oriented star is no more than 2. If a path of length 2 contains a negative weight edge it is either first or last and consequently does not contribute to the cost of the path. 
+	The length of a path in an oriented star is no more than 2. 
+	An edge with non-positive weight is therefore either the first or 
+	the last edge on any path, and does not contribute to its cost. 
 \end{proof}
 
 Here is the outline of the resulting algorithm for cost function $H_s$:
-\begin{enumerate}
-	\item Remove from $S_n$ each edge with a direction of negative weight. Denote the resulting star $S$.
-	\item $\vec{S}\leftarrow \mbox{BestOrientStar-m} (S)$.
-	\item Add to $\vec{S}$ each edge removed in step 1 with a direction of negative weight.
-\end{enumerate}
+ \begin{algorithm}\label{a.stars}
+	\KwIn{a bi-weighted $n$-star $S$}
+	\KwOut{an optimal orientation of $S$ under $H_s$} 	\label{s.rem}
+	remove from $S$ every edge with a direction of non-positive weight, and denote the resulting star $S'$
+ \;
+	set $\vec{S'}$ to $\mbox{BestOrientStar}_m (S')$\;
+	add to $\vec{S'}$ all edges removed in statement \ref{s.rem} with a direction of non-positive weight,
+	and denote the resulting directed star $\vec{S}$\;
+	\Return $\vec{S}$\;
+	\caption{Algorithm BestOrientStar$_s (S)$}
+	\label{algo:oc-s}
+\end{algorithm}

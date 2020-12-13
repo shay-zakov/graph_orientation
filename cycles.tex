@@ -17,8 +17,8 @@ For example, $w(n-1,n)=w(n-1,0)$.
 %	equip edge $\{i,i+1\}$ of $L$ with the same weights as edge 
 %	$\{i ,i+1\}$ of $C$\;
 %	let $\vec{L}^*$ be the oriented graph returned by BestCostLinear-$s(L)$, and $h_s(\vec{L}^*)$ its cost\;
-%	\lIf{$h_s(\vec{L}^*) \geq$ \textit{OneWayCost-s}}
-%	{\Return \textit{OneWayCost-s}}
+%	\lIf{$h_s(\vec{L}^*) \geq OneWayCost_s}
+%	{\Return $OneWayCost_s$}
 %	\If{$n$ is odd and every two consecutive edges in  $\vec{L}^*$ have opposite directions}
 %	{
 %		%		find two successive edges of the cycle that form a directed path $\dvec{P_2}$ of length 2 with minimal weight\; 
@@ -53,75 +53,91 @@ respectively.
 	following orientations.
 	\begin{itemize}
 		\item $\vec{C}^{*1way}$ is the one-way orientation of $C$
-		whose cost, \emph{OneWayCost-s}, is least.
+		whose cost, $OneWayCost_s$, is least.
 		\item For a cycle of odd length, $\vec{C}^{2+xx}$ is the orientation of $C$ 
-		obtained 
-		by first finding a minimum weight path of length 2, and then consecutively alternating the directions of the remaining edges. 
+		obtained as follows:
+%		by first finding a minimum weight path of length 2, and then consecutively alternating the directions of the remaining edges. 
+		among all possible directed paths of length 2 find one, $\dvec{L_2}$,
+		whose weight is minimal; 
+	starting with this path direct each successive edge of the cycle in the direction opposite to that of its predecessor.
 %		Its cost is the maximum of  
 %		$$\min\{h_s(\dvec{P_2})\mid \dvec{P_2}\mbox{ is a directed path formed by two successive cycle edges}\}$$ and the maximum of the weights of the cycle edges. 
 		See Lemma \ref{l.odd}.
 		\item $\vec{C}^{i}$ is the orientation of $C$ obtained by copying 
 		from $\vec{L}^*$ the directions
 		of the edges $\{k,k+1\},\ i\leq k <i+n$. See Lemma \ref{l.subo}.
-		\item 	$\vec{C}^{flip_i}$ is the orientation of $C$ obtained by copying 
-		from $\vec{L}^*$ the directions
-		of the edges $\{k,k+1\},\ i+1\leq k <i+n$ and the flipped  
-		direction of edge $\{i, i+1\}$.
+		\item 	$\vec{C}^{flip_i}$ is an orientation of $C$ that is created when $0\leq i \leq 2n$ and
+		$\vec{L}^*$ contains the directed edges 
+		$(i,i+1),(i+1,i+2),(i+3,i+2)$. Its first directed edge
+		is $(i+1,i)$, and the directions of the following edges $\{k,k+1\},\ i+1\leq k <i+n$
+		are copied from $\vec{L}^*$.
 		See Lemma \ref{l.last}.
+		\item 	$\cev{C}^{flip_i}$ is an orientation of $C$ that is created when $n\leq i \leq 3n$ and
+$\vec{L}^*$ contains the directed edges 
+$(i,i-1),(i-1,i-2),(i-3,i-2)$. Its first directed edge
+is $(i-1,i)$, and the directions of the following edges $\{k,k-1\},\ i-n<k \leq i-1$,
+are copied from $\vec{L}^*$.
+See Lemma \ref{l.last}.
 	\end{itemize}
 \end{definition}
 
 \begin{algorithm}
-	%		let \textit{OneWayCost-s} be the least cost of a one-way orientation of the cycle, and let $\dvec{C}$ be that orientation\;
 	create a linear graph $L$ of 
 	length $3n$ by unrolling the cycle three times starting from vertex $0$,
 	numbering its vertices \textit{0} to \textit{3n}, and
 	equipping edge $\{i,i+1\}$ of $L$ with the same weights as edge 
 	$\{i ,i+1\}$ of $C$\;
 	let $\vec{L}^*$ be the oriented graph returned by BestOrientLinear-$s(L)$, and $h_s(\vec{L}^*)$ its cost\;
-	\lIf{$h_s(\vec{L}^*) \geq$ \textit{OneWayCost-s}}
+	\lIf{$h_s(\vec{L}^*) \geq OneWayCost_s$}
 	{set $\vec{C}$ to $\vec{C}^{*1way}$}
-	\lIf{$n$ is odd and every two consecutive edges in  $\vec{L}^*$ have opposite directions}
+	\lElseIf{$n$ is odd and every two consecutive edges in  $\vec{L}^*$ have opposite directions}
 	{
-		%    	find two successive edges of the cycle that form a directed path $\dvec{P_2}$ of length 2 with minimal weight\; 
-		%    	construct $\vec{C}$ beginning with $\dvec{P_2}$ and directing each successive edge of the cycle oppositely to its predecessor;
 	{set $\vec{C}$ to $\vec{C}^{2+xx}$}
 	}
-	\lIf{there are two edges $\{i,i+1\}$ and $\{i+n-1,i+n\}$ that
+	\lElseIf{there are two edges $\{i,i+1\}$ and $\{i+n-1,i+n\}$ that
 		have opposite directions in $\vec{L}^*$}
 	{set $\vec{C}$ to $\vec{C}^{i}$
-		%      	\For {$j=i$ to $i+n-1$}
-		%	     {copy the direction of edge $\{j,j+1\}$ from $\vec{L}^*$ to $\vec{C}$\;
-	}
+	}\label{s.flipi}
+	\lElseIf{there is an $i$, $0\leq i\leq 2n$ such that 
+		the directed edges $(i,i+1),(i+1,i+2),(i+3,1+2)$ appear in $\vec{L}^*$ }{set $\vec{C}$ to $\vec{C}^{flip_i}$}\label{s.pilfi}
 	\lElse
-	%     { \If{there are edges $(i,i+1),(i+1,i+2),(i+3,i+2)$ with $i\leq n$ in $\vec{L}^*$}
-	%     	{initialize $\vec{C}$  with edge $(i+1,i)$\;
-	%     	\For {$j=i+1$ to $i+n-1$}
-	%     	{copy the direction of edge $\{j,j+1\}$ from $\vec{L}^*$ to $\vec{C}$\; }}
-	%     	\Else{find edges $(i,i-1),(i-1,i-2),(i-3,i-2)$ with $i\geq n$ in $\vec{L}^*$\;
-	%     	          initialize $\vec{C}$  with edge $(i-1,i)$\;
-	%               	\For {$j=i-1$ to $i-n+1$}
-	%               {copy the direction of edge $\{j,j-1\}$ from $\vec{L}^*$ to $\vec{C}$\; }}
-	%       }
-	{set $\vec{C}$ to $\vec{C}^{flip_i}$}
+	{set $\vec{C}$ to $\cev{C}^{flip_i}$}
 	\Return $\vec{C}$;
 	\caption{BestOrientCycle-$s$ $(C)$}
 	\label{algo:oc-s}
 \end{algorithm}
 
-\newpage For ease of reading we break up the proof of correctness of Algorithm \ref{algo:oc-s} into a series of Lemmas. Before doing so we point out that the conditions laid out in 
-statements 3 through 6 are exhaustive. In other words, the preconditions of statement 6 are 
-that the following hold for $\vec{L}^*$:
-\begin{verse}
-\texttt{
-$h_s(\vec{L}^*) < \textit{OneWayCost-s}$, and \\
-every pair of edges $\{j,j+1\}$ and $\{j+n-1,j+n\}$ have the same direction, and \\
-there is a directed path of length 2 followed by an edge whose direction is flipped.}
-\end{verse}
-The first precondition implies that not all edges have the same direction. The last 
-precondition states, therefore, that at this point $\vec{L}^*$ is known not to be a completely alternating
-orientation: if $n$ is odd because of the falsity of the condition of statement 4, and 
-if $n$ is even because of the falsity of the condition of statement 5.
+For convenience we spell out what we know about $\vec{L}^*$ when the conditions of statements
+\ref{s.flipi} and \ref{s.pilfi} are checked.
+\begin{lemma}\label{l.flipc}
+	If the conditions of statements 3, 4, and 5 do not hold  then $\vec{L}^*$ has the following properties:
+	\begin{itemize}
+		\item for $0\leq i \leq 2n$, the edges $\{i,i+1\}$ and $\{i+n-1,i+n\}$ have the same direction;
+		\item either there is an $i$, $0\leq i\leq 2n$, such that 
+		the edges $(i,i+1),(i+1,i+2),(i+3,i+2)$ belong to $\vec{L}^*$, or
+		there is an $i$, $n\leq i\leq 3n$, such that the edges 
+		$(i,i-1),(i-1,i-2),(i-3,i-2)$ belong to $\vec{L}^*$. 
+	\end{itemize}
+\end{lemma}
+\begin{proof}
+	The first item is self evident from the failure of statement 5. 
+	
+	To prove the second item note 
+	that $h_s(\vec{L}^*)<\mbox{OneWayCost}_s$ implies
+	that each directed path in $\vec{L}^*$ has length less than $n$. Moreover, from
+	statements 4 and 5 it follows that not all successive edges of $\vec{L}^*$ alternate in direction,
+	i.e. there are at least two successive edges with the same direction. Consequently, 
+	$\vec{L}^*$ contains either a triplet of edges $(i,i+1),(i+1,i+2),(i+3,1+2)$ or a triplet of edges 
+	$(i,i-1),(i-1,i-2),(i-3,1-2)$. 
+	
+	We show that $0\leq i\leq 2n$ in the former case; the proof that $n\leq i\leq 3n$ in the latter case
+	is entirely similar. Suppose there is a triplet $(i,i+1),(i+1,i+2),(i+3,i+2)$ with $2n< i \leq 3n-3$. 
+	It follows then from the first item that $\vec{L}^*$ also contains the triplet $(i-n+1,i-n+2),(i-n+2,i-n+3),(i-n+4,i-n+3)$, and $n+1 < i-n+1 \leq 2n-2$.
+	
+	
+\end{proof}
+
+For ease of reading we break up the proof of correctness of Algorithm \ref{algo:oc-s} into a series of Lemmas. 
 
 \begin{lemma}\label{l.cd}
 	If $\vec{C}$ includes a change in direction then the orientation it induces,  $\vec{L}$, satisfies $h_s(\vec{C})= h_s(\vec{L})$.
@@ -139,13 +155,13 @@ whence also $h_s(\vec{C})\leq h_s(\vec{L})$.
 
 Lemma \ref{l.cd} implies the correctness of statement 4 of the algorithm:
 \begin{lemma}
-	If $h_s(\vec{L}^*) \geq$ \textit{OneWayCost-s} then \textit{OneWayCost-s} is the cost 
+	If $h_s(\vec{L}^*) \geq OneWayCost_s$ then $OneWayCost_s$ is the cost 
 	of an optimal orientation of $C$. 
 \end{lemma}
 \noindent {\bf Proof}: Suppose to the contrary that there is an $\vec{C^*}$ such that 
-$h_s(\vec{C^*})<\textit{OneWayCost-s}$. Then there is a direction change in 
+$h_s(\vec{C^*})< OneWayCost_s$. Then there is a direction change in 
 $\vec{C^*}$, and the induced orientation $\vec{L}$ satisfies, according to Lemma \ref{l.cd},
-$h_s(\vec{L}^*) \leq h_s(\vec{L}) =h_s(\vec{C^*}) <\textit{OneWayCost-s}$,
+$h_s(\vec{L}^*) \leq h_s(\vec{L}) =h_s(\vec{C^*}) < OneWayCost_s$,
 a contradiction.
 \qed
 
@@ -156,17 +172,11 @@ a contradiction.
 \end{remark}
 Here is an example: $n=3$ and $w(i,i+1)=w(i+1,i)=2$ for $i=0,1$,
 and  $w(2,0)=w(0,2)=3$. Then  $h_s(\vec{C^*})=4> h_s(\vec{L}^*)=3$.
-\qed
+
 
 \begin{lemma}\label{l.odd}
-	Suppose $h_s(\vec{L}^*) < \textit{OneWayCost-s}$. Suppose further that  $n>1$ is odd and that every two consecutive edges in  $\vec{L}^*$ have opposite directions.
-	Construct an orientation of the cycle, $\vec{C}^{2+xx}$, as follows:
-	\begin{enumerate}
-		\item among all possible directed paths of length 2 find one, $\dvec{L_2}$,
-		whose weight is minimal; 
-		\item 	starting with this path direct each successive edge of the cycle in the direction opposite to that of its predecessor.
-	\end{enumerate}
-This orientation of the cycle is optimal, and 
+	Suppose $h_s(\vec{L}^*) < OneWayCost_s$. Suppose further that  $n>1$ is odd and that every two consecutive edges in  $\vec{L}^*$ have opposite directions.
+Then the cycle orientation $\vec{C}^{2+xx}$ is optimal, and 
 \begin{equation}\label{e.odd}
 h_s(\vec{C}) = max \{h_s(\vec{L}^*), h_s(\dvec{L_2})\}.
 \end{equation}
@@ -183,25 +193,25 @@ contains at least two successive edges that form a directed path, so that
 $h_s(\vec{C^*})\geq h_s(\dvec{L_2})$. 
 
 We prove next that there is a change of direction in $\vec{C^*}$. 
-Suppose to the contrary that $h_s(\vec{C^*})=\textit{OneWayCost-s}$, and  $\vec{C^*}$
+Suppose to the contrary that $h_s(\vec{C^*})=OneWayCost_s$, and  $\vec{C^*}$
 is a one-way orientation, say $(0,1),\ (1,2),\ldots , (n-1,n),\ (n,0)$.
-Since $0\leq h_s(\vec{L}^*) < \textit{OneWayCost-s}$ there is an edge with positive weight on $\vec{C}^{*}$, say the edge $(0,1)$. 
+Since $0\leq h_s(\vec{L}^*) <  OneWayCost_s$ there is an edge with positive weight on $\vec{C}^{*}$, say the edge $(0,1)$. 
 
 Consider first the case that all edges of $\vec{C}^{*}$ have positive weight.
 Replacing edge $(0,1)$ with $(1,0)$ we get an orientation 
 $\vec{C'}$ with weight $h_s(\vec{C'})=\max \{h_s(\vec{C}^{*})-w(0,1), w(1,0)\}$.
 Now 
-$$w(1,0)\leq \max_{0\leq i \leq n-1}\{w(i,i+1),w(i+1,i)\}= h_s(\vec{L}^*) <\textit{OneWayCost-s},$$
-resulting in the contradiction $\textit{OneWayCost-s}=h_s(\vec{C}^{*})\leq h_s(\vec{C'})<\textit{OneWayCost-s}$.
+$$w(1,0)\leq \max_{0\leq i \leq n-1}\{w(i,i+1),w(i+1,i)\}= h_s(\vec{L}^*) <OneWayCost_s,$$
+resulting in the contradiction $OneWayCost_s=h_s(\vec{C}^{*})\leq h_s(\vec{C'})<OneWayCost_s$.
 
-The same proof idea can also be applied in the general case when some edges are non-positive. For simplicity assume that the edge $(n,0)$ is non-positive, and that 
+The same proof idea can also be applied in the general case when some edges are non-positive. For simplicity assume that the edge $(n-1,0)$ is non-positive, and that 
 $i_0=0 <i_1 < \cdots <i_{2k-1}<i_{2k}=n$ are such that all edges $(i,i+1)$ are positive for 
 $i_{2\ell}\leq i \leq i_{2\ell+1}$, and non-positive for 
 $i_{2\ell+1}\leq i \leq i_{2\ell+2}$, $0\leq \ell \leq k-1$. For each $\ell$ flip an edge
 $(j_{\ell},j_{\ell}+1)$ with $i_{2\ell}\leq j_{\ell} \leq i_{2\ell+1}$, and call the resulting orientation $C'$.
 Now $h_s(\vec{C'})\leq \max \{h_s(\vec{C}^{*})-\min_{j_{\ell}} w(j_{\ell},j_{\ell}+1), 
 \max_{j_{\ell}} w(j_{\ell}+1,j_{\ell})\}$. As before we arrive at the contradiction 
-$\textit{OneWayCost-s}=h_s(\vec{C}^{*})\leq h_s(\vec{C'})<\textit{OneWayCost-s}$.
+$OneWayCost_s=h_s(\vec{C}^{*})\leq h_s(\vec{C'})< OneWayCost_s$.
 
  Lemma \ref{l.cd} ensures, therefore, that the orientation $\vec{L}'$ of $L$ 
 induced by $\vec{C^*}$ satisfies $h_s(\vec{C^*})=h_s(\vec{L}')\geq h_s(\vec{L}^*)$.
@@ -209,77 +219,74 @@ Hence $h_s(\vec{C}) \leq max \{h_s(\vec{L}^*), h_s(\dvec{L_2})\} \leq h_s(\vec{C
 \qed
 
 \begin{lemma}\label{l.subo}
-	Suppose $h_s(\vec{L}^*) < \textit{OneWayCost-s}$.
+	Suppose $h_s(\vec{L}^*) < OneWayCost_s$.
 	If there is an $i,\ 0\leq i \leq n$, such that the edges $\{i,i+1\}$ and $\{i+n-1,i+n\}$ 
 	have opposite directions in $\vec{L}^*$,
 	then its subgraph $\vec{L}_{i,i+n}$ induced by the vertices $i,\ldots,i+n$ induces
 	an orientation $\vec{C}^{i}$ of the cycle that is optimal, and $h_s(\vec{C}^{i})= h_s(\vec{L}^*)$.
 \end{lemma}
-\noindent {\bf Proof}:
+\begin{proof}
+	
 There is a change of direction at vertex $i$ in $\vec{C}^{i}$,
 because the edges $\{i,i+1\}$ and $\{i+n-1,i+n\}$ have opposite directions.
 Hence $h_s(\vec{C}^{i}) =h_s(\vec{L}_{i,i+n})\leq h_s(\vec{L}^*)$.
 
 There is also a change of direction in any optimal $\vec{C^*}$, because 
-$h_s(\vec{C^*}) \leq h_s(\vec{C}^{i, i+n})  \leq h_s(\vec{L}^*)<\textit{OneWayCost-s}$. 
+$h_s(\vec{C^*}) \leq h_s(\vec{C}^{i, i+n})  \leq h_s(\vec{L}^*)<OneWayCost_s$. 
 By Lemma \ref{l.cd},  the orientation $\vec{L'}$ induced by $\vec{C}^*$
 satisfies $h_s(\vec{L'})= h_s(\vec{C^*})$. Hence
 $$h_s(\vec{L}^*)\leq h_s(\vec{L'})= h_s(\vec{C^*})\leq h_s(\vec{L}^*) .$$
+\end{proof}
 
-\qed
-
+Finally we consider the orientations constructed when the conditions of statements 3, 4, and 5 
+do not hold. Recall that in this case Lemma \ref{l.flipc} guarantees the existence of a triplet
+of 3 successive edges the first pointing to the second, the second pointing to the third and the last pointing back to the second.
 \begin{lemma}\label{l.last}
-	Suppose $\vec{L}^*$ satisfies the following preconditions 
-	\begin{enumerate}
-		\item $h_s(\vec{L}^*) < \textit{OneWayCost-s}$;
-		\item \label{i.o1}every pair of edges $\{j,j+1\}$ and $\{j+n-1,j+n\}$, $0\leq j \leq 2n$,
-		 have the same direction in $\vec{L}^*$;
-		\item there are two consecutive edges in  $\vec{L}^*$ that point in the same direction.
-	\end{enumerate} 
-Construct an orientation of the cycle, $\vec{C}^{flip_i}$ as follows:
-\begin{enumerate}
-	\item find three consecutive edges in $\vec{L}^*$ such that the first two point in the same direction and the third points in the opposite direction;
-	\item add the first edge to $\vec{C}^{flip_i}$ but reverse its direction;
-	\item starting with the second edge copy the directions of the following $n-1$ edges 
-	from $\vec{L^*}$.
-\end{enumerate}
-This orientation is optimal and $h_s(\vec{L}^*) = h_s(\vec{C}^{flip_i})$.
+	Suppose that $h_s(\vec{L}^*) < OneWayCost_s$ and that 
+	all edges $\{i,i+1\}$ and $\{i+n-1,i+n\}$, $0\leq i \leq 2n$, have the same direction in $\vec{L}^*$.
+	If $\vec{L}^*$  contains a triplet of edges  $(i,i+1),(i+1,i+2),(i+3,i+2)$, $0\leq i\leq 2n$, then 
+	$\vec{C}^{flip_i}$ is an optimal orientation and $h_s(\vec{L}^*) = h_s(\vec{C}^{flip_i})$;
+	and if it contains a triplet of edges
+	$(i,i-1),(i-1,i-2),(i-3,i-2)$, $n\leq i\leq 3n$,  then $\cev{C}^{flip_i}$ 
+	is an optimal orientation and $h_s(\vec{L}^*) = h_s(\cev{C}^{flip_i})$.
 	\end{lemma}
-\noindent {\bf Proof}: 
-It is possible to find the three consecutive edges of step 1 of the construction, because 
-all paths in $\vec{L}^*$ are shorter than $n$ since $h_s(\vec{L}^*) < \textit{OneWayCost-s}$.
-The first two edges in such a triple can be directed to the left or to the right.
-For simplicity and w.l.o.g we assume that they are $(0,1), (1,2),(3,2)$. Precondition
-	 \ref{i.o1} ensures that $\vec{L}^*$ also contains the edges $(n-1,n),(n,n+1),(n+2,n+1)$ and $(2n-2,2n-1),(2n-1,2n), (2n+1,2n) $, from which it follows that $\vec{C}^{flip_i}$ has edges 
+\begin{proof}
+We prove the optimality of 	$\vec{C}^{flip_i}$.
+For simplicity and w.l.o.g we assume that $i=0$, i.e. the triplet is $(0,1), (1,2),(3,2)$. 
+Since edges $\{i,i+1\}$ and $\{i+n-1,i+n\}$ have the same direction
+%Precondition \ref{i.o1} ensures that $\vec{L}^*$ also contains 
+the edges $(n-1,n),(n,n+1),(n+2,n+1)$ and $(2n-2,2n-1),(2n-1,2n), (2n+1,2n) $ 
+also belong to $\vec{L}^*$,
+from which it follows that $\vec{C}^{flip_i}$ has edges 
 	 $(1,0), (1,2),(3,2),(n-1,0)$, among others.
 	
 	We show next that any directed path in $\vec{C}^{flip_i}$ appears in $\vec{L}^*$. Consider first a directed path $\vec{P}$ that contains the edge $(1,0)$. 
-	Since this edge is surrounded by the edges $(1,2), (n-1,0)$ it is the only one in $\vec{P}$. Moreover, edge $(1,0)$ is identical to edge $(2n+1,2n)$, an edge that belongs to 
+	Since this edge is surrounded by the edges $(1,2), (n-1,0)$ it is the only one in $\vec{P}$. Moreover, edge $(1,0)$ is identical to edge $(2n+1,2n)$, which belongs to 
 	$\vec{L}^*$, proving that  $\vec{P}$ is a path in $\vec{L}^*$.
-	Any other path in $\vec{C}^{flip_i}$ does not contain the edge $(1,0)$ and is therefore by its construction a path in $\vec{L}^*$. 
-	Consequently, $h_s(\vec{C}^{flip_i})\leq h_s(\vec{L}^*)<\textit{OneWayCost-s}$.
+	Any other path in $\vec{C}^{flip_i}$ does not contain the edge $(1,0)$ and is therefore 
+	also a path in $\vec{L}^*$. 
+	Consequently, $h_s(\vec{C}^{flip_i})\leq h_s(\vec{L}^*)<OneWayCost_s$.
 	
 	Let $\vec{C}^*$ be an optimal orientation of the cycle. It contains a direction reversal
-	because $h_s(\vec{C}^*)\leq h_s(\vec{C}^{flip_i})<\textit{OneWayCost-s}$.
+	because $h_s(\vec{C}^*)\leq h_s(\vec{C}^{flip_i})<OneWayCost_s$.
 	Hence the orientation of $L$ it induces, $\vec{L}'$, satisfies
 	$h_s(\vec{C}^*)=h_s(\vec{L}')\geq h_s(\vec{L}^*)\geq h_s(\vec{C}^{flip_i})$.
-\qed
+\end{proof}
 
 We summarize the previous analysis as a Theorem.
 \begin{theorem}\label{t.cycle-s}
 	BestOrientCycle-$s$  returns  in linear time an orientation for a cycle graph that is optimal under the cost function $h_s$.
 \end{theorem}
-%\noindent {\bf Proof}: The algorithm reduces the problem of finding an optimal 
-%orientation of the cycle to finding one on the linear graph $L$.
 
 Another conclusion from Lemmas \ref{l.odd}, \ref{l.subo} and \ref{l.last} is
 \begin{corollary}
-	If $h_s(\vec{L}^*) < {OneWayCost_s}$ then $h_s(\vec{L}^*)$ is the cost of an optimal orientation of the cycle, unless $n$ is odd and $\vec{L}^*$ reverses direction at each vertex.
+	If $h_s(\vec{L}^*) < OneWayCost_s$ then $h_s(\vec{L}^*)$ is the cost of an optimal orientation of the cycle, unless $n$ is odd and $\vec{L}^*$ reverses direction at each vertex.
 \end{corollary}
 
 \subsection{An algorithm for cost function $H_m$}\label{s.c}
 
-The cycle algorithm for cost function $H_m$ is, disappointingly, the simplest one: 
+To our disappointment we have been unable to devise a cycle algorithm for cost function $H_m$ that 
+is more efficient than the simplest one: 
 try all possibilities of breaking up the cycle into a linear graph, applying 
 BestCostLinear$_m$ to that graph, and choose the one with least cost. 
 To describe th algorithm in more detail 
