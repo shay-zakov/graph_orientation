@@ -1,0 +1,187 @@
+\section{Algorithms for \textit{k}-legged spiders}\label{s.3}
+
+\noindent {\bf Terminology}: A \textit{spider (graph)}  is a connected undirected graph in which 
+there is one  vertex of degree at least 3 and all other vertices have degree at most 2.
+A spider can therefore have arbitrary many legs, each of which is a path of possibly different length. 
+Spiders with $k$ legs will be called $k$-legged spiders. 
+
+\noindent {\bf Notation}: Assign the lone vertex of degree at least 3 the number 0,
+and number the vertices on leg $\ell$, going outward from vertex $0$, as $(\ell,i), 1\leq i \leq n_\ell$.
+For convenience  $(\ell,0)$ denotes the common vertex \textit{0}. Denote by $L^{\ell}$ the linear graph
+that is leg $\ell$ of the spider, i.e. the subgraph induced by vertices $(\ell,0),\ldots, (\ell,n_{\ell})$.
+Where the number of the leg is evident from the context we omit it.
+For example, the weight of the directed edge from $(\ell,i)$ to $(\ell,i+1)$ will be denoted
+$w_{\ell}(i,i+1)$.
+
+Continuing with the notation of Section \ref{s.2}, 
+$L^{\ell}_{i, j}$ is the sub-graph of $L^{\ell}$ induced by the vertices $(\ell,i),  \ldots, (\ell,j)$,
+$\vec{L^{\ell}}_{i, j}$ is its oriented version in which all edges are directed to the right 
+(from $k$ to $k+1$),
+and in the oriented version $\cev{L^{\ell}}_{i, j}$ all edges are directed to the left. 
+
+To state the algorithm for finding an optimal orientation of a given spider, we slightly modify some other notations of Section \ref{s.2}: 
+$H^{\ell}_x(i,d)$ is the value of the optimal orientation of $L^{\ell}_{i,n_\ell}$
+under the constraint that the edge $\{i,i+1\}$ is directed towards $i+1$ if $d=\succ$ or 
+towards $i$ if $d=\prec$. We will use $\bar{d}$ to denote the direction opposite to $d$, e.g.
+$\bar{\prec}=\succ$.
+
+A possible brute force algorithm considers for each leg the two possible directions of the first edge on that leg, and all possible end- (respectively start-) points of the directed path that starts 
+(respectively begins) with that edge. Denote by
+ $D=(d_1,\ldots ,d_k)$ with $d_{\ell}\in\{\succ,\prec\}$
+ the $k$-vector of directions of  the first edges,
+  and by $J=\{j_1,\ldots j_k\}$ leg $\ell$ with $1\leq j_{\ell} \leq n_{\ell}$ 
+  the $k$-vector of vertices. 
+For $d_{\ell}= \prec,
+d_{m}=\succ $ we denote by ${\cev{L^{\ell}}_{0, j_{\ell}}} \ast \vec{L}^{m}_{0, j_{m}}$ the directed path that starts at vertex $(\ell,j_{ell})$, passes through vertex $0$ and ends at vertex $(m,j_m)$.
+
+\begin{enumerate}
+		\item initialize $BestCost$ to $\infty$;
+	\item \label{i.pp} \textbf{for} each pair of vectors $(D,J)$	\textbf{do}
+\begin{enumerate}
+
+	\item compute the maximum cost of a directed path through $0$:\\
+	$$W_x(D,J)=\max \{h_x({\cev{L^{\ell}}_{0, j_{\ell}}} \ast \vec{L}^{m}_{0, j_{m}}) \mid 
+	\mbox{all } \ell,m \mbox{ such that }d_{\ell}= \prec,
+	d_{m}=\succ 
+	\};$$
+	\item optimally orienting the remainders of the legs, find the leg whose orientation is costliest:
+	$H_x(D,J)=\max \{H^{\ell}_x(j_{\ell},\bar{d_{\ell}}) \mid 1\leq \ell \leq k\}$;
+	\item \textbf{if} $\max\{W_x(D,J),H_x(D,J)\}\leq BestCost$ \textbf{then} update $BestCost$;
+\end{enumerate}
+	\item \textbf{return} an orientation whose cost is $BestCost$;
+\end{enumerate}
+A straightforward implementation of this algorithm is exponential in $k$. In the next section we 
+present an algorithm under the $H_s$ cost function that runs in $O(n\log n +k \log k \log n)$ time.
+\subsection{An algorithm for cost function $H_s$}
+Here we take a somewhat different approach to guide the design of the algorithm, namely we view
+an (optimal) orientation as consisting of an orientation of the central part,
+the star-like body of the spider, and an orientation of each of the remainders of the legs.
+%of the spider that begin at the first joint (i.e. a vertex 
+%that has outdegree 2 and indegree 0, or the reverse). 
+Given  a weight bound, $\gamma$, Algorithm \ref{a.spiderbody} 
+describes how to obtain the bi-weighted body of the spider by amputating each leg
+at the joint (a vertex 
+that has outdegree 2 and indegree 0, or the reverse) that is closest to the body under the constraint that the part that is
+amputated does not exceed $\gamma$. Note that the joint at
+which the amputation is performed can differ between the outward and inward direction 
+from the body. The data the algorithm uses to determine that joint are
+$H^{\ell}_s(j,\prec)$ and $H^{\ell}_s(j,\succ)$, as defined above. 
+These data are computed in the main Algorithm
+\ref{a.spiders} using BestCostLinear$_s$($L^{\ell}_{1,n_\ell}$).
+
+%\renewcommand{\forcond}{$\ell$ \KwTo\Range{$k$}}
+\begin{algorithm}
+	\newcommand{\forcond}{$\ell=1$ \KwTo $k$.}
+	\KwIn{a bi-weighted $k$-legged spider $Sp$, and a weight $\gamma\geq 0$}
+	\KwOut{the bi-weighted star $S$ 
+obtained from $Sp$ 
+		by amputating each leg $L^{\ell}$ (separately in each direction) as close as possible to the body provided the amputated part has cost at most $\gamma$.}	
+	\KwData{$H^{\ell}_s(j,\prec)$ and $H^{\ell}_s(j,\succ)$, $1\leq j\leq n_{\ell}$, $1\leq \ell \leq k$.}
+	\For{\forcond}
+			{
+				let $j_{\prec}$ be the smallest $j\geq 1$ such that  $H^{\ell}_s(j,\prec)\leq \gamma$,
+				and let $j_{\succ}$ be the smallest $j\geq 1$ such that  $H^{\ell}_s(j,\succ)\leq \gamma$\;
+				set $w(0,\ell)$ to $h_s(\vec{L}^{\ell}_{0,j_{\prec}})$, and set $w(\ell,0)$ to 
+				$h_s(\cev{L}^{\ell}_{0,j_{\succ}})$
+			}
+			let $S$ be the star whose weights are $w(0,\ell)$ and $w(\ell,0)$, $1\leq \ell \leq k$\;
+	{\Return $S$}
+	\caption{Algorithm SpiderBody$_s (Sp,\gamma)$}
+\label{a.spiderbody}
+\end{algorithm}
+\begin{algorithm}
+	\newcommand{\forcond}{$\ell=1$ \KwTo $k$}
+	\KwIn{a bi-weighted $k$-legged spider $Sp$}
+	\KwOut{the cost of an optimal orientation of $Sp$ under $H_s$}	
+	\For {$\ell= 1$ to $k$}
+	{  
+%		set $H^{\ell}_s(n_{\ell},\prec)$ and $H^{\ell}_s(n_{\ell},\succ)$ to $0$\;
+		 \For {$j= 1$ to $n_{\ell}$}
+		{
+		compute $H^{\ell}_s(j,\prec)$ and $H^{\ell}_s(j,\succ)$ using BestCostLinear$_s$($L^{\ell}_{1,n_\ell}$);
+		}
+	}
+	let $\gamma_i$, $1\leq i \leq 2n$ be the $2n$ values $H^{\ell}_s(j,\prec)$ and $H^{\ell}_s(j,\succ)$, 
+	$1\leq \ell \leq k$, $1\leq j \leq n_{\ell}$, sorted in non-increasing order\;
+	set $S^1$ to SpiderBody($Sp,\gamma_1$) ~~~~   \tcc*[h]{smallest possible body}\;
+	\lIf{\emph{BestCostStar}$_s(S^1) \geq \gamma_1$}{set $BestCost$ to BestCostStar$_s$($S^1$) }
+    \Else{
+    find $i$ such that $\mbox{BestCostStar}_s(S^i) <\gamma_i $,  $S^i$= SpiderBody($Sp,\gamma_i$),
+    and BestCostStar$_s(S^{i+1})\geq \gamma_{i+1}$, $S^{i+1}$= SpiderBody($Sp,\gamma_{i+1}$)
+    \;
+    \lIf{$\gamma_{i}\leq \mbox{BestCostStar}_s(S^{i+1})$}
+{set $BestCost$ to $\gamma_{i}$}
+\lElse{set $BestCost$ to BestCostStar$_s(S^{i+1})$}    
+}
+\Return $BestCost$;
+	\caption{Algorithm BestCostSpider$_s (Sp)$}
+	\label{a.spiders}
+\end{algorithm}
+
+\begin{theorem}
+Algorithm BestCostSpider$_s (Sp)$ returns an optimal orientation of $Sp$ in $O((n + k \log k )\log n)$ time.
+\end{theorem}
+\begin{proof}
+	Let's first explain the rationale behind Algorithm BestCostSpider.
+	Under $h_s$ (but not under $h_m$) $H^{\ell}_s(j,\prec)$ and $H^{\ell}_s(j,\succ)$
+	are non-increasing functions of $j$. Consequently,
+	the $j_{\prec}$ found for $\ell$ in SpiderBody$_s (Sp,\gamma)$ for $\gamma=\gamma_i$
+	is no larger than the one found for $\gamma=\gamma_{i+1}$, and 
+	accordingly $w(0,\ell)$ is no larger for $\gamma=\gamma_i$
+	than it is for $\gamma=\gamma_{i+1}$. Denoting 
+	$\beta_i=\mbox{BestCostStar}(S^i)$ with $S^i$= SpiderBody($Sp,\gamma_i$)
+	as in Algorithm \ref{a.spiders}, it follows that $\beta_i\leq \beta_{i+1}$.
+	
+	In essence, Algorithm BestCostSpider examines the sequence of orientations
+	corresponding to $\gamma_i$, $0\leq i\leq 2n$, in order to
+	find the one of minimum value. The cost of orientation $i$ is
+    $\max\{\gamma_i,\beta_i\}$. Note that $\gamma_i$ is non-increasing,
+    with $\gamma_{2n}=0$, while $\beta_i$ is non-negative and
+    non-decreasing (under $h_s$). The desired minimum is therefore achieved either for $i=1$,
+	when the least-cost body is at least as costly as the most-cost leg, or for some $i$
+	such that $1< i \leq 2n$. 
+%	Note that $\gamma_{2n}=0$, because 
+%	$H^{\ell}_s(n_\ell,\succ)=H^{\ell}_s(n_\ell,\prec)=0$, while $\sigma_{2n}\geq 0$.
+Thus, if the minimum is not achieved for $i=1$, there necessarily is an $i$ such that 
+$\gamma_i>\beta_i$ while $\gamma_{i+1}\leq \beta_{i+1}$, and the minimum value is 
+$\min \{\gamma_i,\beta_{i+1}\}$.
+	
+Turning to the proof, assume that  $\tildeb{Sp}^*$ is an optimal orientation of $Sp$. 
+We want to show that 
+	the algorithm considers at some point a valid orientation $\tildeb{Sp}$ that satisfies 
+	$h_s(\tildeb{Sp})\leq h_s(\tildeb{Sp}^*)$. The proof
+	uses the following notation.
+	\begin{itemize}
+
+		\item $d_{\ell}$ is the direction of the edge $\{0,1\}$ on leg $\ell$ of $\tildeb{Sp}^*$.
+		\item $j_{\ell}$ is the largest $j$ such that all edges $\{j,j+1\}$, $0\leq j\leq j_{\ell}-1$,
+		on leg $\ell$ of $\tildeb{Sp}^*$ have the direction $d_{\ell}$.
+		\item $\delta=\max_{1\leq \ell \leq k} H^{\ell}_s(j_{\ell},\bar{d_{\ell}})$ is the maximum cost
+		  of all the amputated legs.
+		\item $\tildeb{S}^*$ is the star-like body of $\tildeb{Sp}^*$, i.e. the star 
+		 whose edge $\{0,\ell\}$ has direction $d_{\ell}$, and 
+		  weight $h_s(\vec{L}^{\ell}_{0,j_{\ell}})$ if $d_\ell =\succ$ or weight
+		  $h_s(\cev{L^{\ell}}_{0,j_{\ell}})$ if $d_\ell =\prec$.
+	\end{itemize}
+Note, first of all, that $h_s(\tildeb{Sp}^*)=\max \{\delta, h_s(\tildeb{S}^*)  \}$.
+Let $i$ be such that $\delta=\gamma_i$, denote $S^i$= SpiderBody($Sp,\gamma_i$),
+and let $j'_\ell(d)$ be the smallest $j\geq 1$ such that  $H^{\ell}_s(j,\bar{d})\leq \gamma_i$,
+$1\leq \ell \leq k$, $d \in\{\succ, \prec\}$. Then $j'_{\ell}(d_{\ell})\leq j_\ell$.
+Looking now at $\tildeb{S}^*$, if the direction of edge $\{0,\ell\}$ is $\succ$
+then the weight of this edge, $h_s(\vec{L}^{\ell}_{0,j_{\ell}})$, is at least the weight of
+the same edge in $S^i$, $h_s(\vec{L}^{\ell}_{0,j_{\ell}(\succ)})$,
+because $\vec{L}^{\ell}_{0,j'_{\ell}(\succ)}$ is a subpath of $\vec{L}^{\ell}_{0,j'_{\ell}}$. The same holds, of course, if the direction of edge $\{0,\ell\}$ is $\prec$. Consequently, the cost of that orientation $\tildeb{S^i}$  of $S^i$ 
+in which all edges have the same orientation as in $\tildeb{S}^*$ is no more than
+$h_s(\tildeb{S}^*)$, so that $\beta_i=$BestCostStar$_s(S^{i})\leq h_s(\tildeb{S}^*)$.
+
+We conclude that amputating $Sp$ at the joints $j_\ell(d), 1\leq k, d\in \{\succ,\prec \}$,
+and optimally orienting the star-like body and the amputated legs results in an orientation
+$\tildeb{Sp}$ that satisfies 
+$h_s(\tildeb{Sp})=\max \{\gamma_i, \beta_i\}\leq \max \{\delta, h_s(\tildeb{S}^*) =h_s(\tildeb{Sp}^*)$.
+
+The algorithm uses $O(n)$ time for the invocations of BestCostLinear$_s$
+in statement 3, $O(n \log n)$ time to sort the $2n$ values $\gamma_i$. Using binary 
+search on these sorted values to find an $i$ satisfying $\beta_i<\gamma_i$ and 
+$\beta_{i+1} \geq \gamma_{i+1}$ involves $O(\log n)$ invocations of  
+BestCostStar$_s$ for a total of $O(k\log k \log n)$ time.
+\end{proof}

@@ -1,6 +1,6 @@
 \subsection{Running time under cost function $H_m$}
 We show here that 
-Algorithm BestCostPath-m can be made to run in time $O(n \log n)$.
+Algorithm BestCostPath$_m$ can be made to run in time $O(n \log n)$.
 As in the case of cost function $H_s$, the key is the analysis and careful implementation
 of statements \ref{st.1} and \ref{st.2} of the algorithm.
 
@@ -57,20 +57,15 @@ To solve this problem efficiently we will maintain a set, whose members are
 pairs  $s_i=(key_{i}, value_{i})$, sorted by $key_i$.  
 Denote by $S_j$ the sorted set formed after $j$ pairs
 from $KV$ have been processed.
-%Then $S_j$ has the property that 
-%for $s_i \in S_j$
-%$\mu_{i}=\min_{1\leq k \leq j} \{value_k \mid key_k \geq key_{i}\}$,
-%see Proposition \ref{p.kmu}.  
 For convenience we add a first pair $(key_{0},\mu_{0})=(-\infty,-\infty)$
 and a last pair
 $(key_{\ell_j+1},value_{\ell_j+1})=(\infty,\infty)$, with $\ell_j=|S_j|-2$.
 All pairs in $S_j$, except for the first and last, are also present in $Pre_j$ but some of the 
 latter's pairs may be absent from $S_j$. 
-%In particular $|S_j|\leq j$.
 
-The maintenance operations are:
+The operations on $S_j$ are:
 \begin{itemize}
-	\item  Initialization: Set $S_0 \leftarrow <(-\infty,-\infty), (\infty,\infty)>$.
+	\item  Initialization: Set $S_0$ to $<(-\infty,-\infty), (\infty,\infty)>$.
 	\item  Computing $min_j(W_j)$:\\
 	find the smallest $key_{k}$ in $S_{j}$ such that 
 	$W_j\leq key_{k}$;\\  \textbf{return} $value_{k}$.\\
@@ -78,24 +73,65 @@ The maintenance operations are:
 	\begin{enumerate}
 		\item let $key_{m}$ be the smallest key in $S_{j-1}$ such that 
 		$key < key_{m}$;
-		\item {\bf if} $value\geq value_{m}$ \textbf{then} $S_j \leftarrow S_{j-1}$;\\
+		\item {\bf if} $value\geq value_{m}$ \textbf{then} $S_j $ is the same as $S_{j-1}$;\\
 		\{\emph{comment:  s=$(key,value)$ } is discarded\} ; \label{i.discard}
 		\item \textbf{else} \label{i.else}
 		  \begin{enumerate}
-		  	\item $k \leftarrow m-1$;\\  \textbf{while} $value_k \geq value $ \textbf{do} \\
-%		  	\begin{itemize}
-%		  		\item 
-		  		delete $s_k$ from $S_{j-1}$; $k\leftarrow k-1$;\label{i.while}
-%		  	\end{itemize}\ 
-%	  	\{\emph{comment: $\mu_{k-1}<value< \mu_{p}$ }\}
-%		  	\item let $\mu_k$ be largest in $S_{j-1}$ such that  $\mu_k<value  $;
-%		  	\item if $k+1 \leq m-1$ delete from $S_{j-1}$ all pairs $s_i$, $k+1\leq i \leq m-1$ \{\emph{comment: $\mu_{i}\geq value  $ for all such i}\} ;
+		  	\item set $k$ to $m-1$;\\  \textbf{while} $value_k \geq value $ \textbf{do} \\
+		  		delete $s_k$ from $S_{j-1}$; set $k$ to  $k-1$;\label{i.while}
 		  	\item  create $S_j$ by inserting $ s$ into $S_{j-1}$ between $s_k$ and $s_m$;
 		  	\label{i.insert}
 		  \end{enumerate} 
 	\end{enumerate}
 \end{itemize}
- 
+\begin{figure}[h]
+	\centering
+	\begin{minipage}{0.45\textwidth}
+		\centering  
+		\includegraphics[width=0.9\textwidth]{KV_2.eps}
+		\caption{Computing $min_j(W_j)$.}\label{fig:min_fig}
+	\end{minipage}\hfill
+	\begin{minipage}{0.45\textwidth}
+		\centering 
+		\includegraphics[width=0.9\textwidth]{KV_update_2.eps}
+		\caption{Updating $S_j$}\label{fig:update_fig}
+	\end{minipage}
+\end{figure}
+%\begin{figure}[h]
+%	\centering
+%	\subfloat[Computing $min_j(W_j)$.]{\includegraphics[width=0.4\textwidth]{KV_2.eps}\label{fig:min_fig}}
+%	\hfill
+%	\subfloat[Updating $S_j$.]{\includegraphics[width=0.4\textwidth]{KV_update_2.eps}\label{fig:update_fig}}
+%	\caption{Operations on $S_j$.}
+%\end{figure}
+Figure  \ref{fig:min_fig} illustrates the computation of $min_j(W_j)$: the step function represents 
+$S_j$, the scattered points are $(key, value)$ pairs that were discarded, and the points to the right
+of the broken vertical line are the ones whose minimum value is to be found.
+
+% \begin{figure}[h]
+% 	\centering
+% 	\includegraphics[width=0.5\textwidth]{KV_2.eps}
+% 	\caption{Computing $min_j(W_j)$}
+% 	\label{fig:min_fig}
+% \end{figure}
+Figure \ref{fig:update_fig} illustrates the updating of $S_j$: the star point is a new pair that is added
+to $S_j$, and $S_j$ is updated by discarding the points on the step function that are above the horizontal line to the left  of the star point.
+
+% \begin{figure}[h]
+%	\centering
+%	\includegraphics[width=0.5\textwidth]{KV_update_2.eps}
+%	\caption{Updating $S_j$}
+%	\label{fig:update_fig}
+%\end{figure}
+%\begin{figure}%
+%	\centering
+%	\subfloat[\centering label 1]{\includegraphics[width=5cm]{KV_2.eps} }%
+%	\qquad
+%	\subfloat[\centering label 2]{\{\includegraphics[width=5cm]{KV_update_2.eps} }}\%
+%	\caption{2 Figures side by side}%
+%	\label{fig:example}%
+%\end{figure}
+
 \begin{theorem}\label{p.kmu} The updating procedure preserves the following invariants of $S_j$.
   \begin{enumerate}
   	\item If $0\leq i_1< i_2 \leq \ell_j+1$ then $key_{i_1}< key_{i_2}$ and 
@@ -105,7 +141,6 @@ The maintenance operations are:
    \end{enumerate}
    Taken together the two invariants imply the correctness of the $\min_j$ computation: if $key_{i-1}<W\leq key_{i}$ for some $1\leq i \leq \ell_j+1$. then 
   	$\min_j(W)=value_{i}$.
-%Moreover, the overall running time for solving Problem \ref{p.msp} is $O(n \log n)$.
 \end{theorem}
 \begin{proof}
 By induction on $j$. When $j=0$ both invariants are clearly true.
@@ -124,7 +159,7 @@ satisfy $key_k<key'\leq key$, $value'\geq value$, so that the second invariant i
 updated.
 \end{proof}
 \begin{theorem}\label{t.linear-m}
-	When the cost function used in Algorithm BestCostPath-x is $H_m$ its running time is $O(n\log n)$.
+	When the cost function used in Algorithm \emph{BestCostPath}$_x$ is $H_m$ its running time is $O(n\log n)$.
 \end{theorem}
 \begin{proof}
 One possible implementation of the sorted set data structure uses red-black trees, \cite{guibas}.

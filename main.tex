@@ -4,7 +4,8 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{graphicx}
-
+%\usepackage[demo]{graphicx}
+\usepackage{subfig}
 
 % Definintg \devc for double-arrow vector notation:
 \newcommand\shrinkage{2.1mu}
@@ -21,8 +22,14 @@
 \newcommand{\vecP}{\vec{P}}
 \newcommand{\vecO}{\vec{O}}
 \newcommand{\vecG}{\vec{G}}
+
 \newcommand{\dir}[1]{\stackrel{\rightarrow}{#1}}
+\newcommand{\overto}[1]{\stackrel{\mapsto}{#1}}
+\newcommand{\overfrom}[1]{\stackrel{\mapsfrom}{#1}}
+%\newcommand{\mapsfrom}{\mathrel{\vcenter{\hbox{\rotatebox{180}{$\mapsto$}}}}}
+\newcommand{\mapsfrom}{\mathrel{\reflectbox{\ensuremath{\mapsto}}}}
 \newcommand{\dirO}[1][O]{\stackrel{\rightarrow}{#1}}
+
 %\newcommand{\rdir}[1]{\rho ({#1})}
 %\newcommand{\ldir}[1]{\lambda ({#1})}
 %\newcommand{\rdir}[1]{\vec{#1}}
@@ -66,6 +73,7 @@
 %\makeatother   
 
 \makeatletter
+
 \DeclareRobustCommand{\cev}[1]{%
 	{\mathpalette\do@cev{#1}}%
 }
@@ -79,6 +87,11 @@
 		}%
 	}%
 }
+
+
+
+%\rightsquigarrow
+
 \DeclareMathOperator*{\argmin}{arg\,min}
 \makeatother
 
@@ -100,6 +113,7 @@
 \include{linears}
 \include{linear_hm}
 \include{cycles}
+\include{spider}
 % bibliography, glossary and index would go here.
 
 \bibliography{orientation}{}
