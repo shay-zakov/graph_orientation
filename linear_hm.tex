@@ -14,14 +14,12 @@ A similar equality holds for $h_m(\cev{L}_{i, j})$.
 Consequently, finding the minimum values in statements \ref{st.1} and \ref{st.2} takes on a form 
 that is very different from the one obtained for $H_s$. Focusing on statement \ref{st.1}, 
 equation (\ref{eq.hmij}) shows that for $1\leq j \leq n$
-%\begin{align}
+
 \begin{equation}
 \begin{array}{ll@{}l}
-%\begin{align}
 H^{\succ}(j)
 %&=\min_{0\leq i <j}\max &\{ H^{\prec}(i), h_m(\vec{L}_{i, j})\}\nonumber \\
 &=\min_{0\leq i <j} \max &\{ H^{\prec}(i), W_{j}-W_{i} \}\nonumber.
-%\end{align}
 \end{array}
 \end{equation}
 Let us split the points of the interval ${0\leq i <j}$ into those that satisfy 
@@ -43,8 +41,6 @@ Rephrased slightly more abstractly we need to solve the following problem.
 
 \noindent \emph{\bf Given:} A sequence $KV$ of $n$ pairs of the form $(key,value)$,
 	and a sequence of lower bounds $W_j,\  1\leq j \leq n$, 
-%	with  $(key_{1},value_{1})=(-\infty,-\infty)$, $W_1=0$.
-
 
 \noindent \emph{\bf Compute:} 
 \begin{equation}
@@ -97,40 +93,13 @@ The operations on $S_j$ are:
 		\caption{Updating $S_j$}\label{fig:update_fig}
 	\end{minipage}
 \end{figure}
-%\begin{figure}[h]
-%	\centering
-%	\subfloat[Computing $min_j(W_j)$.]{\includegraphics[width=0.4\textwidth]{KV_2.eps}\label{fig:min_fig}}
-%	\hfill
-%	\subfloat[Updating $S_j$.]{\includegraphics[width=0.4\textwidth]{KV_update_2.eps}\label{fig:update_fig}}
-%	\caption{Operations on $S_j$.}
-%\end{figure}
+
 Figure  \ref{fig:min_fig} illustrates the computation of $min_j(W_j)$: the step function represents 
 $S_j$, the scattered points are $(key, value)$ pairs that were discarded, and the points to the right
 of the broken vertical line are the ones whose minimum value is to be found.
 
-% \begin{figure}[h]
-% 	\centering
-% 	\includegraphics[width=0.5\textwidth]{KV_2.eps}
-% 	\caption{Computing $min_j(W_j)$}
-% 	\label{fig:min_fig}
-% \end{figure}
 Figure \ref{fig:update_fig} illustrates the updating of $S_j$: the star point is a new pair that is added
 to $S_j$, and $S_j$ is updated by discarding the points on the step function that are above the horizontal line to the left  of the star point.
-
-% \begin{figure}[h]
-%	\centering
-%	\includegraphics[width=0.5\textwidth]{KV_update_2.eps}
-%	\caption{Updating $S_j$}
-%	\label{fig:update_fig}
-%\end{figure}
-%\begin{figure}%
-%	\centering
-%	\subfloat[\centering label 1]{\includegraphics[width=5cm]{KV_2.eps} }%
-%	\qquad
-%	\subfloat[\centering label 2]{\{\includegraphics[width=5cm]{KV_update_2.eps} }}\%
-%	\caption{2 Figures side by side}%
-%	\label{fig:example}%
-%\end{figure}
 
 \begin{theorem}\label{p.kmu} The updating procedure preserves the following invariants of $S_j$.
   \begin{enumerate}

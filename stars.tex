@@ -1,8 +1,18 @@
  \section{Algorithms for stars}\label{s.1}
  A $n$-star $S$ is a tree with one internal node $c$ and $n$ leaves.
+ 
+% Say that u dominates v if both $w(c, u) \geq w(c, v)$ and $w(u, c)\geq w(v, c)$. When visualizing the leaves as a set of 2D points, the point corresponding to u dominates all points which are to the left and below it.
+% 
+% First, we can argue that we can exclude from consideration all vertices which are dominated by other vertices. For example, if v is dominated by u, then whatever the direction of {c, u} in the star orientation we chose the same direction for {c, v} and don't increase the overall score. This leaves us with a subset of dominating vertices (if two or more vertices have exactly the same in and out weights and are not dominated by any other vertex, we take one of them as a representative in the dominating set). When sorting this set according to non-decreasing out-weights, we get a sequence of strictly increasing out-weights and strictly decreasing in-weights (because no vertex in the set dominates another vertex in it). Let's denote this sequence of vertices by $u_1, u_2, ..., u_r$, and 
+% add for convenience $u_0$ with $-\infty /+\infty$ out/in weights, and $u_{r+1}$ with 
+% $\infty /-\infty$ out/in weights. 
+% 
+% Now, let's assume an optimal star orientation that includes $(c, u_j)$ for some $u_j$ in the dominating set. Clearly, we can orient all edges $\{c, u_i\}$ for $i < j$ as $(c, u_i)$ (since $w(c, u_i) < w(c, u_j)$). Similarly, if the orientation includes $(u_j, c)$ we can orient every $\{c, u_i\}$ with $i > j$ as $(u_i, c)$. Therefore, there exists some optimal orientation and a corresponding index $0 < j \leq r+1$ such for all $i < j$ we have the edges $(c, u_i)$, and for all $i \geq j$ we have $(u_i, c)$. The score of this orientation is $\max(w(c, u_{j-1}), w(u_j, c))$. So the algorithm can do a binary search over the sequence of dominating vertices and find an optimal star orientation.
+% 
+% For the first instance, finding and sorting the dominating set takes $O(n \log n)$ time, and then finding the optimal j takes an additional $O(\log n)$ time. When updating the instance by changing one edge weight, we just need to update the dominating set similarly as done for the linear graph $H_m$ algorithm in $O(log n)$ time, and again find the optimal $j$ in $O(\log n)$ time.
 
  \subsection{An algorithm for cost function $H_m$}
- \begin{algorithm}
+ \begin{algorithm}\label{a.starm}
  	\KwIn{a bi-weighted $n$-star $S$}
  	\KwOut{an optimal orientation of $S$ under $H_m$}
  	

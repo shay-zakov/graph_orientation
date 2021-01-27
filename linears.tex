@@ -20,20 +20,20 @@ the two cost functions of this high level version, presented in the succeeding s
 of $L_{i, j}$ in which all edges are directed to the right (i.e. of the form $(i, {i+1})$),
 and $\cev{L}_{i, j}$ denotes the oriented version 
 of $L_{i, j}$ in which all edges are directed to the left. 
-\item $\rlast{H}_x(i)$ is the value of an optimal orientaton of $L_{0, i}$ under the constraint
-that edge $\{i-1,i\}$ is directed towards $i$, and $H_x^{\prec}(i)$ is the value of an optimal orientaton of $L_{0, i}$ under the constraint
-that edge $\{i-1,i\}$ is directed towards $i-1$.\\
+\item $\rlast{H}_x(i)$ is the value of an optimal orientaton of $L_{i,n}$ under the constraint
+that edge $\{i,i+1\}$ is directed towards $i+1$, and $H_x^{\prec}(i)$ is the value of an optimal orientaton of $L_{i,n}$ under the constraint
+that edge $\{i,i+1\}$ is directed towards $i$.\\
 In particular, the cost of an optimal orientation of $L$ under $H_x$ is 
-$\min \{H_x^{\succ}(n),\ H_x^{\prec}(n)\}$.
+$\min \{H_x^{\succ}(0),\ H_x^{\prec}(0)\}$.
 \end{itemize}
 
 The basic step of the recursive algorithm for finding an optimal orientation, or its cost, is to locate the last 
-vertex of an optimal orientation of $L_{0, j}$ at which there is a change in direction,
+vertex of an optimal orientation of $L_{ j,n}$ at which there is a change in direction,
 given that the very last edge has a specified direction. Keeping this in mind the proof 
 of correctness of the algorithm is straightforward. 
 For simplicity we outline the algorithm for finding the cost of an optimal orientation, BestCostLinear$_x(L)$.
 That algorithm is easily converted into an algorithm for finding the orientation itself, BestOrientLinear$_x(L)$,
- by keeping a record for each 
+ by recording for each 
 $H^{\succ}(j)$ and $H^{\prec}(j)$ which $i$ corresponds to the minimum in statements 
 \ref{st.1} and \ref{st.2}.
 %\bigskip
@@ -41,14 +41,14 @@ $H^{\succ}(j)$ and $H^{\prec}(j)$ which $i$ corresponds to the minimum in statem
 \begin{algorithm}
 	\KwIn{a bi-weighted linear graph $L$ on $n+1$ vertices}
 \KwOut{an optimal orientation of $L$ under $H_x$}
-	$H^{\succ}(0)=H^{\prec}(0)=-\infty$, $n=length(L)+1$\;
-	\For{$j=1$ to $n$}{
-		set $H^{\succ}(j)$ to the minimum over $0\leq i <j$ of $\max \{ H^{\prec}(i), h_x(\overto{L}_{i, j})\}$\;
+	$H^{\succ}(n)=H^{\prec}(n)=-\infty$, $n=length(L)+1$\;
+	\For{$i=n-1$ to $0$}{
+		set $H^{\succ}(i)$ to the minimum over $i< j \leq n$ of $\max \{h_x(\vec{L}_{i, j}), H^{\prec}(j)\}$\;
 		\label{st.1}
-		set $H^{\prec}(j)$ to the minimum over $0\leq i <j$ of  $\max \{ H^{\succ}(i), h_x(\overfrom{L}_{i, j})\}$\;
+		set $H^{\prec}(j)$ to the minimum over $ i <j \leq n$ of  $\max \{h_x(\cev{L}_{i, j}), H^{\succ}(i)\}$\;
 			\label{st.2}
 	}
-	\Return{$\min \{H^{\succ}(n),\ H^{\prec}(n)\}$}\;
+	\Return{$\min \{H^{\succ}(0),\ H^{\prec}(0)\}$}\;
 	\caption{BestCostLinear$_x(L)$}
 	\label{algo:H}
 \end{algorithm}
@@ -93,20 +93,20 @@ Two issues have to be addressed.
 \end{lemma}
 A question remains: how many queries $RMSOQ( i, j)$ will the algorithm present?
 The answer to this question will be found by addressing the second issue: what is the time needed to find all minimum values in statements \ref{st.1} and \ref{st.2}. Here the notion of a totally monotone matrix will be helpful. 
-To emphasize that this monotinicity is columnwise we call it c-monitinicity.
+To emphasize that this monotinicity is rowwise we call it r-monitinicity.
 \begin{definition}\label{d.tm}
 	Given an $n \times n$ matrix $M$, denote
-	by $R(j)$ the largest row index at which the minimum in column $j$ of $M$ is achieved, 
+	by $C(i)$ the least column index at which the minimum in row $i$ of $M$ is achieved, 
 	i.e.,
-	$R(j) = \max \{k :M_{k,j} = min_{1\leq i \leq n} M_{i,j}\}$.
-	The matrix $M$ is c-monotone if $R(1) \leq  R(2)\leq \cdots \leq R(n)$, and it is totally c-monotone 
+	$C(i) = \min \{k :M_{i,k} = min_{1\leq j \leq n} M_{i,j}\}$.
+	The matrix $M$ is r-monotone if $C(1) \leq  C(2)\leq \cdots \leq C(n)$, and it is totally c-monotone 
 	if all $2\times 2$
-	submatrices of $M$ formed by choosing two rows and two columns are c-monotone.
+	submatrices of $M$ formed by choosing two rows and two columns are r-monotone.
 \end{definition}
 The following Lemma is easily verified.
-\begin{lemma}\label{l.cmono}
-	$M$ is totally c-monotone if and only if $M(i_1,j_2)\geq M(i_2,j_2)$
-	whenever $M(i_1,j_1)\geq M(i_2,j_1)$,
+\begin{lemma}\label{l.rmono}
+	$M$ is totally r-monotone if and only if $M(i_1,j_1)\leq M(i_1,j_2)$
+	whenever $M(i_2,j_1)\leq M(i_2,j_2)$,
 for all $i_1<i_2$ and $j_1<j_2$.
 \end{lemma}
 Whereas for an arbitrary square matrix it takes quadratic time to 
@@ -116,19 +116,19 @@ is able to do so, off-line, in linear time.
 Define the matrices $M^{\succ}(i,j)$ and $M^{\prec}(i,j)$ as follows.
 \begin{itemize}
 	\item For $0\leq i<j \leq n$,
-$$M^{\succ}(i,j)=\max \{ H^{\prec}(i), h_s(\vec{L}_{i, j})\},\ 
-M^{\prec}(i,j)=\max \{ H^{\succ}(i), h_s(\cev{L}_{i, j})\}.$$	
+$$M^{\succ}(i,j)=\max \{h_s(\vec{L}_{i, j}), H^{\prec}(j)\},\ 
+M^{\prec}(i,j)=\max \{h_s(\cev{L}_{i, j}), H^{\succ}(i)\}.$$	
 	\item $M^{\succ}(i,j)=M^{\prec}(i,j)=\infty$  for $1\leq j \leq i \leq n $.
 %	\item $M^{\succ}(0,j)=h_s(\vec{L}_{0, j})$, $M^{\prec}(0,j)=h_s(\cev{L}_{0, j})$, $1\leq j\leq n$.
 \end{itemize}
-In these terms the algorithm computes the minimum value in column $j$ of 
+In these terms the algorithm computes the minimum value in row $i$ of 
 the matrices $M^{\succ}$
-and $M^{\prec}$, for $1\leq j \leq n$.
+and $M^{\prec}$, for $0\leq i <n$.
 Two features of this computation deserve particular attention.
 \begin{enumerate}
 	\item The computation of $M^{\succ}$
-	and $M^{\prec}$ has an on-line flavor: before computing the minimum value in column $j$ of 
-	the matrix $M^{\succ}$, or $M^{\prec}$, the minimum values of all columns $j'<j$ of 
+	and $M^{\prec}$ has an on-line flavor: before computing the minimum value in row $i$ of 
+	the matrix $M^{\succ}$, or $M^{\prec}$, the minimum values of all rows $i<i'$ of 
 	the matrix $M^{\prec}$, respectively $M^{\succ}$,  have to be available.
 		\item \label{i.1} It follows from equation (\ref{eq.hsij}) that
 	$h_s(\vec{L}_{i, j})$ and $h_s(\cev{L}_{i, j})$ are both non-increasing in $i$ 
@@ -137,40 +137,42 @@ Two features of this computation deserve particular attention.
 According to the first feature, the problem of computing 
 $H^{\succ}(j)$ and $H^{\succ}(j)$ can be dealt with by any method that solves the 
  following problem
-\begin{problem}[OCM - Online Column Minima]
-	For $1\leq j \leq n$ compute $H(j)=\min \{M(i,j) \mid 0\leq i \leq n\}$, where 
-	the values of $H(j'),\ 1\leq j'<j$ have to be computed before $M(i,j)$ can be evaluated.
+\begin{problem}[ORM - Online Row Minima]
+	For $1\leq i \leq n$ compute $H(i)=\min \{M(i,j) \mid 1\leq j \leq n\}$, where 
+	the values of $H(i'),\ i< i'\leq n$ have to be computed before $M(i,j)$ can be evaluated.
 \end{problem}
-In our case, both $M^{\prec}$ and $M^{\succ}$ are of the form $M(i,j)=\max \{f(i),g(i,j)\}$,
-where $g$ is non-increasing in $i$ and non-decreasing in $j$, according to the 
-above second feature. This is the key to proving that $M^{\prec}$ and $M^{\succ}$ are totally c-monotone.
+In our case, both $M^{\prec}$ and $M^{\succ}$ are of the form $M(i,j)=\max \{f(i,j),g(j)\}$,
+where $f$ is non-increasing in $i$ and non-decreasing in $j$, according to the 
+above second feature. This is the key to proving that $M^{\prec}$ and $M^{\succ}$ are totally r-monotone.
 \begin{proposition}
-	If $g$ is non-increasing in $i$ and non-decreasing in $j$ and $M(i,j)=\max \{f(i),g(i,j)\}$,
-	then $M$ is totally c-monotone.
+	If $f$ is non-increasing in $i$ and non-decreasing in $j$ and $M(i,j)=\max \{f(i,j),g(j)\}$,
+	then $M$ is totally r-monotone.
 \end{proposition}
 \begin{proof}
-	According to Lemma \ref{l.cmono} we have to prove that for any $i_1<i_2$ and $j_1<j_2$,
-	 if $M(i_1,j_1)\geq M(i_2,j_1)$ then $M(i_1,j_2)\geq M(i_2,j_2)$.
+	According to Lemma \ref{l.rmono} we have to prove that for any $i_1<i_2$ and $j_1<j_2$,
+	 $M(i_2,j_1)\leq M(i_2,j_1)$ implies $M(i_1,j_1)\leq M(i_1,j_2)$.
 
-For any $j$ and  $i_1<i_2$, $M(i_1,j)\geq M(i_2,j)$, i.e.
-$\max \{ f(i_1), g(i_1, j)\}\geq \max \{ f(i_2), g(i_2, j)\}$,
-if and only if 
-$\max \{ f(i_1), g(i_1, j)\}\geq \ f(i_2)$, since $g(i_1, j)\geq g(i_2, j)$.
+We claim that, for any $i$ and  $j_1<j_2$, 
+\begin{equation}\label{e.iff}
+M(i,j_1)\leq M(i,j_2) \mbox{ if and only if }  g(j_1)\leq \max \{ f(i, j_2),g(j_2)\}. 
+\end{equation}
+This follows from the definition of $M$, and the fact that 
+ $f(i, j_1)\leq f(i, j_2)\leq \max \{ f(i, j_2),g(j_2)\} $ for $j_1 < j_2$.
 
-Consequently,  if $M(i_1,j_1)\geq M(i_2,j_1)$ then
-$$ f(i_2)\leq \max \{ f(i_1), g(i_1, j_1)\}\leq \max \{ f(i_1), g(i_1, j_2)\},$$
-since $g(i_1, j_1)\leq g(i_1, j_2)$.
-Thus $M(i_1,j_2)\geq M(i_2,j_2)$.
+Consequently,  if $M(i_2,j_1)\leq M(i_2,j_2)$ then
+$$ g(j_1)\leq \max \{ f(i_2,j_2), g( j_2)\}\leq \max \{ f(i_1,j_2), g( j_2)\},$$
+since $ f(i_2, j_2) \leq f(i_1, j_2)$.
+Using equation (\ref{e.iff}) again, $M(i_1,j_1)\leq M(i_1,j_2)$.
 \end{proof}
 Summarizing the foregoing discussion, to find all minimum values in statements \ref{st.1} and \ref{st.2} of the algorithm we can employ the solution to the following problem.
-\begin{problem}[OCMM - Online Column Minima of  a c-Monotone matrix]\label{p.ocmm}
-		For $1\leq j \leq n$ compute $H(j)=\min \{M(i,j) \mid 0\leq i \leq n\}$, where 
-		$M$ is c-monotone and
-	the values of $H(j'),\ 1\leq j'<j$ have to be computed before $M(i,j)$ can be evaluated.
+\begin{problem}[ORMM - Online Row Minima of  a r-Monotone matrix]\label{p.ormm}
+		For $1\leq j \leq n$ compute $H(j)=\min \{M(i,j) \mid 1\leq j \leq n\}$, where 
+		$M$ is r-monotone and
+	the values of $H(i'),\ i < i' \leq n$ have to be computed before $M(i,j)$ can be evaluated.
 \end{problem}
 Note that the SMAWK algorithm cannot
 be used directly because it is off-line whereas our computation has to be online.
-Fortunately, several linear-time online algorithms for solving Problem \ref{p.ocmm} have been published, 
+Fortunately, several linear-time online algorithms for solving Problem \ref{p.ormm} have been published, 
 \cite{klawe89,larmore91,galil92,barnoy09}.
 
 \begin{theorem}\label{t.linear-s}
