@@ -77,7 +77,7 @@ in number.
 \end{enumerate}
 
 %\renewcommand{\forcond}{$\ell$ \KwTo\Range{$k$}}
-\begin{algorithm}[!h]
+\begin{algorithm}[!ht]
 	\newcommand{\forcond}{$\ell=1$ \KwTo $k$}
 	\KwIn{a bi-weighted $k$-legged spider $Sp$, and a weight $\gamma\geq 0$.}
 	\KwOut{the bi-weighted star $S$ 
@@ -101,7 +101,7 @@ obtained from $Sp$
 \label{a.spiderbody}
 \end{algorithm}
 
-\begin{algorithm}[!h]
+\begin{algorithm}[!ht]
 	\newcommand{\forcond}{$\ell=1$ \KwTo $k$}
 	\KwIn{a bi-weighted $k$-legged spider $Sp$}
 	\KwOut{an optimal orientation of $Sp$ under $H_s$}	
@@ -206,7 +206,7 @@ To analyze the running times for the two cost functions, let us look at the time
 in each part of the algorithm.
 \begin{enumerate}
 	\item The part consisting of lines 1-5 does the following for each $d$ and $\ell$:\\
-	it computes all values $H^{d}_x(\ell,j)$, deleted the irrlevant ones, and sorts the remaining ones. 
+	it computes all values $H^{d}_x(\ell,j)$, deletes the irrelevant ones, and sorts the remaining ones. 
 	 
 	 In case of $h_s$ this only takes $O(n)$ time because the linear graph algorithm 
 	 runs in linear time, and the values $H^{d}_x(\ell,j)$ it computes are already sorted, 
@@ -218,6 +218,13 @@ in each part of the algorithm.
     To this end a priority queue holds the  $2k$ current lowest values and at each increase  
     of $i$ the minimum value is extracted, its  $\ell$, $d$ and $j$ are noted, and 
     the value $H^{d}_x(\ell,j+1)$ is inserted. Overall this takes $O(n \log k)$ time.
+    
+    The computation of the optimal orientation of the spider body is stated in line 9
+    using BestOrientStar$_x(S^i)$ for
+    clarity, although for efficiency it should be implemented rather as an update of the star
+    of the optimal orientation when a single weight is increased. It is shown in Subsection
+    \ref{s.star.update} that such an update takes $O(\log k)$ time. This
+    establishes the stated running times.
 \end{enumerate}
 
 \end{proof}
