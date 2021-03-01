@@ -77,12 +77,17 @@ See Lemma \ref{l.last}.
 	\lElseIf{there is an $i$, $0\leq i\leq 2n$ such that 
 		the directed edges $(i,i+1),(i+1,i+2),(i+3,1+2)$ appear in $\tildeb{L}^*$ }{set $\tildeb{C}$ to $\tildeb{C}^{rflip_i}$}\label{s.pilfi}
 	\lElse
-	{set $\tildeb{C}$ to $\tildeb{C}^{lflip_i}$}
+	{find $i$, $n\leq i \leq 3n$,  such that
+		$\tildeb{L}^*$ contains the directed edges 
+		$(i,i-1),(i-1,i-2),(i-3,i-2)$, and
+		set $\tildeb{C}$ to $\tildeb{C}^{lflip_i}$}
 	\Return $\tildeb{C}$;
 	\caption{BestOrientCycle$_s(C)$}
 	\label{algo:oc-s}
 \end{algorithm}
-
+\begin{remark}
+The case in which every two consecutive edges in  $\tildeb{L}^*$ have opposite directions and $n$ is even is a special case of the condition in statement 5.
+\end{remark}
 For convenience we spell out what we know about $\tildeb{L}^*$ when the conditions of statements
 \ref{s.flipi} and \ref{s.pilfi} are checked.
 \begin{lemma}\label{l.flipc}
@@ -152,7 +157,7 @@ and  $w(2,0)=w(0,2)=3$. Then  $h_s(\tildeb{C^*})=4> h_s(\tildeb{L}^*)=3$.
 
 \begin{lemma}\label{l.odd}
 	Suppose $h_s(\tildeb{L}^*) < OneWayCost_s$. Suppose further that  $n>1$ is odd and that every two consecutive edges in  $\tildeb{L}^*$ have opposite directions.
-Then the cycle orientation $\tildeb{C}^{2+xx}$ is optimal, and 
+Then the cycle orientation $\tildeb{C}=\tildeb{C}^{2+xx}$ is optimal, and 
 \begin{equation}\label{e.odd}
 h_s(\tildeb{C}) = max \{h_s(\tildeb{L}^*), h_s(\dvec{L_2})\}.
 \end{equation}
@@ -164,34 +169,36 @@ because the cycle is odd and $L$ contains 3 full cycles. For example, if $(1,2)$
 $(n+2,n+1)$. Therefore
 $$h_s(\tildeb{L}^*)= \max_{0\leq i \leq n-1}\{w(i,i+1),w(i+1,i)\}.$$ 
 It follows that $h_s(\tildeb{C})\leq \max \{h_s(\tildeb{L}^*), h_s(\dvec{L_2})\}$.
-Let $\tildeb{C}^*$ be an optimal orientation of the cycle. Since the cycle is odd $\tildeb{C}^*$
-contains at least two successive edges that form a directed path, so that 
-$h_s(\tildeb{C^*})\geq h_s(\dvec{L_2})$. 
 
-We prove next that there is a change of direction in $\tildeb{C^*}$. 
+Let $\tildeb{C}^*$ be an optimal orientation of the cycle. 
+We prove first that there is a change of direction in $\tildeb{C^*}$. 
 Suppose to the contrary that $h_s(\tildeb{C}^*)=OneWayCost_s$, and  $\tildeb{C}^*$
 is a one-way orientation, say $(0,1),\ (1,2),\ldots , (n-1,n),\ (n,0)$.
-Since $0\leq h_s(\tildeb{L}^*) <  OneWayCost_s$ there is an edge with positive weight on $\tildeb{C}^{*}$, say the edge $(0,1)$. 
-
-Consider first the case that all edges of $\tildeb{C}^{*}$ have positive weight.
-Replacing edge $(0,1)$ with $(1,0)$ we get an orientation 
-$\tildeb{C'}$ with weight $h_s(\tildeb{C'})=\max \{h_s(\tildeb{C}^{*})-w(0,1), w(1,0)\}$.
-Now 
-$$w(1,0)\leq \max_{0\leq i \leq n-1}\{w(i,i+1),w(i+1,i)\}= h_s(\tildeb{L}^*) <OneWayCost_s,$$
-resulting in the contradiction $OneWayCost_s=h_s(\tildeb{C}^{*})\leq h_s(\tildeb{C'})<OneWayCost_s$.
-
-The same proof idea can also be applied in the general case when some edges are non-positive. For simplicity assume that the edge $(n-1,0)$ is non-positive, and that 
-$i_0=0 <i_1 < \cdots <i_{2k-1}<i_{2k}=n$ are such that all edges $(i,i+1)$ are positive for 
-$i_{2\ell}\leq i \leq i_{2\ell+1}$, and non-positive for 
-$i_{2\ell+1}\leq i \leq i_{2\ell+2}$, $0\leq \ell \leq k-1$. For each $\ell$ flip an edge
-$(j_{\ell},j_{\ell}+1)$ with $i_{2\ell}\leq j_{\ell} \leq i_{2\ell+1}$, and call the resulting orientation $C'$.
-Now $h_s(\tildeb{C'})\leq \max \{h_s(\tildeb{C}^{*})-\min_{j_{\ell}} w(j_{\ell},j_{\ell}+1), 
-\max_{j_{\ell}} w(j_{\ell}+1,j_{\ell})\}$. As before we arrive at the contradiction 
-$OneWayCost_s=h_s(\tildeb{C}^{*})\leq h_s(\tildeb{C'})< OneWayCost_s$.
+Since $0\leq h_s$ and $h_s(\tildeb{L}^*) <  OneWayCost_s=h_s(\tildeb{C}^*)$ there is an edge with positive weight on $\tildeb{C}^{*}$. 
+Consider a maximum-weight directed sub-path of the cycle $h_s(\tildeb{C}^{*})$. For simplicity suppose that the first and last vertices on this 
+sub-path are 
+$0$ and $\ell$, so that  $w(n-1,0) \leq 0$, $w(0,1)>0$, and the weight of any path $L_{\ell,m}$, $\ell+1 \leq m \leq n$ is non-positive.
+Flipping edge $(0,1)$ to $(1,0)$ we get an orientation 
+$\tildeb{C'}$ with weight 
+$$h_s(\tildeb{C'})=\max \{h_s(\tildeb{C}^{*})-w(0,1), w(1,0), h_s(L_{\ell,n})\}.$$
+Now $h_s(\tildeb{C}^{*})-w(0,1)<h_s(\tildeb{C}^{*})$ and 
+$$w(1,0)\leq \max_{0\leq i \leq n-1}\{w(i,i+1),w(i+1,i)\}= h_s(\tildeb{L}^*) <OneWayCost_s = h_s(\tildeb{C}^{*}).$$ 
+Hence, if $h_s(L_{\ell,n})<h_s(\tildeb{C}^{*})$ we get
+that $h_s(\tildeb{C'})<h_s(\tildeb{C}^{*})$, contradicting $h_s(\tildeb{C}^{*})\leq h_s(\tildeb{C'})$. And if $h_s(L_{\ell,n}) = h_s(\tildeb{C}^{*})$,
+we repeat the same procedure, of 
+focusing on a maximum weight sub-path of $h_s(L_{\ell,n})$ and flipping its first 
+positive edge,
+until we arrive at a similar contradiction.
 
  Lemma \ref{l.cd} ensures, therefore, that the orientation $\tildeb{L}'$ of $L$ 
 induced by $\tildeb{C^*}$ satisfies $h_s(\tildeb{C^*})=h_s(\tildeb{L}')\geq h_s(\tildeb{L}^*)$.
+Moreover, since $\tildeb{C}^*$ contains a change in direction, and the cycle is odd,
+it contains a directed path consisting of two edges that have the same direction followed by an edge with the opposite direction, so that 
+$h_s(\tildeb{C^*})\geq h_s(\dvec{L_2})$. 
+
 Hence $h_s(\tildeb{C}) \leq max \{h_s(\tildeb{L}^*), h_s(\dvec{L_2})\} \leq h_s(\tildeb{C^*})$.
+
+
 \qed
 
 \begin{lemma}\label{l.subo}
@@ -303,7 +310,7 @@ orientation of $C$.
 
 Let $\tildeb{C}^*$ be an optimal orientation 
 of $C$.
-If $\tildeb{C}^*$ is a clockwise or counterclockwise cycle then the opptimal cost will be found in step 1.
+If $\tildeb{C}^*$ is a clockwise or counterclockwise cycle then the optimal cost will be found in step 1.
 Otherwise, $\tildeb{C}^*$ contains at least one vertex $i$ such that both of the edges $\{i-1,i\}$ and $\{i,i+1\}$
 are oriented away from \textit{i} in $C^*$.  Consider the linear graph $L^i$ constructed in
 the $i$-the execution of the loop \ref{ac.i1}. Denote by $\tildeb{L^i}$ the orientation of $L^i$ 
