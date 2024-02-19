@@ -1,0 +1,89 @@
+\section{An generic algorithm for trees}\label{s.trees}
+
+%
+%
+%Number the vertices of the linear graph  $L_n$ from \textit{0} to \textit{n}, and denote the weights of
+%edges $(i,i+1)$ and  $(i+1,i)$ by $w(i,i+1)$ and $w(i+1,1)$, respectively.
+%
+%We describe here an algorithm for finding an optimal orientation 
+%of a linear graph. The high level version of the algorithm makes no use of the details
+%of the cost function, be it $H_m$ or $H_s$. The description therefore uses the subscript $x$ with $x\in \{s,m\}$. However, upon implementing the high level version, the difference between 
+%the two cost functions leads to a surprising difference in running times.
+%\bigskip
+
+Let $T_r = (V, E)$ be an undirected bi-weighted tree, where $r \in V$ is a node which is referred to as $T_r$'s \emph{root}. For a node $v \in V$, denote by $T_v$ the sub-tree of $T$ induced by all nodes $u \in V$ such that the (unique) simple path between $u$ and $r$ in $T_r$ goes through $v$. Say that $v$ is the \emph{parent} of $u$ if $u \in T_v$ and $\{v, u\} \in E$ (and correspondingly say that $u$ is a \emph{child} of $v$).
+For $u, v \in V$ such that $v$ is the parent of $u$, denote by $T_{v,u}$ the sub-tree obtained by adding to $T_u$ the edge $\{v, u\}$. 
+
+For a subset of orientations $\mathcal{O} \subseteq \mathcal{O}(T_v)$ for $T_v$, define $H(\mathcal{O}) = \min\left\{h(\tildeb{T}_v): \tildeb{T}_v \in \mathcal{O}\right\}$. When $\mathcal{O}$ is empty, define $H(\mathcal{O}) = \infty$.
+
+Let $\tildeb{T}_v$ be an orientation of $T_v$. Define $\delta^\text{in}(\tildeb{T}_v)$ and $\delta^\text{out}(\tildeb{T}_v)$ to be the lengths of the longest paths into and out from $v$ in $T_v$, respectively. For a set of orientations $\mathcal{O} \subseteq \mathcal{O}(T_v)$, define 
+
+$$\mathcal{O}^{\text{in} \leq d} = \left\{\tildeb{T}_v \in \mathcal{O}: \delta^{\text{in}}(\tildeb{T}_v) \leq d\right\} $$
+$$\mathcal{O}^{\text{out} \leq d} = \left\{\tildeb{T}_v \in \mathcal{O}: \delta^{\text{out}}(\tildeb{T}_v) \leq d\right\} $$
+
+%Define the following subsets of $\mathcal{O}(T_v)$:
+%
+%$$\mathcal{O}^\text{in}_{T_v, d} = \left\{\tildeb{T}_v \in \mathcal{O}(T_v): \delta^{\text{in}}(\tildeb{T}_v) \leq d\right\} $$
+%$$\mathcal{O}^\text{out}_{T_v, d} = \left\{\tildeb{T}_v \in \mathcal{O}(T_v): \delta^{\text{out}}(\tildeb{T}_v) \leq d\right\} $$
+
+%$$H_{\text{in}}(T_v, d) = \min\left\{h(\tildeb{T}_v):  \tildeb{T}_v\in \mathcal{O}_{\text{in}}(T_v, d)\right\} $$
+%$$H_{\text{out}}(T_v, d) = \min\left\{h(\tildeb{T}_v):  \tildeb{T}_v\in \mathcal{O}_{\text{out}}(T_v, d)\right\} $$
+
+Observe that for $\mathcal{O} = \mathcal{O}(T_v)$, by definition $\mathcal{O}^{\text{in} \leq \infty} = \mathcal{O}(T_v)$, therefore $H(T_v) = H(\mathcal{O}^{\text{in} \leq \infty})$.
+
+\bigskip
+\textbf{Finite decreasing step functions.}
+
+Call a function $C: \mathbb{R} \cup \{-\infty, \infty\} \rightarrow \mathbb{R} \cup \{\infty\}$ a \emph{finite decreasing step function} if the following holds:
+\begin{itemize}
+	\item $C(-\infty) = \infty$,
+	\item $C$ is monotonously non-increasing, i.e. for every $-\infty \leq d \leq d' \leq \infty$, $C(d) \geq C(d')$, and
+	\item there exists a finite sequence of strictly decreasing values $Y = [y_0 = \infty, y_1, \ldots, y_k]$ such that for every $-\infty \leq d \leq \infty$, $C(d) \in Y$.
+\end{itemize}
+
+Under these conditions, $C$ is can be represented by a sequence of pairs $[(d_0 = -\infty, y_0 = \infty), (d_1, y_1), \ldots, (d_k, y_k)]$ such that for $i = 0, 1, \ldots, k$, $d_i = \min\{d : C(d) = y_i\}$. To compute $C(d)$ given such a representation, one should simply find the maximal value $d_i$ such that $d_i \leq d$ and return the corresponding value $y_i$. We will write $C = [(d_1, y_1), (d_2, y_2), \ldots, (d_k, y_k)]$ to indicate the pair sequence representation of $C$, omitting the first sentinel pair $(d_0 = -\infty, y_0 = \infty)$.
+
+For a sub-tree $T_v$ and a subset of orientations $\mathcal{O} \subseteq \mathcal{O}(T_v)$, define $C^\text{in}_{\mathcal{O}}(d) = H(\mathcal{O}^{\text{in} \leq d})$, and similarly define $C^\text{out}_{\mathcal{O}}(d) = H(\mathcal{O}^{\text{out} \leq d})$. Observe that $C^\text{in}_{\mathcal{O}}$ and $C^\text{out}_{\mathcal{O}}$ are finite decreasing step functions, fulfilling all three requirements from such functions. 
+
+As observed above, $H(T_r) = H(\mathcal{O}(T_r)) = H(\mathcal{O}^\text{in}_{T_r, \infty}) = C^\text{in}_{T_r}(\infty)$. In order to compute $C^\text{in}_{T_r}$, we next describe a recursive algorithm which computes $C^\text{in}_{T_v}$ and $C^\text{out}_{T_v}$ for every sub-tree $T_v$ of $T_r$.
+
+
+When $T_v$ contains the single node $v$, $C^\text{in}_{T_v} = C^\text{out}_{T_v} = \left[(0, 0)\right]$. When $T_v$ contains more than one node, $C^\text{in}_{T_v}$ and $C^\text{out}_{T_v}$  can be recursively computed from the corresponding functions for sub-trees of $T_v$ as follows:
+
+\textbf{Case 1: $v$ has a single child $u$ in $T_v$.}
+In this case, $T_v = T_{v,u}$. 
+%Every orientation for $T_{v,u}$ is obtained by adding to some orientation for $T_u$ either the directed edge $(u, v)$ or the directed edge $(v, u)$. 
+Consider first the set $\mathcal{O}' \subset \mathcal{O}(T_{v, u})$ of $T_{v, u}$ orientations in which $\{v, u\}$ is oriented as $(v, u)$. Observe that $\delta^\text{in}(\tildeb{T}_{v,u}) = 0$ for every $\tildeb{T}_{v,u} \in \mathcal{O}'$. Let $\tildeb{T}'_{v,u}$ be an optimal orientation in $\mathcal{O}'$, i.e. $H(\mathcal{O}') = h(\tildeb{T}'_{v,u})$. There exists some orientation $\tildeb{T}_u$ for $T_u$ such that $\tildeb{T}'_{v,u}$ is obtained by adding $(v, u)$ to $\tildeb{T}_u$. For $d = \delta^\text{out}(\tildeb{T}_u)$, a longest path in $\tildeb{T}'_{v,u}$ either starts at $v$, in which case its length is $w(v,u) + d$, or it does not go through $(v,u)$, in which case its length is $h(\tildeb{T}_u)$, thus $h(\tildeb{T}'_{v,u}) = \max\left(w(v,u) + d, h(\tildeb{T}_u)\right)$. From $C^\text{out}_{T_u}$ definition, we have that 
+
+Clearly, among all orientations for $T_u$ with a maximum length of outgoing path from $u$ at most $d$, choosing one which would optimize the above term can will have
+
+
+In this case, a longest path in $\tildeb{T}_{v,u}$ either starts at $v$, in which case its length is $\delta^\text{out}(\tildeb{T}_u) + w(v,u)$, or it does not go through $(v,u)$, in which case its length is $h(\tildeb{T}_u)$, thus $h(\tildeb{T}_{v,u}) = \max\left(\delta^\text{out}(\tildeb{T}_u) + w(v,u), h(\tildeb{T}_u)\right)$. It is simple to show that among all such orientations, one which optimizes $h(\tildeb{T}_{v,u})$ can be obtained by finding a pair $(d_i, H(\mathcal{O}^\text{out}_{T_u, d_i})) \in C^{out}_{T_u}$ which minimizes the term $\max\left(d_i + w(v,u), H(\mathcal{O}^\text{out}_{T_u, d_i})\right)$:
+
+$$
+H(\mathcal{O}') = \min\left\{\max\left(d_i + w(v,u), H(\mathcal{O}^\text{out}_{T_u, d_i})\right) : (d_i, H(\mathcal{O}^\text{out}_{T_u, d_i})) \in C^{out}_{T_u}\right\}
+$$
+
+
+Now, consider the set $\mathcal{O}'' \subset \mathcal{O}(T_{v, u})$ of $T_{v, u}$ orientations in which $\{v, u\}$ is oriented as $(u, v)$. For every such orientation $\tildeb{T}_{v,u}$ there exists some orientation $\tildeb{T}_u$ for $T_u$ such that $\tildeb{T}_{v,u}$ is obtained by adding $(u, v)$ to $\tildeb{T}_u$. In this case, $\delta_{\text{in}}(\tildeb{T}_{v,u}) = \delta_{\text{in}}(\tildeb{T}_{u}) + w(u,v)$, and similarly as above it can be shown that $h(\tildeb{T}_{v,u}) = \max\left\{\delta_{\text{in}}(\tildeb{T}_{v,u}), h(\tildeb{T}_{u})\right\}$. 
+
+For a particular value of $d$, denote $\mathcal{O}''^{\text{in}}_{d} = \left\{\tildeb{T}_v \in \mathcal{O}'': \delta^{\text{in}}(\tildeb{T}_v) \leq d\right\}$. It is simple to prove that $H\left(\mathcal{O}''^{\text{in}}_{d}\right) = C$
+
+
+In addition, there exists some orientation $\tildeb{T}_u$ for $T_u$ such that $\tildeb{T}_{v,u}$  is obtained by adding $(v, u)$ to $\tildeb{T}_u$. In this case, a longest path in $\tildeb{T}_{v,u}$ either starts at $v$, in which case its length is $\delta^\text{out}(\tildeb{T}_u) + w(v,u)$, or it does not go through $(v,u)$, in which case its length is $h(\tildeb{T}_u)$, thus $h(\tildeb{T}_{v,u}) = \max\left(\delta^\text{out}(\tildeb{T}_u) + w(v,u), h(\tildeb{T}_u)\right)$. It is simple to show that among all such orientations, one which optimizes $h(\tildeb{T}_{v,u})$ can be obtained by finding a pair $(d_i, H(\mathcal{O}^\text{out}_{T_u, d_i})) \in C^{out}_{T_u}$ which minimizes the term $\max\left(d_i + w(v,u), H(\mathcal{O}^\text{out}_{T_u, d_i})\right)$:
+
+
+For such an orientation, 
+
+
+Among these orientations, the one which minimizes the longest path can be obtained by finding a point $(d_i, H_{\text{out}}(T_u, d_i))$ in the point-sequence representation of $C^\text{out}_{T_u}$ which minimizes the term $\max\left\{d_i + w(v,u), H_{\text{out}}(T_u, d_i)\right\}$. Let $\tildeb{T}^\text{out}_{v,u}$ be such orientation, which induce a point to consider in the curve $C_\text{in}(T_{v,u})$: $p^\text{out} = \left(0, \min_{(d_i, H_{\text{out}}(T_u, d_i)) \in C_\text{out}(T_u)}\max\left\{d_i + w(v,u), H_{\text{out}}(T_u, d_i)\right\}\right)$. 
+
+In addition to the effect of orientations of $T_{v,u}$ which include $(v, u)$ on $C_\text{in}(T_{v,u})$, we need to consider orientations which include $(u, v)$. For all such orientations $\tildeb{T}_{v,u}$, we have that $\delta_{\text{in}}(\tildeb{T}_{v,u}) = \delta_{\text{in}}(\tildeb{T}_u) + w(u, v)$. In particular, the curve $C_\text{in}(T_u) = \left[(d_1, H_{\text{in}}(T_u, d_1)), (d_2, H_{\text{in}}(T_u, d_2)), \ldots, (d_k, H_{\text{in}}(T_u, d_k))\right]$ corresponds to a sequence of points $P^\text{in} = [p^\text{in}_1, p^\text{in}_2, \ldots, p^\text{in}_k]$, where $p^\text{in}_i = (d_i + w(u, v), \max\left(d_i + w(u, v), H_{\text{in}}(T_u, d_i)\right))$. 
+
+TODO: improve presentation and prove that $C_\text{in}(T_{v,u})$ is a subset of $\{p^\text{out}\} \cup P^\text{in}$.
+
+The sequence $C_\text{out}(T_{v,u})$ can be computed symmetrically.
+
+\textbf{Case 2: $v$ has more than one child in $T_v$.}
+Draft idea for computing $C_\text{in}(T_v)$: for every value $d$, the orientations of $T_v$ which satisfy $\delta_\text{in}(\tildeb{T_v}) \leq d$ are obtained by orienting $T_{v,u^j}$ for every child $u^j$ of $v$ in an orientation in $\mathcal{O}_\text{in}(T_{v,u^j}, d)$. We can construct $C_\text{in}(T_v)$ by simultaneously traversing the sequences $C_\text{in}(T_{v,u^j})$. We use priority queue $Q$ which contains a point $(d^j_{i_j}, H_\text{in}(T_{v,u}, d^j_{i_j}))$ for each child $u^j$ of $v$ (thus it size is the degree of $v$). The priority keys are the $d$-values of these points. At the beginning, all points of the form $(d^j_1, H_\text{in}(T_{v,u}, d^j_1))$ are added to $Q$.
+
