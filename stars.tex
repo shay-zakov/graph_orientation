@@ -1,29 +1,42 @@
  \section{Algorithms for stars}\label{s.1}
- A star $S_k$ is a tree with one internal node $c$ and $k$ leaves.
+ A $n$-star $S$ is a tree with one internal node $c$ and $n$ leaves.
+ 
+% Say that u dominates v if both $w(c, u) \geq w(c, v)$ and $w(u, c)\geq w(v, c)$. When visualizing the leaves as a set of 2D points, the point corresponding to u dominates all points which are to the left and below it.
+% 
+% First, we can argue that we can exclude from consideration all vertices which are dominated by other vertices. For example, if v is dominated by u, then whatever the direction of {c, u} in the star orientation we chose the same direction for {c, v} and don't increase the overall score. This leaves us with a subset of dominating vertices (if two or more vertices have exactly the same in and out weights and are not dominated by any other vertex, we take one of them as a representative in the dominating set). When sorting this set according to non-decreasing out-weights, we get a sequence of strictly increasing out-weights and strictly decreasing in-weights (because no vertex in the set dominates another vertex in it). Let's denote this sequence of vertices by $u_1, u_2, ..., u_r$, and 
+% add for convenience $u_0$ with $-\infty /+\infty$ out/in weights, and $u_{r+1}$ with 
+% $\infty /-\infty$ out/in weights. 
+% 
+% Now, let's assume an optimal star orientation that includes $(c, u_j)$ for some $u_j$ in the dominating set. Clearly, we can orient all edges $\{c, u_i\}$ for $i < j$ as $(c, u_i)$ (since $w(c, u_i) < w(c, u_j)$). Similarly, if the orientation includes $(u_j, c)$ we can orient every $\{c, u_i\}$ with $i > j$ as $(u_i, c)$. Therefore, there exists some optimal orientation and a corresponding index $0 < j \leq r+1$ such for all $i < j$ we have the edges $(c, u_i)$, and for all $i \geq j$ we have $(u_i, c)$. The score of this orientation is $\max(w(c, u_{j-1}), w(u_j, c))$. So the algorithm can do a binary search over the sequence of dominating vertices and find an optimal star orientation.
+% 
+% For the first instance, finding and sorting the dominating set takes $O(n \log n)$ time, and then finding the optimal j takes an additional $O(\log n)$ time. When updating the instance by changing one edge weight, we just need to update the dominating set similarly as done for the linear graph $H_m$ algorithm in $O(log n)$ time, and again find the optimal $j$ in $O(\log n)$ time.
 
  \subsection{An algorithm for cost function $H_m$}
- \begin{algorithm}
+ \begin{algorithm}\label{a.starm}
+ 	\KwIn{a bi-weighted $n$-star $S$}
+ 	\KwOut{an optimal orientation of $S$ under $H_m$}
+ 	
 Orient each edge $\{u,c\}$ inwards to \textit{c} if $w(u,c)<w(c,u)$,
 and outward from $c$ otherwise\; \label{i0}
  	 
-denote by $\vec{S_n}$ the resulting directed graph, by $BestCost$ its cost, 
+denote by $\tildeb{S}$ the resulting directed graph, by $BestCost$ its cost, 
 by $E_{in}=\{(u_1,c),\ldots, (u_{\ell},c)\}$ the list of its inward edges, 
 and by $E_{out}=\{(c,v_1),\ldots, (c,v_r)\}$ the list of its outward edges\;
 \label{i00} reorder each of $E_{in}$ and $E_{out}$ so that
 the weights of its edges are in non-increasing order\;
 
-set $\vec{S}$ to $\vec{S_n}$\;
+set $\tildeb{S'}$ to $\tildeb{S}$\;
 
 \For {$k= 1$ to $\ell$}
-  {update $\vec{S}$ by flipping the direction of edge $(u_k,c)$, and update $BestCost$ if necessary}
+  {update $\tildeb{S'}$ by flipping the direction of edge $(u_k,c)$, and update $BestCost$ if necessary;}
    \label{i1} 
-set $\vec{S}$ to $\vec{S_n}$\;
+set $\tildeb{S'}$ to $\tildeb{S}$\;
 \For {$k= 1$ to $r$}
-   {update $\vec{S}$ by flipping the direction of edge $(c,v_k)$, and update $BestCost$ if necessary}
+   {update $\tildeb{S'}$ by flipping the direction of edge $(c,v_k)$, and update $BestCost$ if necessary;}
   \label{i2}
  	\Return an orientation whose cost is $BestCost$\;
- 	\caption{Algorithm BestOrientStar-m ($S_n$)}
- 	\label{algo:oc-s}
+ 	\caption{Algorithm BestOrientStar$_m (S)$}
+ 	\label{algo:os-s}
  \end{algorithm}
 
 \bigskip
@@ -36,49 +49,48 @@ flipping edges that were initially pointing outwards.
 \begin{lemma}\label{l.best}
 	There is no optimal orientation in which both the largest inward edge weight is less than $w(u_1,c)$ 
 	and the largest outward edge weight is less than $w(c,v_1)$.
-	%, where $(u_1,c)$ is an edge with largest weight in $E_{in}$, and $(c,v_1)$ an edge with largest weight in $E_{out}$.
 \end{lemma}
 
 \noindent \textbf{Proof:}
-Note that the cost of the initial orientation is $h_m(\vec{S_n})=w(u_1,c)+w(c,v_1)$.
-Suppose, by contradiction, that there is an optimal orientation $\vec{S^*}$ 
+Note that the cost of the initial orientation is $h_m(\tildeb{S})=w(u_1,c)+w(c,v_1)$.
+Suppose, by contradiction, that there is an optimal orientation $\tildeb{S}^*$ 
 with largest inward weight $w(x,c)< w(u_1,c)$,
 and largest outward weight $w(c,y)<w(c,v_1)$.
-Then $h_m(\vec{S^*})=w(x,c)+w(c,y)$.
+Then $h_m(\tildeb{S}^*)=w(x,c)+w(c,y)$.
 The initial orientation implies that $w(c,u_1) > w(u_1,c)$, and $w(v_1,c) \geq w(c,v_1)$.
-Since $\{u_1,c\}$ is an outward edge in $\vec{S^*}$ and $\{v_1,c\}$ an inward edge,
-$h_m(\vec{S^*})\geq  
-w(v_1,c)+w(c,u_1) >  w(u_1,c)+w(c,v_1) =h_m(\vec{S_n})$, a contradiction.
+Since $\{u_1,c\}$ is an outward edge in $\tildeb{S^*}$ and $\{v_1,c\}$ an inward edge,
+$h_m(\tildeb{S}^*)\geq  
+w(v_1,c)+w(c,u_1) >  w(u_1,c)+w(c,v_1) =h_m(\tildeb{S})$, a contradiction.
 \qed
 
-\begin{theorem}
+\begin{theorem}\label{t.star}
 %	[Correctness of the algorithm]
-Algorithm BestOrientStar-m finds an optimal orientation in  $O(n \log n)$ steps.
+Algorithm \emph{BestOrientStar}$_m$ finds an optimal orientation in  $O(n \log n)$ steps.
 \end{theorem}  
 
 \noindent \textbf{Proof:}
 
- Let $\vec{S^*}$ be an optimal orientation of the input star graph $S_n$.
+ Let $\tildeb{S}^*$ be an optimal orientation of the input $n$-star $S$.
  
- If in $\vec{S^*}$ the edges are all oriented outwards, or all oriented 
+ If the edges in $\tildeb{S}^*$ are all oriented outwards, or all oriented 
  inwards, then the algorithm will find an optimal orientation
  at the completion of the loop of statement \ref{i1}, or
 of statement \ref{i2}, respectively.
  
  Otherwise at least one of the edges $(u_1,c)$ and $(c,v_1)$ takes part 
- in $\vec{S^*}$, according to Lemma \ref{l.best}. If both participate then an optimal orientation is found in step \ref{i0}.
+ in $\tildeb{S}^*$, according to Lemma \ref{l.best}. If both participate then an optimal orientation is found in step \ref{i0}.
  If not, we consider and prove the case that $(c,v_1)$ participates. 
  
- Note first of all that if there is an inward edge in $S^*$ that is oriented as
- an outward edge in $\vec{S_n}$ then flipping that edge cannot
+ Note first of all that if there is an inward edge in $\tildeb{S}^*$ that is oriented as
+ an outward edge in $\tildeb{S}$ then flipping that edge cannot
  increase the cost of the orientation, because its outward weight does not exceed $w(c,v_1)$.
- We can assume, therefore, that all edges in $E_{out}$ participate in $S^*$. 
+ We can assume, therefore, that all edges in $E_{out}$ participate in $\tildeb{S}^*$. 
  Let $(u_j,c)$ be the 
- edge from $E_{in}$ with least index that participates in $S^*$, 
-  $w(u_j,c)<w(u_1,c)$, i.e. all edges $\{u_i,c\}, 1\leq i<j$, are outward edges in $S^*$. 
- The cost of $S^*$ is therefore at least
- $$h_m(\vec{S^*})=w(u_j,c)+\max \{w(c,v_1),\max \{w(c,u_i):1\leq i<j)\}\}.$$
-To complete the proof we observe that $h_m(\vec{S^*})$ is precisely the value of the orientation
+ edge from $E_{in}$ with least index that participates in $\tildeb{S}^*$, 
+  $w(u_j,c)<w(u_1,c)$, i.e. all edges $\{u_i,c\}, 1\leq i<j$, are outward edges in $\tildeb{S}^*$. 
+ The cost of $\tildeb{S}^*$ is therefore 
+ $$h_m(\tildeb{S}^*)=w(u_j,c)+\max \{w(c,v_1),\max \{w(c,u_i):1\leq i<j)\}\}.$$
+To complete the proof we observe that $h_m(\tildeb{S}^*)$ is precisely the value of the orientation
 obtained by the algorithm after flipping the edge  $\{u_{j-1},c\}$
  in iteration $k=j-1$ of the loop of step \ref{i1}.
 
@@ -88,20 +100,212 @@ constant time if  auxiliary variables are maintained for the values of
 $\max \{w(c,u_i):1\leq i<j)\}$ and $\max \{w(v_i,c):1\leq i<j)\}$.
  \qed
  
-  \subsection{An algorithm for cost function $H_s$}
-  An algorithm for cost function $H_s$ is obtained by slightly modifying Algorithm BestOrientStar-m using the following observation.
+  \subsection{An algorithm for cost function $H_s$}\label{ss:ss}
+  An algorithm for cost function $H_s$ is obtained from Algorithm BestOrientStar$_m$ by 
+  using the following observation.
   
   \begin{lemma}
-  	Only  the weights of positive weight edges contribute to the cost of an oriented star 
-  	under $h_s$.
+  	Suppose $S$ contains a vertex $u$ with an edge to or from $c$ that has 
+  	non-positive weight, and denote by $S'$ the star obtained by removing $u$ from $S$.
+  	Then an optimal orientation of $S$ can be constructed by first optimally orienting $S'$,
+  	and then adding to it the vertex $u$ with its edge $\{u,c\}$ oriented in a direction
+  	that has non-positive weight.
+%  	Only the weights of positive weight edges can contribute to the value of $h_s(\tildeb{S})$ for an oriented star $\tildeb{S}$.
   \end{lemma} 
 \begin{proof}
-	The length of a path in an oriented star is no more than 2. If a path of length 2 contains a negative weight edge it is either first or last and consequently does not contribute to the cost of the path. 
+	The length of a path in an oriented star is no more than 2. 
+	An edge with non-positive weight is therefore either the first or 
+	the last edge on any path, and does not contribute to its cost. 
 \end{proof}
 
 Here is the outline of the resulting algorithm for cost function $H_s$:
+ \begin{algorithm}
+	\KwIn{a bi-weighted $n$-star $S$}
+	\KwOut{an optimal orientation of $S$ under $H_s$}	
+	remove from $S$ every edge with a direction of non-positive weight, and denote the resulting star $S'$
+	\label{s.rem} \;
+	set $\tildeb{S'}$ to $\mbox{BestOrientStar}_m (S')$\;
+	direct each edge removed in statement \ref{s.rem} in a direction of non-positive weight,
+	and add it to $\tildeb{S'}$;
+	denote the resulting directed star $\tildeb{S}$\;
+	\Return $\tildeb{S}$\;
+	\caption{Algorithm BestOrientStar$_s (S)$}
+	\label{algo:os-m}
+\end{algorithm}
+\newpage
+
+\subsection{Updating the optimal orientation when a single weight is increased}\label{s.star.update}
+In this section we address the problem of efficiently updating the orientation 
+cost of a star 
+every time a single edge weight is increased. This scenario arises in the context of
+constructing an optimal orientation of a $k$-legged spider in Section \ref{s.3}.
+
+\begin{theorem}
+	Suppose we are given an optimal orientation of a bi-weighted $n$-star.
+	The update of this optimal orientation when a single weight, $w(u,c)$ or $w(c,u)$
+	is increased takes time $O(\log n)$.
+\end{theorem}
+\begin{proof}	
+	We will consider only the optimization criteria $H_m$, because for a star graph
+	the same algorithm works also for the $H_s$ criterion once any vertex with a 
+	non-positive weight edge to or from $c$ is discarded,
+	see Subsection \ref{ss:ss}. 
+To lay the foundation for the update algorithm we first dig deeper into the 
+characterization
+of an optimal orientation. 
+\begin{definition}
+	A star leaf $u$ P-dominates (Pareto dominates) star leaf $v$ if both $w(c, u) \geq w(c, v)$ and $w(u, c) \geq w(v, c)$. In particular, every leaf P-dominates itself. 
+	
+	A set of star leaves $D$ is $P$-dominant if for 
+	every leaf $u$ there is a $d\in D$ that P-dominates $u$, and no leaf in $D$
+	is $P$-dominated by another leaf in $D$. 
+	
+	Given a set $D$ that is $P$-dominant for the bi-weighted star $S$, it induces
+	the sub-star $S_D$ obtained by deleting all leaves that are not in $D$.
+\end{definition}
+%Let $D$ be the set of dominant star vertices, so that for every pair of vertices $u,v \in D$, either $w(c, u) < w(c, v)$ and $w(u, c) > w(u, v)$, or  $w(c, u) > w(c, v)$ and $w(u, c) < w(u, v)$. 
+Note that for any two leaves $u,v$ in a $P$-dominant set either 
+$w(c,u)<w(c,v)$ and $w(u,c)>w(v,c)$ or $w(c,u)>w(c,v)$ and $w(u,c)<w(v,c)$.
+We will assume (and the algorithm will implement) that such a set is sorted so
+that its vertices $u_1,\ldots,u_m$ satisfy $w( u_i,c)<w(u_j,c)$, and $w(c,u_i)>w(c,u_j)$, 
+if $i<j$.
+
+\begin{lemma}\label{l.optimalS_D}
+Given a $P$-dominant set $D$ for the bi-weighted star $S$, an optimal orientation of $S_D$ has one of the following forms.
 \begin{enumerate}
-	\item Remove from $S_n$ every edge one of whose directions has negative weight. Denore the resulting star $S$.
-	\item $\vec{S}\leftarrow \mbox{BestOrientStar-m} (S)$.
-	\item Add to $\vec{S}$ each negative weigh edge removed in step 1.
+	\item All edges are directed inward to $c$, and the optimal value is $w(u_m,c)$.
+	\item All edges are directed outward from $c$, and the optimal value is $w(c,u_1)$.
+	\item There is a $j$, $1\leq j<m$, such that all edges $\{u_i,c\}$, $i\leq j$, are directed inward to $c$ and all others are directed outward from $c$,
+    and the optimal value is $w(u_j,c)+w(c,u_{j+1})$.
 \end{enumerate}
+\end{lemma}
+\begin{proof}
+	Given an optimal orientation in which not all edges have the same direction, 
+	let $j_1$ be the largest index such that the edge $\{u_j,c\}$ is directed inward to $c$
+	and let $j_2$ be the smallest index such that the edge $\{u_j,c\}$ is directed outward from $c$. Here $j_1+1\geq j_2$, since all edges are directed.
+	The cost of this orientation is $w(u_{j_1},c)+w(c,u_{j_2})$.
+	Suppose, contrary to 3, that $j_1+1>j_2$, i.e. $j_1>j_2$. 
+	Then another valid orientation is obtained
+	by flipping the direction of edge $\{u_{j_2},c\}$ to be $(u_{j_2},c)$.
+	Since $w(u_{j_1},c)>w(u_{j_2},c)$ the cost of this orientation is
+	at most
+	$$w(u_{j_1},c)+w(c,u_{j_2+1})<w(u_{j_1},c)+w(c,u_{j_2}),$$
+	contradicting the supposed optimality of the given orientaton.
+\end{proof}
+Next we show how to construct an optimal orientation of $S$ given an optimal
+orientation of $S_D$, $\tildeb{S_D}$. The general idea is to 
+add to $\tildeb{S_D}$ each $P$-dominated leaf $v$ while orienting its edge  $\{v,c\}$
+in the same direction as of the edge  $\{u,c\}$ of a leaf $u$ that $P$-dominates $v$. 
+We will call this \emph{an orientation induced by $\tildeb{S_D}$}.
+In case all weights are non-negative
+that orientation has the same cost as $\tildeb{S_D}$ and is therefore optimal. 
+However, negative weight edges have to be given special
+attention., as described in the next Lemma. As an aside we note that 
+this is needed only for the $H_m$ criterion because for the $H_s$ criterion
+only positive weights come into play.
+\begin{lemma}\label{l.optimalSfromS_D}
+Given a bi-weighted star $S$ and a $P$-dominant set of leaves $D$, let 
+$\tildeb{S^*}_D$ be an optimal orientation of $S_D$. Then one of the following
+orientations is optimal.
+\begin{enumerate}
+	\item The orientation induced by $\tildeb{S_D}$.
+	\item The orientation in which all edges are directed toward $c$ except for a 
+	single edge $(c,v)$, such that 
+	$w(c,v)=\min \{w(c,t)\ \mid \ t \notin D \}$.
+	\item The orientation in which all edges are directed outward from $c$ except for a 
+	single edge $(v,c)$, such that 
+	$w(v,c)=\min \{w(t,c)\ \mid \ t \notin D \}$.
+\end{enumerate}
+\begin{proof}
+	Suppose we are given an optimal	orientation $\tildeb{S}$ of $S$ that is not fully
+	induced by $\tildeb{S_D}$. Suppose specifically that the edge 
+%	with largest weight 
+	whose direction is not induced by $\tildeb{S_D}$ is $(c,t)$, and
+	that $t$ is $P$-dominated by $d \in D$ 
+	(the case that this edge is $(t,c)$ is treated
+	entirely analogously). 
+	Thus $w(t,c)\leq w(d,c)$ (and $w(c,t)\leq w(c,d)$) while $(d,c)$ and $(c,t)$ belong to $\tildeb{S}$. 
+
+If there is another edge $(c,v)$ in $\tildeb{S}$ then flipping $(c,t)$ to $(t,c)$
+yields another orientation whose cost is no more than that of $\tildeb{S}$:
+because $w(t,c)\leq w(d,c)$ the largest weight of an edge toward $c$ is not increased,
+while the removal of edge $(c,t)$ does not increase the largest weight of an edge 
+from $c$.
+	
+	Continuing to flip non-induced edges we end up with either an optimal orientation
+	that is induced by $S_D$ or an optimal orientation $\tildeb{S}$
+	in which all edges are directed toward $c$ except for just
+	one edge $(c,t)$ ( or all are directed outward from $c$ except for  
+	one edge $(t,c)$). Among all such orientations the one for which 
+	$w(t,c)=\min \{w(v,c)\ \mid \ v \notin D \}$ is clearly minimal.	
+\end{proof}
+
+\end{lemma}
+
+Lemmas \ref{l.optimalS_D} and \ref{l.optimalSfromS_D} provide the logical steps
+for updating the cost of the optimal orientation given an increase in weight of edge $(u,c)$:
+\begin{enumerate}
+	\item update $D$: if $u$ was not $P$-dominating but is now then insert it into $D$,
+	and remove from $D$ those vertices that it now $P$-dominates.
+	\item find the cost of the optimal orientation of the updated $S_D$:
+	\begin{enumerate}
+		\item get the updated values of $w(u_m,c)$ and $w(c,u_1)$;
+		\item find $\min \{w(u_j,c)+w(c,u_{j+1}) \mid u_j\in D \}$;
+		\item compute $H_m (S_D)$ as the minimum of these three values;
+	\end{enumerate}
+	\item compute $w(u_m,c)+\min_{u\notin D}w(c,u)$ and 
+	        $w(c,u_1)+\min_{u\notin D} w(u,c)$;
+	\item compute $H_m(S)$ as the minimum of these two values and $H_m(S_D)$.
+\end{enumerate}
+To evaluate the running time it remains to specify the data structures used to implement these operations. 
+\begin{itemize}
+	\item The set of $P$-dominant vertices, $D=\{u_1,\ldots,u_m\}$, is kept as a sorted set with sorting key
+	 $w(u,c)$, i.e. $w(u_i,c)<w(u_{i+1},c)$. 
+	\item A min-priority queue $PQ_D$ of the vertices in $D$ with key $w(u_j,c)+w(c,u_{j+1})$
+	 enables efficient computation of $\min_{u_j\in D} w(u_j,c)+w(c,u_{j+1})$.
+	\item Two min-priority queues of vertices \emph{not in $D$}, $PQ_{\bar{D}\_in}$
+	and $PQ_{\bar{D}\_out}$, the first with priority $w(u,c)$ and 
+	 the other with priority $w(c,u)$ serve to efficiently compute
+	 $\min_{u\notin D} w(u,c)$ and $\min_{u\notin D}w(c,u)$. 
+\end{itemize}
+ Finally, we detail the implementations of the operations listed above
+for the case of an increase in $w(u,c)$;  an increase in $w(c,u)$
+ is implemented analogously. The updates entailed by an increase in $w(u,c)$
+ are the following.
+
+\begin{enumerate}
+	\item find $i\in D$ such that $w(u_i,c)\leq w(u,c)< w(u_{i+1},c)$; 
+	\item find the smallest $i\leq j\leq m-1$, if any, such that 
+	$$w(c,u_j)< w(c,u)<w(c,u_{j+1});$$
+	if there is no such $j$ (necessarily $u\notin D$) update $u$'s key in $PQ_{\bar{D}\_in}$; \\
+	else
+	\begin{enumerate}
+		\item  remove $u_i, \ldots ,u_j$ from both $D$ and $PQ_D$, and insert each into both
+	       $PQ_{\bar{D}\_in}$ and $PQ_{\bar{D}\_out}$;
+	    \item  if $u$ was already in $D$ update its keys in $D$ and $PQ_D$;\\
+	     else remove it from $PQ_{\bar{D}\_in}$ and $PQ_{\bar{D}\_out}$
+	     and insert it into $D$ and $PQ_D$; 
+	    \item update $m$;
+		\end{enumerate}
+\end{enumerate}
+
+Initialization of the priority queues takes no more than $O(n \log n)$ time. 
+After that each update takes amortized 
+time $O(\log n)$. To see this note that each increase in weight causes at most one 
+insertion of $u$ into $D$ and $PQ_D$, and one accompanying deletion from 
+$PQ_{\bar{D}\_in}$ and $PQ_{\bar{D}\_out}$, all taking $O(\log n)$ time. 
+The amortization analysis precharges this insertion for any
+possible future deletion of $u$ from $D$ and $PQ_D$ and the accompanying insertion
+into $PQ_{\bar{D}\_in}$ and $PQ_{\bar{D}\_out}$.
+\end{proof}
+%The sorted set $S$ ranks the vertices in $D$ with strictly increasing values of $w(c, u)$, and consequently with strictly decreasing values of $w(c, u)$. Let $u_0$ be the first vertex in S, and denote by $prec (u)$ the vertex preceding $u$ in $S \setminus \{u_0\}$. Q contains all pairs $(prec(u), u)$ for all vertices in  $S \setminus \{u_0\}$, where the key for such a pair is $w(c, prec(u)) + w(u, c)$.
+%
+%Given S and Q, we can compute an optimal non-one-way star orientation as follows: let $(prec(u), u)$ be the minimal element in Q. For all vertices v such that $v\in S$ and its rank is greater than or equals to that of u, or v is dominated by such a vertex, orient 
+%$\{c, v\}$ as $(c, v)$. For all other vertices v' chose the orientation $(v', c)$. It is clear that the score of this orientation is  $w(c, prec(u)) + w(u, c)$, i.e. the minimal key in $Q$. It can also be shown this is the minimum score for a non-one-way orientation.
+%
+%It is not difficult to show that S and Q can be computed from scratch in $O(k \log(k))$. For one edge weight update, we first update S, then Q. If only weight increments are allowed, we can regard it as an addition of a vertex to the star (the "old" vertex is dominated by the "new" one and so it would not belong to D). Say that u is the vertex that was updated by either increasing $w(c, u)$ or $w(u, c)$. We first search for two consecutive vertices $v_1, v_2 \in S$ such that $w(c, v_1) \leq w(c, u) \leq w(c, v_2)$. If $w(u, c) \leq w(v_2, c)$ then u is dominated by $v_2$, and no update is needed to either S or Q (it also implies that u was not in D prior to the increment). Also, no update is needed if $w(c, v_1) = w(c, u)$ and  $w(v_1, c) \geq w(u, c)$ (u is dominated by $v_1$).
+%
+%Otherwise $w(c, v_1) \leq w(c, u) \leq w(c, v_2)$ and $w(v_1, c) \geq w(u, c) > w(v_2, c)$, (where if  $w(v_1, c) > w(u, c)$ then $w(c, v_1) < w(c, u)$, and so u has to be inserted to S (because it is not dominated by any member of S) while some of the current members of S might need to be removed (because they might be dominated by u). If $w(c, u) = w(c, v_2)$ then u dominates $v_2$, and $v_2$ is removed from S. Note u cannot dominate any other vertex v' with a rank in S greater than that of $v_2$, due to  $w(c, u) = w(c, v_2) < w(c, v')$. In addition, if $w(v_1, c) \leq w(u, c)$ then u dominates $v_1$, and possibly some additional vertices preceding $v_1 \in S$. We therefore remove all such vertices from S, and add u to S. The running time for updating S is $O(\log k)$ for finding $v_1$ and $v_2$, plus $O(1)$ for every removed vertex from S.
+%
+%To update Q we need to do the following: (a) remove all pairs $(prec(v), v)$ such that v was removed from S, (b) add the pair $(prec(u), u)$, and (c) for the vertex v in S such that before the update $prec(v) = v'$ and after the update $prec(v) = u$, replace the element $(v', v) \in Q$ by the element $(u, v)$. With a simple queue implementation (e.g. binary heap) all elementary operations take $O(\log (k))$, so (a) takes $O(m \log(k))$ for the m removed elements, and (b) + (c) take $O(\log(k))$. With an amortized analysis that accounts for each element removal at the time it is inserted, the amortized time for every update of S and Q is $O(\log(k))$.
+

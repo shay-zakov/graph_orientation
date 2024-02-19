@@ -4,10 +4,11 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{graphicx}
-\usepackage{amsfonts} 
+% !TeX spellcheck = en_US
+%\usepackage[demo]{graphicx}
+\usepackage{subfig}
 
-
-% Definintg \devc for double-arrow vector notation:
+% Defining \devc for double-arrow vector notation:
 \newcommand\shrinkage{2.1mu}
 \newcommand\vecsign{\mathchar"017E}
 \newcommand\dvecsign{\smash{\stackon[-1.95pt]{\mkern-\shrinkage\vecsign}{\rotatebox{180}{$\mkern-\shrinkage\vecsign$}}}}
@@ -17,13 +18,19 @@
 %\usepackage{graphicx}
 
 % Commands for annotating path directions - either entire path or just last edge
-% TODO: workout the appropriate arrow styls
+% TODO: workout the appropriate arrow styles
 
 \newcommand{\vecP}{\vec{P}}
 \newcommand{\vecO}{\vec{O}}
 \newcommand{\vecG}{\vec{G}}
+
 \newcommand{\dir}[1]{\stackrel{\rightarrow}{#1}}
+\newcommand{\overto}[1]{\stackrel{\mapsto}{#1}}
+\newcommand{\overfrom}[1]{\stackrel{\mapsfrom}{#1}}
+%\newcommand{\mapsfrom}{\mathrel{\vcenter{\hbox{\rotatebox{180}{$\mapsto$}}}}}
+\newcommand{\mapsfrom}{\mathrel{\reflectbox{\ensuremath{\mapsto}}}}
 \newcommand{\dirO}[1][O]{\stackrel{\rightarrow}{#1}}
+
 %\newcommand{\rdir}[1]{\rho ({#1})}
 %\newcommand{\ldir}[1]{\lambda ({#1})}
 %\newcommand{\rdir}[1]{\vec{#1}}
@@ -98,7 +105,7 @@
 
 \include{intro}
 %\include{stars}
-%\include{linears}
+\include{linears}
 %\include{linear_graphs}
 %\include{min_max}
 %\include{cycles}

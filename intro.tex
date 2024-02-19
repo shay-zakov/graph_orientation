@@ -1,11 +1,7 @@
 \section{Introduction}
 
-A \emph{edge bi-weighted graph} is an undirected graph $G = (V, E)$, such that each edge $\{u, v\} \in E$ has a pair of (possibly different) weights $w(u, v)$ and $w(v, u)$ associated with its two possible orientations $(u, v)$ and $(v, u)$, respectively. An \emph{orientation} 
-%$ \vec{O}$ 
-of $G$ creates a directed graph $\vec{G}
-%=\vec{O} (G)
-$ 
-%from $G$ 
+A \emph{edge bi-weighted graph} is an undirected graph $G = (V, E)$ in which each edge $\{u, v\} \in E$ has a pair of (possibly different) weights $w(u, v)$ and $w(v, u)$ associated with its two possible orientations $(u, v)$ and $(v, u)$, respectively. An \emph{orientation} 
+of $G$ creates a directed graph $\tildeb{G}$ 
 by selecting for each undirected edge $\{u, v\} \in E$ exactly one of its two possible orientations. Denote by $\mathcal{O}(G)$ the set of all orientations of $G$. 
 
 The problem we address is the following.
@@ -16,30 +12,34 @@ The problem we address is the following.
 the heaviest of the resulting simple directed paths.
 
 Actually, there remains an ambiguity in the specification of the cost function because it 
-fails to specify whether the minimum is taken only over maximal 
-simple paths or over all simple subpaths. To distinguish between these two possibilities we define two measures.
+fails to specify what kinds of paths the minimum is to be taken over: all simple 
+directed subpaths or only maximal ones. To distinguish between these two possibilities we define two measures.
 
 \begin{definition}
-	Given a directed path $\vec{P}=<v_0,\ldots,v_n>$ denote its cost
+	Given a directed path $ \vec{P}=<v_0,\ldots,v_n>$ denote its cost
 	\begin{equation}\label{eq.W}
 		W(\vec{P})=\sum_{k=0}^{n-1} w(v_k,v_{k+1}).
 	\end{equation}
-	We define two cost measures for an oriented graph $\vec{G}$:
+	We define two cost measures for an oriented graph $\tildeb{G}$:
 	\begin{align} 
-		h_s(\vecG) &= \max\{W(\vec{P})\mid \vecP \mbox{ is a simple path in }\vecG \},\label{eq.hs} \\
-		h_m(\vecG) &= \max\{W(\vec{P})\mid \vecP \mbox{ is a maximal simple path in }\vecG \}.
+		h_s(\tildeb{G}) &= \max\{W(\vec{P})\mid \vec{P} \mbox{ is a directed path in}\tildeb{G} \},\label{eq.hs} \\
+		h_m(\tildeb{G}) &= \max\{W(\vec{P})\mid \vec{P} \mbox{ is a maximal directed path in}
+		\tildeb{G} \}.\label{eq.hm}
 	\end{align}
 	The corresponding cost functions for orienting an undirected graph are 
 	\begin{align}
-		H_s(G) &= \min\{h_s(\vecG)\mid \vecG \in \mathcal{O}(G)\}, \\
-		H_m(G) &= \min\{h_m(\vecG)\mid \vecG \in \mathcal{O}(G)\}.
+		H_s(G) &= \min\{h_s(\tildeb{G})\mid \tildeb{G} \in \mathcal{O}(G)\}, \\
+		H_m(G) &= \min\{h_m(\tildeb{G})\mid \tildeb{G} \in \mathcal{O}(G)\}.
 	\end{align}
 \end{definition}
+Note that always $h_s(\tildeb{G})\geq 0$, because the empty path is one of the possible 
+directed paths appearing in equation (\ref{eq.hs}).
 
 \noindent {\bf Example}: To illustrate the differences between the two cost functions consider
- $\vec{P}=<v_0,v_1,v_2,v_3>$, with $w(v_0,v_1)=2, w(v_1,v_2)=-3,w(v_2,v_3)=6$.
- Then $h_m(\vec{P})=W(\vec{P})=5, h_s(\vec{P})=6$.
- \qed
+ $\vec{P}=<v_0,v_1,v_2,v_3>$ and $\vec{P_{1,2}}=<v_1,v_2>$, with $w(v_0,v_1)=2$, $w(v_1,v_2)=-3$, $w(v_2,v_3)=6$.
+ Then $h_m(\vec{P})=W(\vec{P})=5$, $h_s(\vec{P})=6$, and 
+ $h_m(\vec{P_{1,2}})=-3$, $h_s(\vec{P_{1,2}})=0$.
+% \qed
 
 A very useful property of $H_s$ is that it is monotone: the cost of a graph is never less than the cost of a subgraph.
 \begin{lemma}\label{lem:sprop}
@@ -48,49 +48,65 @@ A very useful property of $H_s$ is that it is monotone: the cost of a graph is n
 \end{lemma}
 
 \begin{proof}
-It is clear from the definition (\ref{eq.hs}) of $h_s$ that $h_s(\vecP)\geq h_s(\vecP ')$for any subpath 
-$\vecP '$ of $\vecP$.  
+It is clear from the definition (\ref{eq.hs}) of $h_s$ that $h_s(\vec{P})\geq h_s(\vec{P '})$ for any subpath 
+$\vec{P '}$ of $\vec{P}$.  
 \end{proof}
 
 This property sets $H_m$ apart from $H_s$,  as the above example shows:
-$h_{m}(\vecP)=5 <  h_{m}(\vecP')=6$ for the subgraph $\vecP '=<v_2,v_3>$ of $\vecP$.
+$h_{m}(\vecP)=5 <  h_{m}(\vec{P'})=6$ for the subgraph $\vec{P '}=<v_2,v_3>$ of $\vec{P}$.
 
-However, if all weights are non-negative $H_m$, too, is monotonic. In fact, in that case the two definitions coincide.
+However, if all weights are non-negative then $H_m$ is monotonic as well. In fact, in that case the two definitions coincide.
 
 \begin{lemma}
 	If all of the weights an edge-bi-weighted graph $G$ are non-negative 
-	then $h_{s}( \vecG )= h_{m}( \vecG )$ for any orientation $\vecG$ of $G$.
+	then $h_{s}( \tildeb{G} )= h_{m}(\tildeb{G})$ for any orientation $\tildeb{G}$ of $G$.
 	In particular,  $H_{s}(G)= H_{m}(G)$,  and 
-	$\vecG$ is an optimal orientation of $G$ with respect to $h_{s}$
+	$\tildeb{G}$ is an optimal orientation of $G$ with respect to $h_{s}$
 	if and only if it is optimal with respect to $ h_{m} $.
 \end{lemma}
 \begin{proof}
-From the definitions of $H_m$ and $H_s$ it is clear that for any directed path $\vec{P}$ $h_{m}(\vec{P})\leq  h_{s}(\vec{P})$, and that the inequality is in fact an equality if all the weights 
-are non-negative. This implies that $h_{s}( \vecG )= h_{m}( \vecG )$ for any orientation $\vecG$ of $G$.
+From the definitions of $H_m$ and $H_s$ it is clear that  $h_{m}(\vec{P})\leq  h_{s}(\vec{P})$
+for any directed path $\vec{P}$, and that the inequality is in fact an equality if all the weights 
+are non-negative. This implies that $h_{s}(\tildeb{G})= h_{m}(\tildeb{G})$.
 \end{proof}
+%
+%{\bf Conjecture}:
+%\textit{Given an edge bi-weighted graph $G$, any orientation that is optimal with 
+%	respect to $h_{m}$ is also optimal with respect to $h_{s} $.}
 
-\bigskip
-{\bf Conjecture}:
-\textit{Given an edge bi-weighted graph $G$, any orientation that is optimal with 
-	respect to $h_{m}$ is also optimal with respect to $h_{s} $.}
-
-\bigskip
+\medskip
 In the coming sections we will consider the following two problems
 for various classes of graphs.
 
-\begin{problem}[
-%	Minimizing the heaviest subpath - 
-	HS]
-	Given a class of edge bi-weighted graphs find an algorithm to compute
-	$H_s(G) $
-	for any $G$
-	in the class.
+\begin{problem}
+	Find an algorithm to compute
+	$H_s(G) $, or an optimal orientation of $G$ under $H_s$,
+	for any $G$ in a given class of edge bi-weighted graphs.
 \end{problem}
 
-\begin{problem}[
-%	Minimizing the heaviest maximal path - 
-	HM]
-	Given a class of edge bi-weighted graphs find an algorithm to compute $H_m(G) $
-	for any $G$
-	in the class.
+\begin{problem}
+Find an algorithm to compute
+$H_m(G) $, or an optimal orientation of $G$ under $H_m$,
+for any $G$ in a given class of edge bi-weighted graphs.
 \end{problem}
+
+\begin{table*}[h!]
+	\begin{center}
+		\caption{Summary of Results.}
+		\label{tbl:summary}
+		\begin{tabular}{|l|l|l|l|}
+			\hline
+			graph class & time under $H_s$ & time under $H_m$  & Theorems  \\
+			\hline
+			star            &        $O(n \log n)$  & $O(n \log n)$        & \ref{t.star}, Algorithm \ref{algo:os-m}	\\
+						\hline
+			linear graph & $O(n)$        		&$O(n \log n)$ 	& \ref{t.linear-s}, \ref{t.linear-m} \\
+						\hline
+			cycle 		 & $O(n)$ 		& $O(n^2 \log n)$ 		&  \ref{t.cycle-s}, \ref{t.cycle-m} \\
+%									\hline
+%			$k$-legged spider 		 & $O(k^22^k n^2)$ 		& $O(k^22^kn^2 \log n)$ 		&   \\
+
+			\hline
+		\end{tabular}
+	\end{center}
+\end{table*}

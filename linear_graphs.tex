@@ -84,6 +84,22 @@ Symmetrically:
 \end{array}\right.
 \end{equation}
 
+\subsection{Finding the minimum with $h_s$}
+\begin{definition}
+A matrix is \emph{monotone} if each row's minimum value occurs in a column which is equal to or greater than the column of the previous row's minimum. It is totally monotone if the same property is true for every submatrix (defined by an arbitrary subset of the rows and columns of the given matrix). 
+\end{definition}
+Consider an $n\times n$ matrix upper triangular matrix $U$. Denote
+by $L(j)$ the index of the lowermost minimum of column $j$ of $M$, i.e.,
+$L(j) = \max\{\ell :M_{\ell,j}= \min_{1\leq i<j}\}$
+A matrix M is monotone if R(1) ≤ R(2)≤· · ·≤R(N), M is totally monotone if all
+submatrices3 of M are monotone. The SMAWK algorithm says that if M is totally
+monotone, then the set of all of the R(n) for 1 ≤ n ≤ N can be computed in O(N)
+time.
+
+(5)
+then h(n) = a(n,R(n)). Hence, if we can show that the matrixM defined by (5) is totally
+monotone, then the SMAWK algorithm can solve our problem (offline version)
+in O(N) time.
 
 \subsection{Data structure implementations}
 We now turn to describe data structure implementations designated specifically to each of the cost functions $h_s$ and $h_m$. Instead of using graph orientation notation, we describe the settings applicable to these structures in a more general manner.

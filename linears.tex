@@ -1,160 +1,182 @@
-\section{An generic algorithm for linear graphs}\label{s.2}
-Number the vertices of the linear graph  $L_n$ from \textit{0} to \textit{n}, and denote the weights of
+\section{Algorithms for linear graphs \label{s.2}}
+We call a graph that has two vertices of degree 1 and all other vertices of degree 2  a \emph{ linear graph}, and 
+reserve the term \emph{path} for a directed linear graph that has a single source (and a single sink).
+Given a linear graph  $L$ on $n+1$ vertices number its vertices from \textit{0} to \textit{n}, and denote the weights of
 edges $(i,i+1)$ and  $(i+1,i)$ by $w(i,i+1)$ and $w(i+1,1)$, respectively.
 
-We describe here an algorithm for finding an optimal orientation 
-of a linear graph. The high level version of the algorithm makes no use of the details
-of the cost function, be it $H_m$ or $H_s$. The description therefore uses the subscript $x$ with $x\in \{s,m\}$. However, upon implementing the high level version, the difference between 
-the two cost functions leads to a surprising difference in running times.
-\bigskip
+We describe next a generic algorithm for finding the cost of an optimal orientation 
+of a bi-weighted linear graph. This high level version makes no use of the details
+of the cost function, be it $H_m$ or $H_s$. Its description therefore uses the subscript $x$ with $x\in \{s,m\}$. However, the implementations under 
+the two cost functions of this high level version, presented in the succeeding subsections, reveal surprising differences between their running times.
+
+\subsection{A generic algorithm for linear graphs}
+
+%\bigskip
 
 {\bf Notation}:
 \begin{itemize}
-\item $L_{i, j}$ is the sub-graph of $L_n$ induced by the vertices $i,  \ldots, j$. 
-\item $\rdir{L}_{i, j}$ denotes the oriented version 
+\item $L_{i, j}$ is the sub-graph of $L$ induced by the vertices $i,  \ldots, j$. 
+\item $\vec{L}_{i, j}$ denotes the oriented version 
 of $L_{i, j}$ in which all edges are directed to the right (i.e. of the form $(i, {i+1})$),
-and $\ldir{L}_{i, j}$ denotes the oriented version 
-of $L_{i, j}$ in which all edges are directed to the left.
-\item $\rlast{H}_x[i]$ is the value of an optimal orientaton of $L_{0, i}$ under the constraint
-that edge $\{i-1,i\}$ is directed towards $i$, and $H_x^{\prec}[i]$ is the value of an optimal orientaton of $L_{0, i}$ under the constraint
-that edge $\{i-1,i\}$ is directed towards $i-1$.\\
-In particular, the cost of an optimal orientation of $L_n$ under $h_x$ is 
-$\min \{H_x^{\succ}[n],\ H_x^{\prec}[n]\}$.
+and $\cev{L}_{i, j}$ denotes the oriented version 
+of $L_{i, j}$ in which all edges are directed to the left. 
+\item $\rlast{H}_x(i)$ is the value of an optimal orientaton of $L_{i,n}$ under the constraint
+that edge $\{i,i+1\}$ is directed towards $i+1$, and $H_x^{\prec}(i)$ is the value of an optimal orientaton of $L_{i,n}$ under the constraint
+that edge $\{i,i+1\}$ is directed towards $i$.\\
+In particular, the cost of an optimal orientation of $L$ under $H_x$ is 
+$\min \{H_x^{\succ}(0),\ H_x^{\prec}(0)\}$.
 \end{itemize}
 
-The basic step of the recursive algorithm is to locate the last 
-vertex of an optimal orientation of $L_{0, j}$ at which there is a change in direction,
-given that the very last edge has a specified direction. 
-\bigskip
+The basic step of the recursive algorithm for finding an optimal orientation, or its cost, is to locate the last 
+vertex of an optimal orientation of $L_{ j,n}$ at which there is a change in direction,
+given that the very last edge has a specified direction. Keeping this in mind the proof 
+of correctness of the algorithm is straightforward. 
+For simplicity we outline the algorithm for finding the cost of an optimal orientation, BestCostLinear$_x(L)$.
+That algorithm is easily converted into an algorithm for finding the orientation itself, BestOrientLinear$_x(L)$,
+ by recording for each 
+$H^{\succ}(j)$ and $H^{\prec}(j)$ which $i$ corresponds to the minimum in statements 
+\ref{st.1} and \ref{st.2}.
+%\bigskip
 
 \begin{algorithm}
-	Allocate two null arrays $H^{\succ}$ and $H^{\prec}$ of length $n=length(L)+1$\;
-	\For{$j=1$ to $n$}{
-		set $H^{\succ}[j]$ to the minimum over $0\leq i <j$ of $\max \{ H^{\prec}[i], h_x(\vec{L}_{i, j})\}$\;
+	\KwIn{a bi-weighted linear graph $L$ on $n+1$ vertices}
+\KwOut{an optimal orientation of $L$ under $H_x$}
+	$H^{\succ}(n)=H^{\prec}(n)=-\infty$, $n=length(L)+1$\;
+	\For{$i=n-1$ to $0$}{
+		set $H^{\succ}(i)$ to the minimum over $i< j \leq n$ of $\max \{h_x(\vec{L}_{i, j}), H^{\prec}(j)\}$\;
 		\label{st.1}
-		set $H^{\prec}[j]$ to the minimum over $0\leq i <j$ of  $\max \{ H^{\succ}[i], h_x(\cev{L}_{i, j})\}$\;
+		set $H^{\prec}(j)$ to the minimum over $ i <j \leq n$ of  $\max \{h_x(\cev{L}_{i, j}), H^{\succ}(i)\}$\;
 			\label{st.2}
 	}
-	\Return{$\min \{H^{\succ}[n],\ H^{\prec}[n]\}$}\;
-	\caption{BestCostPath-$x$ $(L)$}
+	\Return{$\min \{H^{\succ}(0),\ H^{\prec}(0)\}$}\;
+	\caption{BestCostLinear$_x(L)$}
 	\label{algo:H}
 \end{algorithm}
 \begin{theorem}
-Algorithm BestCostPath-x finds an optimal orientation.
+Given input $L$, Algorithm \emph{BestCostLinear}$_x$ finds the cost of an optimal orientation of $L$.
 \end{theorem}
-
+A straightforward implementation of this algorithm runs in $O(n^2)$ time. 
+The implementations described in the coming two subsections provide drastic improvements.
 
 \subsection{Running time under cost function $H_s$}
 In this subsection we show that 
-Algorithm BestCostPath-s can be made to run in time $O(n)$ by carefully implementing
+Algorithm BestCostLinear$_s$ can be made to run in time $O(n)$ by carefully implementing
 the computational operations of the algorithm.
-Two issues have to addressed.
+Two issues have to be addressed.
 
 	The first is the time needed to compute $h_s(\vec{L}_{i, j})$ 
-	and $h_s(\cev{L}_{i, j})$ for given $0\leq i<j\leq n$.\\
+	and $h_s(\cev{L}_{i, j})$ for given $0\leq i<j\leq n$.
 	Focusing on $h_s(\vec{L}_{i, j})$, and combining equations (\ref{eq.W}) and (\ref{eq.hs}):
 	\begin{equation}\label{eq.hsij}
-	h_s(\vec{L}_{i, j})=\max \{ \sum_{t=i'}^{j'-1}w(t,t+1) \mid i\leq i' \leq j' \leq j\}.
+	h_s(\vec{L}_{i, j})=\max \left\{ \sum_{t=i'}^{j'-1}w(t,t+1) \mid i\leq i' \leq j' \leq j\right\}.
 	\end{equation}
-	Computing $h_s(\vec{L}_{i, j})$ for a series of pairs $(i,j)$ is therefore an instance
+	
+	Computing $h_s(\vec{L}_{i, j})$ for a pair $(i,j)$ is therefore an instance
 	of the Range Maximum-sum Segment On-line Query problem, 
-	RMSOQ for short:
-	given a nonempty sequence $A[1] ,\ldots A[ n]$ of real numbers,  
-	the task is to
-	respond to each query of the form $RMSOQ( i, j)$ by returning a pair of indices $(i', j')$ 
-	such that 
-	$\sum_{t=i'}^{j'}A[t]$ is maximized over all $i\leq i' \leq j' \leq j$.
-	Chen and Chao  \cite{chen2007range} established  that each such query can be answered in constant time after  $A$ is preprocessed in $O(n)$ time. The following Lemma 
+	RMSOQ for short, as defined in \cite{chen2007range}:
+	\begin{problem}[Range Maximum-sum Segment On-line Query problem]\ \\
+		\noindent \emph{\bf Input to be preprocessed:}
+		A nonempty sequence $a_1 ,\ldots a_n$ of real numbers.\\ 
+		\noindent \emph{\bf Online query:} respond to a query of the form $RMSOQ( i, j)$ by returning a pair of indices $(i', j')$ 
+		which maximize
+		$\sum_{t=i'}^{j'}a_t$ over all $i\leq i' \leq j' \leq j$.	
+	\end{problem}
+	Chen and Chao \cite{chen2007range} presented a method for answering each such query 
+	in constant time after  $A$ is preprocessed in $O(n)$ time. The following Lemma 
 	summarizes the discussion and its relevance.
 \begin{lemma}
-	Suppose $h_s(\vec{L}_{0, n})$ and $h_s(\cev{L}_{0, n})$ have been preprocessed 
+	Suppose $w(i,i+1),0\leq i <n$ and $w(i+1,i),0\leq i <n$ have been preprocessed 
 	in linear time for the RMSOQ problem.
-	After  $H^{\prec}[i]$ and $H^{\succ}[i]$ have been computed for $0\leq i <j$ all 
-	values $\max \{ H^{\prec}[i], h_s(\vec{L}_{i, j})\}$ and $\max \{ H^{\succ}[i], h_s(\cev{L}_{i, j})\}$ appearing in statements \ref{st.1} and \ref{st.2} in iteration $j$
+	After  $H^{\prec}(i)$ and $H^{\succ}(i)$ have been computed for $0\leq i <j$ each 
+	value of the form $\max \{ H^{\prec}(i), h_s(\vec{L}_{i, j})\}$ and $\max \{ H^{\succ}(i), h_s(\cev{L}_{i, j})\}$ appearing in statements \ref{st.1} and \ref{st.2} in iteration $j$
 	can be evaluated in constant time.
 \end{lemma}
-
-The second issue is the time needed to find all minimum values in statements \ref{st.1} and \ref{st.2}. Here the notion of a totally monotone matrix will be helpful. 
-To emphasize that this monotinicity is columnwise we call it c-monitinicity.
+A question remains: how many queries $RMSOQ( i, j)$ will the algorithm present?
+The answer to this question will be found by addressing the second issue: what is the time needed to find all minimum values in statements \ref{st.1} and \ref{st.2}. Here the notion of a totally monotone matrix will be helpful. 
+To emphasize that this monotinicity is rowwise we call it r-monitinicity.
 \begin{definition}\label{d.tm}
 	Given an $n \times n$ matrix $M$, denote
-	by $R(j)$ the largest row index at which the minimum in column $j$ of $M$ is achieved, 
+	by $C(i)$ the least column index at which the minimum in row $i$ of $M$ is achieved, 
 	i.e.,
-	$R(j) = \max \{k :M_{k,j} = min_{1\leq i \leq n} M_{i,j}\}$.
-	The matrix $M$ is c-monotone if $R(1) \leq  R(2)\leq \cdots \leq R(n)$, and it is totally c-monotone 
+	$C(i) = \min \{k :M_{i,k} = min_{1\leq j \leq n} M_{i,j}\}$.
+	The matrix $M$ is r-monotone if $C(1) \leq  C(2)\leq \cdots \leq C(n)$, and it is totally c-monotone 
 	if all $2\times 2$
-	submatrices of $M$ formed by choosing two rows and two columns are c-monotone.
+	submatrices of $M$ formed by choosing two rows and two columns are r-monotone.
 \end{definition}
-\begin{lemma}\label{l.cmono}
-	$M$ is totally c-monotone if and only if $M[i_1,j_2]\geq M[i_2,j_2]$
-	whenever $M[i_1,j_1]\geq M[i_2,j_1]$,
+The following Lemma is easily verified.
+\begin{lemma}\label{l.rmono}
+	$M$ is totally r-monotone if and only if $M(i_1,j_1)\leq M(i_1,j_2)$
+	whenever $M(i_2,j_1)\leq M(i_2,j_2)$,
 for all $i_1<i_2$ and $j_1<j_2$.
 \end{lemma}
 Whereas for an arbitrary square matrix it takes quadratic time to 
 compute all values $R(j)$, for a c-monotone matrix the SMAWK algorithm \cite{smawk1987} 
 is able to do so, off-line, in linear time.
 	
-Define the matrices $M^{\succ}[i,j]$ and $M^{\prec}[i,j]$ as follows.
+Define the matrices $M^{\succ}(i,j)$ and $M^{\prec}(i,j)$ as follows.
 \begin{itemize}
-	\item For $1\leq i<j \leq n$,
-$$M^{\succ}[i,j]=\max \{ H^{\prec}[i], h_s(\vec{L}_{i, j})\},\ 
-M^{\prec}[i,j]=\max \{ H^{\succ}[i], h_s(\cev{L}_{i, j})\}.$$	
-	\item $M^{\succ}[i,j]=M^{\prec}[i,j]=\infty$  for $1\leq j \leq i \leq n $.
-	\item $M^{\succ}[0,j]=h_s(\vec{L}_{0, j})$, $M^{\prec}[0,j]=h_s(\cev{L}_{0, j})$, $1\leq j\leq n$.
+	\item For $0\leq i<j \leq n$,
+$$M^{\succ}(i,j)=\max \{h_s(\vec{L}_{i, j}), H^{\prec}(j)\},\ 
+M^{\prec}(i,j)=\max \{h_s(\cev{L}_{i, j}), H^{\succ}(i)\}.$$	
+	\item $M^{\succ}(i,j)=M^{\prec}(i,j)=\infty$  for $1\leq j \leq i \leq n $.
+%	\item $M^{\succ}(0,j)=h_s(\vec{L}_{0, j})$, $M^{\prec}(0,j)=h_s(\cev{L}_{0, j})$, $1\leq j\leq n$.
 \end{itemize}
-In these terms the algorithm computes the minimum value in column $j$ of 
+In these terms the algorithm computes the minimum value in row $i$ of 
 the matrices $M^{\succ}$
-and $M^{\prec}$, for $1\leq j \leq n$.
+and $M^{\prec}$, for $0\leq i <n$.
 Two features of this computation deserve particular attention.
 \begin{enumerate}
 	\item The computation of $M^{\succ}$
-	and $M^{\prec}$ has to be performed on-line: before computing the minimum value in column $j$ of 
-	the matrix $M^{\succ}$, or $M^{\prec}$, the minimum values of all columns $j'<j$ of 
+	and $M^{\prec}$ has an on-line flavor: before computing the minimum value in row $i$ of 
+	the matrix $M^{\succ}$, or $M^{\prec}$, the minimum values of all rows $i<i'$ of 
 	the matrix $M^{\prec}$, respectively $M^{\succ}$,  have to be available.
 		\item \label{i.1} It follows from equation (\ref{eq.hsij}) that
 	$h_s(\vec{L}_{i, j})$ and $h_s(\cev{L}_{i, j})$ are both non-increasing in $i$ 
 	and non-decreasing in $j$. 
 \end{enumerate}
 According to the first feature, the problem of computing 
-$H^{\succ}[j]$ and $H^{\succ}[j]$ can be dealt with by any method that solves the 
+$H^{\succ}(j)$ and $H^{\succ}(j)$ can be dealt with by any method that solves the 
  following problem
-\begin{problem}[OCM - Online Column Minima]
-	For $1\leq j \leq n$ compute $H[j]=\min \{M[i,j] \mid 0\leq i \leq n\}$, where 
-	the values of $H[j'],\ 1\leq j'<j$ have to be computed before $M[i,j]$ can be evaluated.
+\begin{problem}[ORM - Online Row Minima]
+	For $1\leq i \leq n$ compute $H(i)=\min \{M(i,j) \mid 1\leq j \leq n\}$, where 
+	the values of $H(i'),\ i< i'\leq n$ have to be computed before $M(i,j)$ can be evaluated.
 \end{problem}
-In our case $M$ is of the form $M[i,j]=\max \{f[i],g[i,j]\}$.
-The second feature, that $g$ is non-increasing in $i$ and non-decreasing in $j$, is the key to proving that our $M$ is in fact totally c-monotone.
+In our case, both $M^{\prec}$ and $M^{\succ}$ are of the form $M(i,j)=\max \{f(i,j),g(j)\}$,
+where $f$ is non-increasing in $i$ and non-decreasing in $j$, according to the 
+above second feature. This is the key to proving that $M^{\prec}$ and $M^{\succ}$ are totally r-monotone.
 \begin{proposition}
-	$M$ is totally c-monotone.
+	If $f$ is non-increasing in $i$ and non-decreasing in $j$ and $M(i,j)=\max \{f(i,j),g(j)\}$,
+	then $M$ is totally r-monotone.
 \end{proposition}
 \begin{proof}
-	According to Lemma \ref{l.cmono} we have to prove that for any $i_1<i_2$ and $j_1<j_2$,
-	 if $M[i_1,j_1]\geq M[i_2,j_1]$ then $M[i_1,j_2]\geq M[i_2,j_2]$.
+	According to Lemma \ref{l.rmono} we have to prove that for any $i_1<i_2$ and $j_1<j_2$,
+	 $M(i_2,j_1)\leq M(i_2,j_1)$ implies $M(i_1,j_1)\leq M(i_1,j_2)$.
 
-For any $j$ and  $i_1<i_2$, $M[i_1,j]\geq M[i_2,j]$, i.e.
-$\max \{ f[i_1], g[i_1, j]\}\geq \max \{ f[i_2], g[i_2, j]\}$,
-if and only if 
-$\max \{ f[i_1], g[i_1, j]\}\geq \ f[i_2]$, since $g[i_1, j]\geq g[i_2, j]$.
+We claim that, for any $i$ and  $j_1<j_2$, 
+\begin{equation}\label{e.iff}
+M(i,j_1)\leq M(i,j_2) \mbox{ if and only if }  g(j_1)\leq \max \{ f(i, j_2),g(j_2)\}. 
+\end{equation}
+This follows from the definition of $M$, and the fact that 
+ $f(i, j_1)\leq f(i, j_2)\leq \max \{ f(i, j_2),g(j_2)\} $ for $j_1 < j_2$.
 
-Consequently,  if $M[i_1,j]\geq M[i_2,j]$ then
-$$ f[i_2]\leq \max \{ f[i_1], g[i_1, j_1]\}\leq \max \{ f[i_1], g[i_1, j_2]\},$$
-since $g[i_1, j_1]\leq g[i_1, j_2]$.
-Thus $M[i_1,j_2]\geq M[i_2,j_2]$.
+Consequently,  if $M(i_2,j_1)\leq M(i_2,j_2)$ then
+$$ g(j_1)\leq \max \{ f(i_2,j_2), g( j_2)\}\leq \max \{ f(i_1,j_2), g( j_2)\},$$
+since $ f(i_2, j_2) \leq f(i_1, j_2)$.
+Using equation (\ref{e.iff}) again, $M(i_1,j_1)\leq M(i_1,j_2)$.
 \end{proof}
 Summarizing the foregoing discussion, to find all minimum values in statements \ref{st.1} and \ref{st.2} of the algorithm we can employ the solution to the following problem.
-\begin{problem}[OCMM - Online Column Minima of c-Monotone matrix]
-		For $1\leq j \leq n$ compute $H[j]=\min \{M[i,j] \mid 0\leq i \leq n\}$, where 
-		$M$ is c-monotone and
-	the values of $H[j'],\ 1\leq j'<j$ have to be computed before $M[i,j]$ can be evaluated.
+\begin{problem}[ORMM - Online Row Minima of  a r-Monotone matrix]\label{p.ormm}
+		For $1\leq j \leq n$ compute $H(j)=\min \{M(i,j) \mid 1\leq j \leq n\}$, where 
+		$M$ is r-monotone and
+	the values of $H(i'),\ i < i' \leq n$ have to be computed before $M(i,j)$ can be evaluated.
 \end{problem}
 Note that the SMAWK algorithm cannot
 be used directly because it is off-line whereas our computation has to be online.
-Fortunately, several linear-time online algorithms have been published, 
+Fortunately, several linear-time online algorithms for solving Problem \ref{p.ormm} have been published, 
 \cite{klawe89,larmore91,galil92,barnoy09}.
-%\cite{klawe89},  \cite{larmore91}, \cite{galil92}, \cite{barnoy09}.
 
-\begin{theorem}
-	When the cost function used in Algorithm BestCostPath-x is $H_s$ its running time is $O(n)$.
+\begin{theorem}\label{t.linear-s}
+	When the cost function used in Algorithm \emph{BestCostLinear}$_x$ is $H_s$ its running time is $O(n)$.
 \end{theorem}
 
 \
